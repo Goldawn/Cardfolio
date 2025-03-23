@@ -1,5 +1,3 @@
-
-
 Carte Magic : 
 
 {
@@ -52,9 +50,14 @@ Améliorations :
 - Moteur de suggestion en cas de recherche de carte ou de set (often played with via scryfall)
 - ajouter un cache pour améliorer performances dans la collection
 - Affichage des cartes en 3D, gestion des effet premium des cartes
+- corriger le select de sorting sur la page d'importation
+- Gérer l'import des collection via json, csv ...
+- Ajout d'un bouton pour mettre à jour les cartes avec toutes les propriétés désirées
 
 Pages :
 
 DeckBuilder
 Wishlist
 Profil utilisateur
+
+Ajout des autres jeux de cartes principaux

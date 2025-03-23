@@ -29,6 +29,8 @@ export default function CollectionActionBar({
   toggleRarityFilter,
   sortOption,
   setSortOption,
+  sortOrderAsc,
+  toggleSortOrder,
 }) {
 
     const colorFilterElements = [
@@ -42,15 +44,15 @@ export default function CollectionActionBar({
     ];
 
   const TypeFilterElements = [
+    { name: "Creature", icon: Creature },
+    { name: "Instant", icon: Instant },
+    { name: "Sorcery", icon: Sorcery },
+    { name: "Enchantment", icon: Enchantment },
     { name: "Artifact", icon: Artifact },
     { name: "Battle", icon: Battle },
     { name: "Commander", icon: Commander },
-    { name: "Creature", icon: Creature },
-    { name: "Enchantment", icon: Enchantment },
-    { name: "Instant", icon: Instant },
-    { name: "Land", icon: Land },
     { name: "Planeswalker", icon: Planeswalker },
-    { name: "Sorcery", icon: Sorcery },
+    { name: "Land", icon: Land },
   ];
   
   const rarityFilterElements = [
@@ -97,13 +99,19 @@ export default function CollectionActionBar({
         ))}
       </div>
 
-      <select value={sortOption} onChange={(e) => setSortOption(e.target.value)}>
-        <option value="name">Nom (A-Z)</option>
-        <option value="price">Prix</option>
-        <option value="date">Date d'ajout</option>
-        <option value="set">Set</option>
-        <option value="color">Couleur</option>
-      </select>
+      <div className={styles.sortControls}>    
+        <select value={sortOption} onChange={(e) => setSortOption(e.target.value)}>
+          <option value="name">Nom (A-Z)</option>
+          <option value="price">Prix</option>
+          <option value="date">Date d'ajout</option>
+          <option value="set">Set</option>
+          <option value="color">Couleur</option>
+          <option value="rarity">Rareté</option>
+        </select>
+        <button onClick={toggleSortOrder} className={styles.sortIcon}>
+          {sortOrderAsc ? "Asc" : "Desc"}
+        </button>
+      </div>
     </div>
   );
 }
