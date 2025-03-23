@@ -1,0 +1,54 @@
+.card {
+    width: 200px;
+    /* border: 1px solid #ccc; */
+    /* padding: 10px; */
+    cursor: pointer;
+}
+
+.card img {
+    width: 100%;
+    height: auto;
+    /* border-radius: 4.5%; */
+    border-radius: 11px;
+  /* border-radius: 5% / 3.5% ;  */
+}
+
+.card > img:not(.owned) {
+  filter: grayscale(100%) brightness(0.5);
+}
+
+.cardDetails {
+    height: 100px;
+    padding-left: 5px;;
+}
+
+.card h3 {
+    font-size: 1rem;
+    margin: 0;
+}
+
+.quantityBtnBox {
+    display: flex;
+    justify-content: space-between;
+    margin: 5px 0;
+    gap: 5px;
+  }
+  
+  .card button:hover {
+    filter: brightness(1.2);
+  } 
+  
+  .card .actionBox .add, .remove{
+    background-color: #2f8bc0;
+    flex: 1;
+  }
+  
+  .card .delete {
+    width: 100%;
+    background-color: #bd4a4a;
+  }
+  
+  button.update {
+    background-color: #26708d;
+    margin-right: 5px;
+  }

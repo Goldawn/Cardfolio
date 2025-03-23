@@ -1,0 +1,60 @@
+
+
+Carte Magic : 
+
+{
+    id
+    name
+    setCode
+    lang
+    quantity
+    addedAt
+    priceHistory: [
+        {
+            date:
+            currency_1
+            currency_2
+        }
+    ]
+    image
+    colorIdentity
+    colors
+    type
+    manaCost
+    rarity
+    oracleText
+    power
+    toughness
+    flavorText
+    artist
+    collectorNumber
+    legalities
+    layout != normal 
+    cardBack: {
+        name
+        typeLine
+        image
+        colors
+        manaCost
+        oracleText
+        flavorText
+        power
+        toughness
+    }
+}
+
+Améliorations :
+
+- Naviguer dans la modale avec clavier
+- Ajouter le loader là où c'est nécessaire
+- Améliorer le hook useCardFilters avec filtres persistants si besoin, bouton de reinitialisation et filtres avancés.
+- Page stats, Evolution valeur de la collection, nb de cartes, Repartition collection par types/couleur/rareté, top des cartes les +chères, etc...
+- Moteur de suggestion en cas de recherche de carte ou de set (often played with via scryfall)
+- ajouter un cache pour améliorer performances dans la collection
+- Affichage des cartes en 3D, gestion des effet premium des cartes
+
+Pages :
+
+DeckBuilder
+Wishlist
+Profil utilisateur

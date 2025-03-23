@@ -1,0 +1,32 @@
+#globalNavigation {
+    background-color: rgba(255, 255, 255, 0.1);
+    list-style-type: none;
+    display: flex;
+    gap: 2px;
+    align-items: center;
+    /* margin-bottom: 50px; */
+}
+
+#globalNavigation .navigationElement {
+    background-color: rgba(255, 255, 255, 0.1);
+    font-size: 20px;
+    font-weight: 600;
+}
+
+#globalNavigation .navigationElement:hover {
+    background-color: antiquewhite;
+    color: black;
+}
+
+#globalNavigation .navigationElement a {
+    display: inline-block;
+    padding: 10px 20px;
+}
+
+#globalNavigation .navigationElement a.active {
+    color: red !important;
+}
+
+a.active {
+    color: red !important;
+}
