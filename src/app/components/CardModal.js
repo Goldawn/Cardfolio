@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import manaSymbols from '../assets/mock/mana.json';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import styles from './CardModal.module.css';
+import useModalKeyboardNavigation from '../hooks/useModalKeyboardNavigation';
 import { useCurrencyContext } from "@/context/";
 
 export default function CardModal({ card, onClose, cardList = [], currentIndex = 0 }) {
@@ -27,6 +28,20 @@ export default function CardModal({ card, onClose, cardList = [], currentIndex =
     }
   };
 
+  useModalKeyboardNavigation({
+    isOpen: true,
+    onClose,
+    onNext: handleNextCard,
+    onPrev: handlePreviousCard
+  });
+
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, []);
+
   const formatAndParseText = (text) => {
     if (!text) return null;
 
@@ -45,36 +60,68 @@ export default function CardModal({ card, onClose, cardList = [], currentIndex =
     ));
   };
 
-  const isFrontAndBack = currentCard.layout === "flip" || currentCard.layout === "transform" || currentCard.layout === "modal_dfc";
-  const isDualCard = currentCard.layout === "split" || currentCard.layout === "adventure";
+  const isFrontAndBack = ["flip", "transform", "modal_dfc"].includes(currentCard.layout);
+  const isDualCard = ["split", "adventure"].includes(currentCard.layout);
 
-  const formatPriceHistoryForChart = (priceHistory) => {
-    if (!priceHistory || priceHistory.length === 0) return [];
-    return priceHistory
+  const displayedCard = useMemo(() => {
+    if (isFrontAndBack && flipped) return currentCard.cardBack;
+    if (isDualCard) {
+
+      return {
+        ...currentCard,
+        name: currentCard?.name,
+        manaCost: currentCard?.manaCost,
+        type: currentCard?.type,
+        backFace: {
+          name: currentCard.cardBack?.name,
+          manaCost: currentCard.cardBack?.manaCost,
+          type: currentCard.cardBack?.type,
+          oracleText: currentCard.cardBack?.oracleText,
+          flavorText: currentCard.cardBack?.flavorText,
+          power: currentCard.cardBack?.power,
+          toughness: currentCard.cardBack?.toughness,
+        },
+      };
+    }
+    return currentCard;
+  }, [currentCard, flipped]);
+
+  const formattedPriceHistory = useMemo(() => {
+    if (!currentCard.priceHistory || currentCard.priceHistory.length === 0) return [];
+    return currentCard.priceHistory
       .map(entry => ({
         date: entry.date,
         eur: parseFloat(entry.eur),
         usd: parseFloat(entry.usd),
       }))
       .sort((a, b) => new Date(a.date) - new Date(b.date));
-  };
-
-  const formattedPriceHistory = formatPriceHistoryForChart(currentCard.priceHistory);
+  }, [currentCard]);
 
   return (
-    <div className={styles.overlay}>
+    <div className={styles.overlay} onClick={(e) => {
+      if(e.target === e.currentTarget) {
+        onClose();
+      }
+    }}>
       <div className={styles.modal}>
         <button className={styles.closeButton} onClick={onClose}>×</button>
+
         {cardList.length > 1 && (
           <div className={styles.navButtons}>
-            <button onClick={handlePreviousCard} disabled={currentCardIndex === 0}>Prev</button>
-            <button onClick={handleNextCard} disabled={currentCardIndex === cardList.length - 1}>Next</button>
+            <button onClick={handlePreviousCard} disabled={currentCardIndex === 0}>
+              ← {cardList[currentCardIndex - 1]?.name}
+            </button>
+            Carte {currentCardIndex + 1} / {cardList.length}
+            <button onClick={handleNextCard} disabled={currentCardIndex === cardList.length - 1}>
+              {cardList[currentCardIndex + 1]?.name} →
+            </button>
           </div>
         )}
+
         <div className={styles.content}>
           <div className={styles.cardQuantityPanel}>
             {isFrontAndBack ? (
-              <div className={styles.cardContainer}>
+              <div key={currentCard.id} className={`${styles.cardContainer} ${styles.cardTransition}`}>
                 <div className={`${styles.card} ${flipped ? styles.flipped : ''}`}>
                   <div className={styles.cardFace} style={{ backgroundImage: `url(${currentCard.image.large})` }}>
                     <button className={styles.flipButton} onClick={() => setFlipped(true)}>Voir le verso</button>
@@ -85,10 +132,12 @@ export default function CardModal({ card, onClose, cardList = [], currentIndex =
                 </div>
               </div>
             ) : (
-              <div className={styles.imageContainer}>
+              <div
+                key={currentCard.id} className={`${styles.imageContainer} ${styles.cardTransition}`}>
                 <img src={currentCard.image.large} alt={currentCard.name} className={styles.image} />
               </div>
             )}
+
             <div className={styles.quantityBox}>
               <p>Exemplaires possédés</p>
               <button>Ajouter un exemplaire</button>
@@ -97,40 +146,38 @@ export default function CardModal({ card, onClose, cardList = [], currentIndex =
           </div>
 
           <div className={styles.details}>
-            <h2>{flipped ? currentCard.cardBack.name : isDualCard ? currentCard.name.split(" // ")[0] : currentCard.name}</h2>
-            {flipped ? currentCard.cardBack.manaCost && <p><strong>Coût de mana :</strong> {formatAndParseText(currentCard.manaCost)}</p>
-              : isDualCard ? <p><strong>Coût de mana :</strong>{formatAndParseText(currentCard.manaCost.split(" // ")[0])}</p>
-              : currentCard.manaCost && <p><strong>Coût de mana :</strong>{formatAndParseText(currentCard.manaCost)}</p>}
-            <p><strong>Type :</strong> {flipped ? currentCard.cardBack.type : isDualCard ? currentCard.type.split(" // ")[0] : currentCard.type}</p>
+            <h2>{displayedCard.name}</h2>
+            {displayedCard.manaCost && <p><strong>Coût de mana :</strong> {formatAndParseText(displayedCard.manaCost)}</p>}
+            <p><strong>Type :</strong> {displayedCard.type}</p>
             <p><strong>Rareté :</strong> {currentCard.rarity}</p>
             <p><strong>Set:</strong>{currentCard.setName} ({currentCard.setCode})</p>
-            {flipped ? currentCard.cardBack.power && currentCard.cardBack.toughness && <p><strong>statistiques</strong>{currentCard.cardBack.power}/{currentCard.cardBack.toughness}</p>
-              : currentCard.power && currentCard.toughness && <p><strong>statistiques</strong>{currentCard.power}/{currentCard.toughness}</p>}
-            {flipped ? currentCard.cardBack.loyalty && <p><strong>Points de loyauté :</strong> {currentCard.cardBack.loyalty}</p>
-              : currentCard.loyalty && <p><strong>Points de loyauté :</strong> {currentCard.loyalty}</p>}
-            {flipped ? currentCard.cardBack.oracleText && <p><strong>Description :</strong> {formatAndParseText(currentCard.cardBack.oracleText)}</p>
-              : currentCard.oracleText && <p><strong>Description :</strong> {formatAndParseText(currentCard.oracleText)}</p>}
-            {flipped ? currentCard.cardBack.flavorText && <p><em>{formatAndParseText(currentCard.cardBack.flavorText)}</em></p>
-              : currentCard.flavorText && <p><em>{formatAndParseText(currentCard.flavorText)}</em></p>}
-            <p><strong>Numéro de collection :</strong> {currentCard.collectorNumber}</p>
-            {currentCard.colors?.length > 0 && (
-              <p><strong>Couleurs :</strong> {flipped ? currentCard.cardBack.colors.join(", ") : currentCard.colors.join(", ")}</p>
+            {displayedCard.power && displayedCard.toughness && (
+              <p><strong>Statistiques :</strong> {displayedCard.power}/{displayedCard.toughness}</p>
             )}
-            {isDualCard &&
+            {displayedCard.loyalty && <p><strong>Points de loyauté :</strong> {displayedCard.loyalty}</p>}
+            {displayedCard.oracleText && <p><strong>Description :</strong> {formatAndParseText(displayedCard.oracleText)}</p>}
+            {displayedCard.flavorText && <p><em>{formatAndParseText(displayedCard.flavorText)}</em></p>}
+            <p><strong>Numéro de collection :</strong> {currentCard.collectorNumber}</p>
+            {displayedCard.colors?.length > 0 && (
+              <p><strong>Couleurs :</strong> {displayedCard.colors.join(", ")}</p>
+            )}
+
+            {displayedCard.backFace && (
               <>
                 <p>---------------------------------------------------------</p>
-                <h2>{currentCard.cardBack.name}</h2>
-                <p><strong>Coût de mana :</strong> {formatAndParseText(currentCard.cardBack.manaCost)}</p>
-                <p><strong>Type :</strong>{currentCard.cardBack.type}</p>
-                {currentCard.cardBack.power && currentCard.cardBack.toughness && <p><strong>statistiques :</strong>{currentCard.cardBack.power}/{currentCard.cardBack.toughness}</p>}
-                {currentCard.cardBack.oracleText && <p><strong>Description :</strong>{formatAndParseText(currentCard.cardBack.oracleText)}</p>}
-                {currentCard.cardBack.flavorText && <p><strong>Flavor :</strong>{formatAndParseText(currentCard.cardBack.flavorText)}</p>}
+                <h2>{displayedCard.backFace.name}</h2>
+                <p><strong>Coût de mana :</strong> {formatAndParseText(displayedCard.backFace.manaCost)}</p>
+                <p><strong>Type :</strong> {displayedCard.backFace.type}</p>
+                {displayedCard.backFace.power && displayedCard.backFace.toughness && <p><strong>Statistiques :</strong> {displayedCard.backFace.power}/{displayedCard.backFace.toughness}</p>}
+                {displayedCard.backFace.oracleText && <p><strong>Description :</strong> {formatAndParseText(displayedCard.backFace.oracleText)}</p>}
+                {displayedCard.backFace.flavorText && <p><em>{formatAndParseText(displayedCard.backFace.flavorText)}</em></p>}
               </>
-            }
+            )}
+
             <p>---------------------------------------------------------</p>
             <p><strong>Formats légaux :</strong></p>
             <ul className={styles.legalities}>
-              {Object.entries(currentCard.legalities)
+              {Object.entries(currentCard.legalities || {})
                 .filter(([_, legality]) => legality === "legal")
                 .map(([format]) => (
                   <li key={format}>{format}</li>

@@ -1,4 +1,5 @@
 'use client';
+
 import { useEffect, useState } from 'react';
 import { fetchSets, fetchSetCards, fetchMoreCards } from '../../services/Scryfall.js';
 import Card from '../../components/Card.js';
@@ -24,10 +25,10 @@ export default function MTGHome() {
   const [displaySetList, setDisplaySetList] = useState(false);
   const [nextPage, setNextPage] = useState();
 
-  const formattedCards = cards.length > 0 ?cards.map(formatCard) : [];
+  const formattedCards = cards.length > 0 ? cards.map(formatCard) : [];
 
   const {
-    filteredCards,
+    sortedAndFilteredCards,
     selectedColors,
     toggleColorFilter,
     selectedTypes,
@@ -37,10 +38,11 @@ export default function MTGHome() {
     searchQuery,
     setSearchQuery,
     sortOption,
-    setSortOption
+    setSortOption,
+    sortOrderAsc,
+    setSortOrderAsc
   } = useCardFilters(formattedCards);
 
-  // Charger tous les sets
   useEffect(() => {
     const loadSets = async () => {
       const allSets = await fetchSets();
@@ -108,8 +110,6 @@ export default function MTGHome() {
     }
   }, [nextPage]);
 
-  useEffect(() => {console.log(filteredCards)})
-
   return (
     <div>
       <h1>Magic: The Gathering</h1>
@@ -158,14 +158,16 @@ export default function MTGHome() {
             toggleRarityFilter={toggleRarityFilter}
             sortOption={sortOption}
             setSortOption={setSortOption}
+            sortOrderAsc={sortOrderAsc}
+            toggleSortOrder={() => setSortOrderAsc((prev) => !prev)}
           />
 
           <div id={styles.cardContainer}>
-            {(filteredCards || []).map((card, index) => (
+            {sortedAndFilteredCards.map((card, index) => (
               <Card
                 key={card.id}
                 card={card}
-                cardList={filteredCards}
+                cardList={sortedAndFilteredCards}
                 currentIndex={index}
                 hasOtherFace={card.layout !== "normal"}
                 onAddToCollection={addCardToCollection}
