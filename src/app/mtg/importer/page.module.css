@@ -24,12 +24,12 @@
 
 .inputContainer ul li {
   padding: 10px;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(0, 0, 0, 0.6);
   font-size: 1rem;
 }
 
 .inputContainer ul li:nth-child(2n) {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(0, 0, 0, 0.8);
 }
 
 .inputContainer ul li i {
@@ -120,7 +120,70 @@
   justify-content: center;
 }
 
+.backToTop {
+  position: fixed;
+  bottom: 30px;
+  right: 25px;
+  background-color: rgb(31, 31, 31);
+  font-size: 2em;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-bottom: 4px;
+  border-radius: 50%;
+  cursor: pointer;
+}
 
+.backToTop:hover {
+  background-color: rgb(58, 58, 58);
+}
+
+.recentlyImportedCards {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: linear-gradient(rgb(0, 0, 0), rgb(20, 20, 20));
+  padding: 10px 0;
+  opacity: 0;
+  transition: all 0.3s ease;
+  border-top: 2px solid rgb(68, 68, 68);
+  font-size: 0.9em;
+}
+
+.recentlyAddedHeader .reduceSection {
+  position: absolute;
+  right: 20;
+  top: 0;
+  background-color: rgb(51, 51, 51);
+  padding: 5px;
+  cursor: pointer;
+}
+
+.recentlyImportedCards.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.recentlyImportedCards.reduced {
+  transform: translateY(82%);
+}
+
+.recentlyImportedCards .cardContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  transition: all 0.3s ease;
+}
+
+.recentlyImportedCards .cardContainer > div {
+  width: 100px;
+}
+
+.cardAppear {
+  animation: fadeInSlide 0.4s ease-out;
+}
 
 
 
@@ -135,4 +198,15 @@
 {
 	border-radius: 10px;
 	background-color: #cacaca;
+}
+
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translatex(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translatex(0);
+  }
 }

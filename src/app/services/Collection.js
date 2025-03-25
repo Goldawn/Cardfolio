@@ -3,7 +3,7 @@ import { fetchCardPrice } from "./pricing.js";
 import { formatCard } from "./FormatCard.js";
 
 // Sauvegarder la collection dans le localStorage
-export const saveCollection = (collection) => {
+export const saveCollection = (collection, card) => {
     localStorage.setItem('mtgCollection', JSON.stringify(collection));
 };
   
@@ -44,7 +44,7 @@ export const addCardToCollection = async (card) => {
 
   }
 
-  saveCollection(collection);
+  saveCollection(collection, card);
 };
 
 export const getLastPrice = (card, currency) => {
@@ -55,6 +55,7 @@ export const getLastPrice = (card, currency) => {
 };
 
 export const updateQuantity = (cardId, delta) => {
+  const collection = loadCollection();
   const updatedCollection = collection.map((card) =>
     card.id === cardId
       ? { ...card, quantity: Math.max(1, card.quantity + delta) }
@@ -63,10 +64,10 @@ export const updateQuantity = (cardId, delta) => {
   saveCollection(updatedCollection);
 };
 
-// export const removeCard = (cardId) => {
-//   const updatedCollection = collection.filter((card) => card.id !== cardId);
-//   saveCollection(updatedCollection);
-// };
+export const removeCard = (cardId) => {
+  const updatedCollection = collection.filter((card) => card.id !== cardId);
+  saveCollection(updatedCollection);
+};
 
 export const filterCollection = (collection, filters) => {
   const filteredCollection = collection.filter

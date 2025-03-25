@@ -43,6 +43,8 @@ Carte Magic :
 
 Améliorations :
 
+- AJOUTER TYPESCRIPT
+- AJOUTER LA STACK
 - Naviguer dans la modale avec clavier
 - Ajouter le loader là où c'est nécessaire
 - Améliorer le hook useCardFilters avec filtres persistants si besoin, bouton de reinitialisation et filtres avancés.
