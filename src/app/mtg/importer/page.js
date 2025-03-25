@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { fetchSets, fetchSetCards, fetchMoreCards } from '../../services/Scryfall.js';
 import Card from '../../components/Card.js';
 import Loader from '../../components/Loader.js';
-import { addCardToCollection } from "../../services/Collection.js";
+import { addCardToCollection, loadCollection, updateQuantity, removeCard } from "../../services/Collection.js";
 import { formatCard } from "../../services/FormatCard.js";
 import useCardFilters from "../../hooks/useCardFilters.js";
 import CollectionActionBar from "../../components/CollectionActionBar.js";
@@ -24,6 +24,8 @@ export default function MTGHome() {
   const [loading, setLoading] = useState(false);
   const [displaySetList, setDisplaySetList] = useState(false);
   const [nextPage, setNextPage] = useState();
+  const [recentlyAddedToCollection, setRecentlyAddedToCollection] = useState([])
+  const [ isReduced, setIsReduced] = useState(false)
 
   const formattedCards = cards.length > 0 ? cards.map(formatCard) : [];
 
@@ -110,9 +112,40 @@ export default function MTGHome() {
     }
   }, [nextPage]);
 
+  const handleAddToCollection = (card) => {
+    addCardToCollection(card);
+  
+    setRecentlyAddedToCollection((prev) => [
+      { ...card, addedAt: new Date().toISOString() },
+      ...prev,
+    ]);
+  };
+ 
+  const handleUndoAdd = (cardToRemove) => {
+    const collection = loadCollection();
+    const cardsWithId = collection.filter(card => card.id === cardToRemove.id)
+    if (cardsWithId.quantity === 1) {
+      removeCard(cardToRemove.id)
+    }
+    else {
+      updateQuantity(cardToRemove.id, -1)
+    }
+    setRecentlyAddedToCollection((prev) => {
+      const index = prev.findIndex((c) => c.id === cardToRemove.id);
+      if (index !== -1) {
+        const updated = [...prev];
+        updated.splice(index, 1); // On retire juste la première occurrence trouvée
+        return updated;
+      }
+      return prev;
+    });
+  };
+
   return (
     <div>
-      <h1>Magic: The Gathering</h1>
+      <h1 id={styles.top} >Magic: The Gathering</h1>
+
+      {/* <div className={styles.backToTop}><a href="#top">&#x2b06;</a></div> */}
 
       <div className={styles.inputContainer}>
         <input type="text" placeholder="Recherchez un set..." onChange={handleInputChange} />
@@ -170,11 +203,39 @@ export default function MTGHome() {
                 cardList={sortedAndFilteredCards}
                 currentIndex={index}
                 hasOtherFace={card.layout !== "normal"}
-                onAddToCollection={addCardToCollection}
-              />
-            ))}
+                onAddToCollection={() => handleAddToCollection(card)}
+                />
+              ))}
           </div>
         </>
+      )}
+
+      {recentlyAddedToCollection.length > 0 && (
+        <aside
+        className={`${styles.recentlyImportedCards} ${isReduced? styles.reduced : "" } ${
+          recentlyAddedToCollection.length > 0 ? styles.show : ''
+        }`}
+        >
+          <div className={styles.recentlyAddedHeader}>
+            <h3>Cartes récemment ajoutées</h3>
+            <div className={styles.reduceSection} onClick={() => setIsReduced(!isReduced)}>{isReduced ? "⏶" : "⏷"}</div>
+          </div>
+          <div className={styles.cardContainer}>
+          {recentlyAddedToCollection.map((card, index) => (
+            <Card
+              key={`${card.id}-${index}`}
+              card={card}
+              cardList={recentlyAddedToCollection}
+              currentIndex={index}
+              hasOtherFace={card.layout !== "normal"}
+              className={index === 0 ? styles.cardAppear : ""}
+              name={false}
+              modal={false}
+              undoAddToCollection={() => handleUndoAdd(card)}
+            />
+          ))}
+          </div>
+      </aside>
       )}
     </div>
   );

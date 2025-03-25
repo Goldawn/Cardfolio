@@ -115,7 +115,7 @@ export const formatCard = (card) => {
         power: card.power || null,
         toughness: card.toughness || null,
         loyalty: card.loyalty || null,
-        colors: card.colors.length === 0 ? checkColorless(card) : card.colors,
+        colors: card.colors?.length === 0 ? checkColorless(card) : card.colors,
         image: {
           small: card.image_uris?.small || null,
           normal: card.image_uris?.normal || null,

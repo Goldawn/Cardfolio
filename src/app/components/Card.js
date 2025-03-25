@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import styles from "./Card.module.css";
 import CardModal from "./CardModal";
 
-export default function Card({ card, cardList, currentIndex, isFrontAndBack, onAddToCollection, updateQuantity, onRemove, owned = false, currency = "eur" }) {
+export default function Card({ card, undoAddToCollection, name=true, modal=true, className = "", cardList, currentIndex, isFrontAndBack, onAddToCollection, updateQuantity, onRemove, owned = false, currency = "eur" }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Fonction pour récupérer le dernier prix connu
@@ -27,9 +27,14 @@ export default function Card({ card, cardList, currentIndex, isFrontAndBack, onA
   const totalValue = (lastPrice * card.quantity).toFixed(2);
 
   return (
-    <div className={styles.card}>
-        <img className={ owned ? styles.owned : ""} src={card.image.small} alt={cardName} onClick={handleOpenModal} />
-      <h3>{cardName}</h3>
+    <div className={`${styles.card} ${className}`} onClick={ undoAddToCollection ? () => undoAddToCollection(card) : () => {}} >
+        <img 
+          className={ owned ? styles.owned : ""} 
+          src={card.image.small} alt={cardName} 
+          onClick={modal ? handleOpenModal : ()=>{}} 
+        />
+
+      {name &&<h3>{cardName}</h3>}
 
       {onAddToCollection && <button onClick={() => onAddToCollection(card)}>Ajouter à la collection</button>}
 
@@ -51,7 +56,7 @@ export default function Card({ card, cardList, currentIndex, isFrontAndBack, onA
 
       {onRemove && <button className={styles.delete} onClick={() => onRemove(card.id)}>Supprimer</button>}
 
-      {isModalOpen &&
+      {modal && isModalOpen &&
         <CardModal 
           card={card} 
           onClose={handleCloseModal}

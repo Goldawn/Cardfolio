@@ -44,6 +44,7 @@ export default function Collection() {
     let totalValue = 0;
     const uniqueSets = new Set();
     const cardsPerSet = {};
+    const uniqueCardsPerSet = {};
 
     collection.forEach((card) => {
       totalCards += card.quantity;
@@ -54,9 +55,19 @@ export default function Collection() {
       }
       cardsPerSet[card.setCode] += card.quantity;
 
+      if (!uniqueCardsPerSet[card.setCode]) {
+        uniqueCardsPerSet[card.setCode] = new Set();
+      }
+      uniqueCardsPerSet[card.setCode].add(card.id);
+
       const lastPrice = card.priceHistory.length > 0 ? parseFloat(card.priceHistory.at(-1)[currency]) : 0;
       totalValue += lastPrice * card.quantity;
     });
+
+    const uniqueCardsPerSetCounts = {};
+    for (const [setCode, idSet] of Object.entries(uniqueCardsPerSet)) {
+      uniqueCardsPerSetCounts[setCode] = idSet.size;
+    }
 
     return {
       totalCards,
@@ -64,6 +75,7 @@ export default function Collection() {
       totalSetsCodes: [...uniqueSets],
       totalValue: totalValue.toFixed(2),
       cardsPerSet,
+      uniqueCardsPerSet: uniqueCardsPerSetCounts,
     };
   }, [collection, currency]);
 
@@ -170,7 +182,7 @@ export default function Collection() {
               >
                 {getSetIcon(setCode) && <img src={getSetIcon(setCode)} alt={getSetName(setCode)} />}
                 <p>{getSetName(setCode)}</p>
-                <p>{collectionStats.cardsPerSet[setCode]}/{getSetTotalCards(setCode)}</p>
+                <p>{collectionStats.uniqueCardsPerSet[setCode]}/{getSetTotalCards(setCode)}</p>
               </div>
             ))}
           </div>
