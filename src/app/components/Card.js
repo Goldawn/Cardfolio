@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import styles from "./Card.module.css";
 import CardModal from "./CardModal";
 
-export default function Card({ card, undoAddToCollection, name=true, modal=true, className = "", cardList, currentIndex, isFrontAndBack, onAddToCollection, updateQuantity, onRemove, owned = false, currency = "eur" }) {
+export default function Card({ card, undoAddToCollection, cardsInCollection, name=true, modal=true, className = "", cardList, currentIndex, isFrontAndBack, onAddToCollection, updateQuantity, onRemove, owned = false, currency = "eur" }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Fonction pour récupérer le dernier prix connu

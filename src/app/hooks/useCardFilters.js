@@ -36,7 +36,19 @@ export default function useCardFilters(cards = []) {
 
   const filterCards = (cardList) => {
     return cardList.filter((card) => {
-      const matchesSearch = card.name.toLowerCase().includes(debouncedSearchQuery);
+     
+      const fieldsToSearch = [
+        card.name,
+        card.artist,
+        card.oracleText,
+        card.cardBack?.oracleText,
+        card.type
+      ];
+      
+      const matchesSearch = fieldsToSearch.some(
+        (field) => field?.toLowerCase().includes(debouncedSearchQuery)
+      );
+
       const matchesColor =
         selectedColors.length === 0 ||
         card.colors?.some((color) => selectedColors.includes(color)) ||

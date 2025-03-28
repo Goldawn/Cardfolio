@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { fetchSets, fetchSetCards, fetchMoreCards } from '../../services/Scryfall.js';
 import Card from '../../components/Card.js';
 import Loader from '../../components/Loader.js';
-import { addCardToCollection, loadCollection, updateQuantity, removeCard } from "../../services/Collection.js";
+import { fetchCardPrice } from "../../services/pricing.js";
+import { loadCollection, updateQuantity, removeCard } from "../../services/Collection.js";
 import { formatCard } from "../../services/FormatCard.js";
 import useCardFilters from "../../hooks/useCardFilters.js";
 import CollectionActionBar from "../../components/CollectionActionBar.js";
@@ -28,6 +29,8 @@ export default function MTGHome() {
   const [ isReduced, setIsReduced] = useState(false)
 
   const formattedCards = cards.length > 0 ? cards.map(formatCard) : [];
+
+  const userId = "40bb6e2f-c254-4dbc-bb42-3937243c6975";
 
   const {
     sortedAndFilteredCards,
@@ -112,37 +115,90 @@ export default function MTGHome() {
     }
   }, [nextPage]);
 
-  const handleAddToCollection = (card) => {
-    addCardToCollection(card);
+  const handleAddToCollection = async (card) => {
+    const userId = "40bb6e2f-c254-4dbc-bb42-3937243c6975"; // à dynamiser plus tard
+    const scryfallId = card.id;
+    const { usd, eur } = await fetchCardPrice(card.name);
+    const lastPrice = eur || usd || 0;
+    const currency = eur ? "eur" : "usd";
+    const newPriceEntry = {
+      date: new Date().toISOString().split("T")[0],
+      [currency]: lastPrice,
+    };
   
-    setRecentlyAddedToCollection((prev) => [
-      { ...card, addedAt: new Date().toISOString() },
-      ...prev,
-    ]);
+    try {
+      const existingRes = await fetch(`/api/users/${userId}/collection`);
+      const existingCards = await existingRes.json();
+      const alreadyInCollection = existingCards.find(c => c.scryfallId === scryfallId);
+  
+      if (alreadyInCollection) {
+        const patchRes = await fetch(`/api/users/${userId}/collection`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            scryfallId,
+            quantityDelta: 1,
+            newPriceEntry,
+          }),
+        });
+  
+        if (!patchRes.ok) throw new Error("Erreur mise à jour quantité");
+      } else {
+        const postRes = await fetch(`/api/users/${userId}/collection`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            scryfallId,
+            quantity: 1,
+            priceHistory: [newPriceEntry],
+          }),
+        });
+  
+        if (!postRes.ok) throw new Error("Erreur ajout nouvelle carte");
+      }
+
+      setRecentlyAddedToCollection((prev) => [
+        { ...card, addedAt: new Date().toISOString() },
+        ...prev,
+      ]);
+    } catch (err) {
+      console.error("Erreur handleAddToCollection :", err);
+    }
   };
  
-  const handleUndoAdd = (cardToRemove) => {
-    const collection = loadCollection();
-    const cardsWithId = collection.filter(card => card.id === cardToRemove.id)
-    if (cardsWithId.quantity === 1) {
-      removeCard(cardToRemove.id)
-    }
-    else {
-      updateQuantity(cardToRemove.id, -1)
-    }
-    setRecentlyAddedToCollection((prev) => {
-      const index = prev.findIndex((c) => c.id === cardToRemove.id);
-      if (index !== -1) {
-        const updated = [...prev];
-        updated.splice(index, 1); // On retire juste la première occurrence trouvée
-        return updated;
+  const handleUndoAdd = async (cardToRemove) => {
+    const userId = "40bb6e2f-c254-4dbc-bb42-3937243c6975"; // à dynamiser plus tard
+  
+    try {
+      const patchRes = await fetch(`/api/users/${userId}/collection`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          scryfallId: cardToRemove.id,
+          quantityDelta: -1
+        }),
+      });
+  
+      if (!patchRes.ok && patchRes.status !== 204) {
+        throw new Error("Erreur lors de l'annulation");
       }
-      return prev;
-    });
+  
+      setRecentlyAddedToCollection((prev) => {
+        const index = prev.findIndex((c) => c.id === cardToRemove.id);
+        if (index !== -1) {
+          const updated = [...prev];
+          updated.splice(index, 1);
+          return updated;
+        }
+        return prev;
+      });
+    } catch (error) {
+      console.error("Erreur handleUndoAdd :", error);
+    }
   };
 
   return (
-    <div>
+    <div id={styles.importPage}>
       <h1 id={styles.top} >Magic: The Gathering</h1>
 
       {/* <div className={styles.backToTop}><a href="#top">&#x2b06;</a></div> */}

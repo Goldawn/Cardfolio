@@ -1,0 +1,45 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Card {
+  id              String   @id @default(uuid())
+  name            String
+  setCode         String //Envisager une table relationnelle set 
+  lang            String
+  quantity        Int      @default(1)
+  addedAt         DateTime @default(now())
+  imageFront      String
+  manaCost        String?
+  typeLine        String?
+  rarity          String?
+  oracleText      String?
+  flavorText      String?
+  power           String?
+  toughness       String?
+  artist          String?
+  collectorNumber String?
+  colors          String?
+
+  // Card back pour les cartes recto-verso
+  backName       String?
+  backManaCost   String?
+  backImage      String?
+  backTypeLine   String?
+  backRarity     String?
+  backOracleText String?
+  backFlavorText String?
+  backPower      String?
+  backToughness  String?
+
+  priceHistory Json
+}
