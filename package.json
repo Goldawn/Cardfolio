@@ -9,9 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@prisma/client": "^6.5.0",
     "axios": "^1.7.9",
     "file-saver": "^2.0.5",
-    "next": "15.1.4",
+    "next": "^15.2.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "recharts": "^2.15.1"
@@ -23,6 +24,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.1.4",
+    "prisma": "^6.5.0",
     "typescript": "^5"
   }
 }

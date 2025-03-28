@@ -12,7 +12,8 @@ import CollectionActionBar from "../components/CollectionActionBar.js";
 import styles from "./page.module.css";
 
 export default function Collection() {
-  const [collection, setCollection] = useState(loadCollection());
+  // const [collection, setCollection] = useState(loadCollection());
+  const [collection, setCollection] = useState([]);
   const [sets, setSets] = useState([]);
   const [selectedSet, setSelectedSet] = useState();
   const [selectedSetCards, setSelectedSetCards] = useState([]);
@@ -22,6 +23,8 @@ export default function Collection() {
   const cardsToFilter = selectedSetCards.length === 0
     ? collection
     : selectedSetCards.map(formatCard);
+
+  const userId = "40bb6e2f-c254-4dbc-bb42-3937243c6975";
 
   const {
     sortOption,
@@ -80,6 +83,38 @@ export default function Collection() {
   }, [collection, currency]);
 
   useEffect(() => {
+    const fetchCollectionFromAPI = async () => {
+      try {
+        const res = await fetch(`/api/users/${userId}/collection`);
+        if (!res.ok) throw new Error("Erreur de chargement");
+  
+        const data = await res.json(); // => [{ scryfallId, quantity, ... }]
+  
+        // Pour chaque item, fetcher la carte depuis Scryfall
+        const enrichedCards = await Promise.all(
+          data.map(async (item) => {
+            const res = await fetch(`https://api.scryfall.com/cards/${item.scryfallId}`);
+            const rawCard = await res.json();
+            const formattedCard = formatCard(rawCard); // ta fonction habituelle
+            return {
+              ...formattedCard,
+              quantity: item.quantity,
+              priceHistory: Array.isArray(item.priceHistory) ? item.priceHistory : [],
+              dbId: item.id // pour update/delete ensuite
+            };
+          })
+        );
+  
+        setCollection(enrichedCards);
+      } catch (err) {
+        console.error("Erreur lors du fetch de la collection enrichie :", err);
+      }
+    };
+  
+    fetchCollectionFromAPI();
+  }, []);
+
+  useEffect(() => {
     const loadSets = async () => {
       const allSets = await fetchSets();
       setSets(allSets);
@@ -113,18 +148,56 @@ export default function Collection() {
     }
   }, [nextPage]);
 
-  const updateQuantity = (cardId, delta) => {
-    const updatedCollection = collection.map((card) =>
-      card.id === cardId ? { ...card, quantity: Math.max(1, card.quantity + delta) } : card
-    );
-    setCollection(updatedCollection);
-    saveCollection(updatedCollection);
+  const updateQuantity = async (cardId, delta) => {
+    const card = collection.find((c) => c.id === cardId);
+    if (!card || !card.dbId) return;
+  
+    try {
+      const res = await fetch(`/api/users/${userId}/collection`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          scryfallId: card.id,
+          quantityDelta: delta,
+          // Optionnel : ajouter une nouvelle entrée au priceHistory
+          // newPriceEntry: { date: "2025-03-27", eur: 1.5 },
+        }),
+      });
+  
+      if (res.status === 204) {
+        setCollection((prev) => prev.filter((c) => c.id !== cardId));
+      } else if (res.ok) {
+        const updated = await res.json();
+        setCollection((prev) =>
+          prev.map((c) =>
+            c.id === cardId ? { ...c, quantity: updated.quantity } : c
+          )
+        );
+      } else {
+        throw new Error("Erreur lors de la mise à jour");
+      }
+    } catch (err) {
+      console.error("Erreur updateQuantity :", err);
+    }
   };
 
-  const removeCard = (cardId) => {
-    const updatedCollection = collection.filter((card) => card.id !== cardId);
-    setCollection(updatedCollection);
-    saveCollection(updatedCollection);
+  const removeCard = async (cardId) => {
+    const card = collection.find(c => c.id === cardId);
+    if (!card || !card.dbId) return;
+  
+    try {
+      const res = await fetch(`/api/users/${userId}/collection`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scryfallId: card.id }),
+      });
+  
+      if (!res.ok) throw new Error("Erreur lors de la suppression");
+  
+      setCollection(prev => prev.filter(c => c.id !== cardId));
+    } catch (err) {
+      console.error("Erreur removeCard :", err);
+    }
   };
 
   const getSetName = (setCode) => sets.find((set) => set.code === setCode)?.name || "Nom inconnu";
