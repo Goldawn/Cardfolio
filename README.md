@@ -1,16 +1,17 @@
-# 🧙‍♂️ Cardfolio - Version 0.1
+# 🧙‍♂️ Cardfolio - Version 0.1.1
 
-**Cardfolio** est une application web permettant de gérer et visualiser une collection de cartes Magic: The Gathering.  
-Ce projet est en cours de développement – cette version 0.1 marque une étape clé : les premières fonctionnalités principales sont désormais fonctionnelles.
+**Cardfolio** est une application web permettant de gérer et visualiser une collection de cartes **Magic: The Gathering**.  
+Cette version 0.1.1 introduit une **connexion à une base de données SQLite via Prisma**, assurant une gestion persistente et robuste de la collection.
 
 ---
 
 ## ✨ Fonctionnalités
 
-### 📦 Gestion de collection
+### 📦 Gestion de collection (connectée à la base de données)
 - Importation de cartes depuis un set Magic: The Gathering (via l'API Scryfall)
-- Ajout de cartes à sa collection avec suivi de la **quantité possédée**
-- Suppression et modification des quantités à tout moment
+- Ajout de cartes à sa collection avec suivi de la **quantité possédée** et de l'**historique des prix**
+- Suppression et modification des quantités via l'interface
+- Les cartes sont désormais **stockées dans une base de données Prisma**
 
 ### 🔍 Filtres et tri dynamiques
 - Recherche par **nom de carte**
@@ -42,30 +43,16 @@ Ce projet est en cours de développement – cette version 0.1 marque une étape
 
 ---
 
-## ⚖️ Prochaines étapes (v0.2+)
-> Ces fonctionnalités sont envisagées pour les prochaines versions :
+## 🧱 Nouveauté : Prisma + base de données
 
-- Deck Builder et gestion de decks
-- Wishlist et cartes à acquérir
-- Plus de stats et visualisations graphiques
-- Export/Import JSON ou CSV
-- Suggestions de cartes basées sur la collection
-- Comptes utilisateurs (authentification)
-- Responsive mobile
-
----
-
-## 🛠️ Technologies utilisées
-
-- **React (Next.js)** avec App Router
-- **Context API** pour la gestion globale de la devise
-- **Recharts** pour l'affichage des graphiques
-- **CSS Modules** pour le style
-- **Scryfall API** pour récupérer les données des cartes
+Cardfolio utilise désormais **Prisma ORM** avec une base de données **SQLite** (stockée localement par défaut).  
+Chaque utilisateur pourra prochainement avoir sa propre collection, wishlist, et ses decklists.
 
 ---
 
 ## 🚀 Lancer le projet en local
+
+### 1. Cloner et installer les dépendances
 
 ```bash
 git clone https://github.com/votre-utilisateur/cardfolio.git
@@ -74,9 +61,52 @@ npm install
 npm run dev
 ```
 
-> Le projet utilise **Next.js 14+** (avec `app/`), assurez-vous d'avoir Node.js 18+ installé.
+### 2. Initialiser Prisma
+
+```bash
+npx prisma init --datasource-provider sqlite
+```
+
+### 3. Créer et synchroniser la base
+
+```bash
+npx prisma db push
+```
+
+### 4. (Optionnel) Lancer Prisma Studio pour visualiser vos données
+
+```bash
+npx prisma studio
+```
+
+### 5. Lancer le serveur de développement
+
+```bash
+npm run dev
+```
+
+
+> Le projet utilise **Next.js 15+** (avec `app/`), assurez-vous d'avoir Node.js 18+ installé.
 
 ---
+
+## 🔮 Prochaines étapes (v0.2+)
+
+✨ Wishlist et gestion de cartes à acquérir
+✨ Deck builder avec gestion de listes de jeu
+🔐 Authentification des utilisateurs
+📊 Plus de statistiques et visualisations avancées
+📤 Export/Import JSON ou CSV
+📱 Interface responsive mobile
+
+## 🛠️ Technologies utilisées
+
+React (Next.js) avec App Router
+Prisma + SQLite (ou toute base compatible à venir)
+Context API pour la gestion de la devise
+Recharts pour les graphiques
+Scryfall API pour les données cartes
+CSS Modules pour le style
 
 ## 📄 Licence
 
