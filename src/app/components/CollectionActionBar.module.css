@@ -2,6 +2,7 @@
     display: flex;
     justify-content: space-between;
     width: 100%;
+    height: 36px;
     margin-top: 20px;;
     user-select: none;
 }
@@ -57,4 +58,19 @@
 .colorIcon.active, .typeIcon.active, .rarityIcon.active {
     filter: brightness(1.2);
     border: 2px solid white;
+}
+
+.sortControls {
+    display: flex;
+}
+
+.sortIcon {
+    padding: 0;
+    background: none;
+    filter: invert(1)
+}
+
+.sortIcon img {
+    width: 20px;
+    height: 20px;
 }

@@ -1,6 +1,8 @@
 import styles from "./CollectionActionBar.module.css";
 import Image from "next/image";
 
+import HautBas from "../assets/images/icons/haut-bas.png"
+
 import White from "../assets/images/icons/W.svg";
 import Blue from "../assets/images/icons/U.svg";
 import Black from "../assets/images/icons/B.svg";
@@ -101,7 +103,7 @@ export default function CollectionActionBar({
 
       <div className={styles.sortControls}>    
         <select value={sortOption} onChange={(e) => setSortOption(e.target.value)}>
-          <option value="name">Nom (A-Z)</option>
+          <option value="name">Nom</option>
           <option value="price">Prix</option>
           <option value="date">Date d'ajout</option>
           <option value="set">Set</option>
@@ -109,7 +111,7 @@ export default function CollectionActionBar({
           <option value="rarity">Rareté</option>
         </select>
         <button onClick={toggleSortOrder} className={styles.sortIcon}>
-          {sortOrderAsc ? "Asc" : "Desc"}
+          <Image src={HautBas} alt="change order"/>
         </button>
       </div>
     </div>
