@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSession } from "next-auth/react";
 import { fetchSets, fetchSetCards, fetchMoreCards } from '../../services/Scryfall.js';
 import Card from '../../components/Card.js';
 import Loader from '../../components/Loader.js';
@@ -30,7 +31,8 @@ export default function MTGHome() {
 
   const formattedCards = cards.length > 0 ? cards.map(formatCard) : [];
 
-  const userId = "40bb6e2f-c254-4dbc-bb42-3937243c6975";
+  const { data: session, status } = useSession();
+  const userId = session?.user?.id;
 
   const {
     sortedAndFilteredCards,
@@ -116,7 +118,7 @@ export default function MTGHome() {
   }, [nextPage]);
 
   const handleAddToCollection = async (card) => {
-    const userId = "40bb6e2f-c254-4dbc-bb42-3937243c6975"; // à dynamiser plus tard
+  
     const scryfallId = card.id;
     const { usd, eur } = await fetchCardPrice(card.name);
     const lastPrice = eur || usd || 0;
@@ -167,7 +169,6 @@ export default function MTGHome() {
   };
  
   const handleUndoAdd = async (cardToRemove) => {
-    const userId = "40bb6e2f-c254-4dbc-bb42-3937243c6975"; // à dynamiser plus tard
   
     try {
       const patchRes = await fetch(`/api/users/${userId}/collection`, {
@@ -196,6 +197,9 @@ export default function MTGHome() {
       console.error("Erreur handleUndoAdd :", error);
     }
   };
+
+  if (status === "loading") return <p>Chargement de la session...</p>;
+  if (status === "unauthenticated") return <p>Veuillez vous connecter pour accéder à cette page.</p>;
 
   return (
     <div id={styles.importPage}>

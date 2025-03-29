@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { useSession } from "next-auth/react";
 import { loadCollection, saveCollection } from "../services/Collection.js";
 import { fetchSets, fetchSetCards, fetchMoreCards } from '../services/Scryfall.js';
 import { formatCard } from "../services/FormatCard.js";
@@ -24,7 +25,13 @@ export default function Collection() {
     ? collection
     : selectedSetCards.map(formatCard);
 
-  const userId = "40bb6e2f-c254-4dbc-bb42-3937243c6975";
+  // const userId = "40bb6e2f-c254-4dbc-bb42-3937243c6975";
+  
+  const { data: session, status } = useSession();
+  const userId = session?.user?.id;
+  console.log(userId)
+  console.log("Session:", session);
+  console.log("Status:", status);
 
   const {
     sortOption,
@@ -83,24 +90,27 @@ export default function Collection() {
   }, [collection, currency]);
 
   useEffect(() => {
+    if (!userId) return; // ✅ on attend que la session soit prête
+  
     const fetchCollectionFromAPI = async () => {
       try {
         const res = await fetch(`/api/users/${userId}/collection`);
         if (!res.ok) throw new Error("Erreur de chargement");
   
-        const data = await res.json(); // => [{ scryfallId, quantity, ... }]
+        const data = await res.json();
+        console.log("Données brutes de la collection : ", data);
   
-        // Pour chaque item, fetcher la carte depuis Scryfall
         const enrichedCards = await Promise.all(
           data.map(async (item) => {
             const res = await fetch(`https://api.scryfall.com/cards/${item.scryfallId}`);
             const rawCard = await res.json();
-            const formattedCard = formatCard(rawCard); // ta fonction habituelle
+            const formattedCard = formatCard(rawCard);
+            console.log("Carte formatée :", formattedCard);
             return {
               ...formattedCard,
               quantity: item.quantity,
               priceHistory: Array.isArray(item.priceHistory) ? item.priceHistory : [],
-              dbId: item.id // pour update/delete ensuite
+              dbId: item.id,
             };
           })
         );
@@ -112,7 +122,7 @@ export default function Collection() {
     };
   
     fetchCollectionFromAPI();
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     const loadSets = async () => {
@@ -212,6 +222,9 @@ export default function Collection() {
       setSelectedSet(setCode);
     }
   };
+
+  if (status === "loading") return <p>Chargement de la session...</p>;
+  if (status === "unauthenticated") return <p>Veuillez vous connecter pour accéder à cette page.</p>;
 
   return (
     <div id={styles.collectionPage}>
