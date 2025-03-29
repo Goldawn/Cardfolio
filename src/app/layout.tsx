@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SessionProvider } from "next-auth/react";
 import { Geist, Geist_Mono } from "next/font/google";
 import CurrencyContextProvider from "@/context";
 import Navigation from "./components/Navigation.js"
@@ -27,12 +28,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        <SessionProvider>
         <CurrencyContextProvider>
           <Navigation />
           <main>
             {children}
           </main>
         </CurrencyContextProvider>
+        </SessionProvider>
       </body>
     </html>
   );

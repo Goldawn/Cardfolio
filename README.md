@@ -32,6 +32,10 @@ Cette version 0.1.1 introduit une **connexion à une base de données SQLite via
 - **Valeur totale estimée** (EUR / USD)
 - Affichage du ratio possédé / total pour chaque extension
 
+### 🧑‍💻 Authentification sécurisée
+- Connexion via **Google** ou **GitHub**
+- Chaque utilisateur dispose de sa propre collection (données isolées)
+
 ### 📁 Devise dynamique
 - Bascule entre les prix **EUR** et **USD**
 
@@ -43,7 +47,7 @@ Cette version 0.1.1 introduit une **connexion à une base de données SQLite via
 
 ---
 
-## 🧱 Nouveauté : Prisma + base de données
+## 🧱 Nouveauté : Prisma + base de données + nextAuth
 
 Cardfolio utilise désormais **Prisma ORM** avec une base de données **SQLite** (stockée localement par défaut).  
 Chaque utilisateur pourra prochainement avoir sa propre collection, wishlist, et ses decklists.
@@ -58,28 +62,26 @@ Chaque utilisateur pourra prochainement avoir sa propre collection, wishlist, et
 git clone https://github.com/votre-utilisateur/cardfolio.git
 cd cardfolio
 npm install
-npm run dev
 ```
 
 ### 2. Initialiser Prisma
 
 ```bash
-npx prisma init --datasource-provider sqlite
-```
-
-### 3. Créer et synchroniser la base
-
-```bash
+npx prisma generate
 npx prisma db push
-```
-
-### 4. (Optionnel) Lancer Prisma Studio pour visualiser vos données
-
-```bash
 npx prisma studio
 ```
 
-### 5. Lancer le serveur de développement
+### 3. Configurer les variables d’environnement
+
+DATABASE_URL="file:./dev.db"
+AUTH_GITHUB_ID="..."       # à récupérer sur GitHub Developer
+AUTH_GITHUB_SECRET="..."
+AUTH_GOOGLE_ID="..."       # à récupérer sur Google Developer Console
+AUTH_GOOGLE_SECRET="..."
+NEXTAUTH_SECRET="..."      # généré avec : openssl rand -base64 32
+
+### 4. Lancer l'application
 
 ```bash
 npm run dev
@@ -90,23 +92,25 @@ npm run dev
 
 ---
 
-## 🔮 Prochaines étapes (v0.2+)
+## ⚖️ Prochaines étapes (v0.2+)
+> Ces fonctionnalités sont prévues pour les prochaines versions :
 
-✨ Wishlist et gestion de cartes à acquérir
-✨ Deck builder avec gestion de listes de jeu
-🔐 Authentification des utilisateurs
-📊 Plus de statistiques et visualisations avancées
-📤 Export/Import JSON ou CSV
-📱 Interface responsive mobile
+- Deck Builder et gestion de decks
+- Wishlist et cartes à acquérir
+- Plus de stats et visualisations graphiques
+- Export/Import JSON ou CSV
+- Suggestions de cartes basées sur la collection
+- Responsive mobile
 
 ## 🛠️ Technologies utilisées
 
-React (Next.js) avec App Router
-Prisma + SQLite (ou toute base compatible à venir)
-Context API pour la gestion de la devise
-Recharts pour les graphiques
-Scryfall API pour les données cartes
-CSS Modules pour le style
+- **React (Next.js)** avec App Router
+- **NextAuth.js v5** pour l’authentification
+- **Prisma** (ORM avec SQLite)
+- **Context API** pour la gestion globale de la devise
+- **Recharts** pour les graphiques
+- **Scryfall API** pour les données cartes
+- **CSS Modules** pour le style
 
 ## 📄 Licence
 
