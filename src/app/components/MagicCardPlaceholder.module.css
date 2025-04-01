@@ -1,0 +1,44 @@
+.cardPlaceholder {
+    width: 180px;
+    height: 258px;
+    box-shadow: 0 0 0 10px black;
+    background-color: rgb(43, 43, 43);
+    border-radius: 2% / 1%;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    opacity: 85%;
+    position: relative;
+}
+
+.cardPlaceholder:hover {
+    cursor: pointer;
+    opacity: 100%;;
+}
+
+.placeHolderImageBox {
+    width: 90%;
+    height: 50%;
+    margin-top: 15px;
+    background-color: rgb(62, 62, 62);
+    border-radius: 5px;
+}
+
+.placeHolderStatsBox {
+    width: 35px;
+    height: 15px;
+    border-radius: 20%;
+    background-color: rgb(62, 62, 62);
+    align-self: flex-end;
+    margin: 0 5px 5px 0;
+}
+
+.cardPlaceholder p {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.5em;
+    text-align: center;
+}
