@@ -1,0 +1,62 @@
+.searchSection {
+    padding: 1rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+  }
+  
+  .searchSection h2 {
+    margin-bottom: 1rem;
+  }
+  
+  .searchSection input {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .searchSection button {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    background: #1e40af;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  
+  .searchSection button:hover {
+    background: #1d4ed8;
+  }
+  
+  .suggestionList {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1rem 0;
+    background: rgb(0, 0, 0);
+    border: 1px solid #ccc;
+    max-height: 200px;
+    overflow-y: auto;
+    border-radius: 6px;
+  }
+  
+  .suggestionList li {
+    padding: 0.5rem;
+    cursor: pointer;
+  }
+  
+  .suggestionList li:hover {
+    background: #e0e7ff;
+  }
+  
+  .cardResults {
+    gap: 1rem;
+    margin-top: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .cardResultsItem {
+
+  } 
+  

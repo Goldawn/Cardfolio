@@ -1,0 +1,33 @@
+.wishlistList {
+  border: 1px solid #ccc;
+  padding: 1rem;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+.wishlistList:hover {
+  background: #242424;
+}
+
+.addCardContainer {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.addCardContainer input {
+  flex: 1;
+  padding: 0.4rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.addCardContainer button {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  background-color: #262626;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+  

@@ -63,3 +63,14 @@ Wishlist
 Profil utilisateur
 
 Ajout des autres jeux de cartes principaux
+
+
+
+WISHLIST :
+
+- Une page wishlist affiche toutes les cartes que l'on a ajouté à la wishlist.
+- Lorsqu'un utilisateur veut afficher une carte à la wishlist, il peut choisir dans quelle liste l'inclure ( par défaut un utilisateur a une liste de souhait, les cartes sont ajoutés dans celle ci, mais il peut également choisir de créer d'autres listes )
+- L'utilisateur peut modifier le nom et le contenu des liste
+- Lorsque l'utilisateur veut ajoute rune carte à sa wishlist, il peut cocher la/les listes dans lesquelle sil veut l'ajouter, ou même créer nouvelle liste où l'ajouter.
+- L'ajout des cartes à la wishlist est également disponible depuis la page d'importation.
+- Enfin, la wishlist possèdera des options de tri et de filtre propres à cette fonctionnalité ( exemple afficher les cartes par liste / afficher toutes les cartes )

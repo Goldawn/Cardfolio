@@ -232,7 +232,7 @@ export default function Collection() {
         <ul>
           <li>Collection</li>
           <li>Decklists</li>
-          <li>Wishlist</li>
+          <li><Link href="/mtg/wishlist">Wishlist</Link></li>
           <li>Statistiques</li>
         </ul>
       </div>
