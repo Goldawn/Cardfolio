@@ -44,7 +44,6 @@ export default function CardModal({ card, onClose, cardList = [], currentIndex =
 
   const formatAndParseText = (text) => {
     if (!text) return null;
-
     return text.split("\n").map((line, lineIndex) => (
       <span key={lineIndex}>
         {line.split(/(\{[^}]+\})/g).filter(Boolean).map((symbol, symbolIndex) => {
@@ -61,28 +60,10 @@ export default function CardModal({ card, onClose, cardList = [], currentIndex =
   };
 
   const isFrontAndBack = ["flip", "transform", "modal_dfc"].includes(currentCard.layout);
-  const isDualCard = ["split", "adventure"].includes(currentCard.layout);
+  const isDualFaceLayout = ["split", "adventure", "reversible_card"].includes(currentCard.layout);
 
   const displayedCard = useMemo(() => {
     if (isFrontAndBack && flipped) return currentCard.cardBack;
-    if (isDualCard) {
-
-      return {
-        ...currentCard,
-        name: currentCard?.name,
-        manaCost: currentCard?.manaCost,
-        type: currentCard?.type,
-        backFace: {
-          name: currentCard.cardBack?.name,
-          manaCost: currentCard.cardBack?.manaCost,
-          type: currentCard.cardBack?.type,
-          oracleText: currentCard.cardBack?.oracleText,
-          flavorText: currentCard.cardBack?.flavorText,
-          power: currentCard.cardBack?.power,
-          toughness: currentCard.cardBack?.toughness,
-        },
-      };
-    }
     return currentCard;
   }, [currentCard, flipped]);
 
@@ -97,9 +78,35 @@ export default function CardModal({ card, onClose, cardList = [], currentIndex =
       .sort((a, b) => new Date(a.date) - new Date(b.date));
   }, [currentCard]);
 
+  const getCurrentImage = () => {
+    if (currentCard.layout === "reversible_card") {
+      return flipped
+        ? currentCard.reversibleImage?.large || currentCard.image?.large
+        : currentCard.image?.large;
+    }
+    return currentCard.image?.large;
+  };
+
+  const renderCardFace = (cardData) => (
+    <>
+      <h2>{cardData.name}</h2>
+      {cardData.manaCost && <p><strong>Coût de mana :</strong> {formatAndParseText(cardData.manaCost)}</p>}
+      <p><strong>Type :</strong> {cardData.type}</p>
+      {cardData.power && cardData.toughness && (
+        <p><strong>Statistiques :</strong> {cardData.power}/{cardData.toughness}</p>
+      )}
+      {cardData.loyalty && <p><strong>Points de loyauté :</strong> {cardData.loyalty}</p>}
+      {cardData.oracleText && <p><strong>Description :</strong> {formatAndParseText(cardData.oracleText)}</p>}
+      {cardData.flavorText && <p><em>{formatAndParseText(cardData.flavorText)}</em></p>}
+      {cardData.colors?.length > 0 && (
+        <p><strong>Couleurs :</strong> {cardData.colors.join(", ")}</p>
+      )}
+    </>
+  );
+
   return (
     <div className={styles.overlay} onClick={(e) => {
-      if(e.target === e.currentTarget) {
+      if (e.target === e.currentTarget) {
         onClose();
       }
     }}>
@@ -120,21 +127,20 @@ export default function CardModal({ card, onClose, cardList = [], currentIndex =
 
         <div className={styles.content}>
           <div className={styles.cardQuantityPanel}>
-            {isFrontAndBack ? (
+            {isFrontAndBack || currentCard.layout === "reversible_card" ? (
               <div key={currentCard.id} className={`${styles.cardContainer} ${styles.cardTransition}`}>
                 <div className={`${styles.card} ${flipped ? styles.flipped : ''}`}>
                   <div className={styles.cardFace} style={{ backgroundImage: `url(${currentCard.image.large})` }}>
                     <button className={styles.flipButton} onClick={() => setFlipped(true)}>Voir le verso</button>
                   </div>
-                  <div className={styles.cardFace} style={{ backgroundImage: `url(${currentCard.cardBack.image.large})` }}>
+                  <div className={styles.cardFace} style={{ backgroundImage: `url(${currentCard.reversibleImage?.large || currentCard.cardBack?.image?.large})` }}>
                     <button className={styles.flipButton} onClick={() => setFlipped(false)}>Voir le recto</button>
                   </div>
                 </div>
               </div>
             ) : (
-              <div
-                key={currentCard.id} className={`${styles.imageContainer} ${styles.cardTransition}`}>
-                <img src={currentCard.image.large} alt={currentCard.name} className={styles.image} />
+              <div key={currentCard.id} className={`${styles.imageContainer} ${styles.cardTransition}`}>
+                <img src={getCurrentImage()} alt={currentCard.name} className={styles.image} />
               </div>
             )}
 
@@ -146,31 +152,16 @@ export default function CardModal({ card, onClose, cardList = [], currentIndex =
           </div>
 
           <div className={styles.details}>
-            <h2>{displayedCard.name}</h2>
-            {displayedCard.manaCost && <p><strong>Coût de mana :</strong> {formatAndParseText(displayedCard.manaCost)}</p>}
-            <p><strong>Type :</strong> {displayedCard.type}</p>
-            <p><strong>Rareté :</strong> {currentCard.rarity}</p>
-            <p><strong>Set:</strong>{currentCard.setName} ({currentCard.setCode})</p>
-            {displayedCard.power && displayedCard.toughness && (
-              <p><strong>Statistiques :</strong> {displayedCard.power}/{displayedCard.toughness}</p>
-            )}
-            {displayedCard.loyalty && <p><strong>Points de loyauté :</strong> {displayedCard.loyalty}</p>}
-            {displayedCard.oracleText && <p><strong>Description :</strong> {formatAndParseText(displayedCard.oracleText)}</p>}
-            {displayedCard.flavorText && <p><em>{formatAndParseText(displayedCard.flavorText)}</em></p>}
-            <p><strong>Numéro de collection :</strong> {currentCard.collectorNumber}</p>
-            {displayedCard.colors?.length > 0 && (
-              <p><strong>Couleurs :</strong> {displayedCard.colors.join(", ")}</p>
-            )}
+            {renderCardFace(displayedCard)}
 
-            {displayedCard.backFace && (
+            <p><strong>Rareté :</strong> {currentCard.rarity}</p>
+            <p><strong>Set:</strong> {currentCard.setName} ({currentCard.setCode})</p>
+            <p><strong>Numéro de collection :</strong> {currentCard.collectorNumber}</p>
+
+            {isDualFaceLayout && currentCard.cardBack && (
               <>
                 <p>---------------------------------------------------------</p>
-                <h2>{displayedCard.backFace.name}</h2>
-                <p><strong>Coût de mana :</strong> {formatAndParseText(displayedCard.backFace.manaCost)}</p>
-                <p><strong>Type :</strong> {displayedCard.backFace.type}</p>
-                {displayedCard.backFace.power && displayedCard.backFace.toughness && <p><strong>Statistiques :</strong> {displayedCard.backFace.power}/{displayedCard.backFace.toughness}</p>}
-                {displayedCard.backFace.oracleText && <p><strong>Description :</strong> {formatAndParseText(displayedCard.backFace.oracleText)}</p>}
-                {displayedCard.backFace.flavorText && <p><em>{formatAndParseText(displayedCard.backFace.flavorText)}</em></p>}
+                {renderCardFace(currentCard.cardBack)}
               </>
             )}
 
@@ -183,7 +174,7 @@ export default function CardModal({ card, onClose, cardList = [], currentIndex =
                   <li key={format}>{format}</li>
                 ))}
             </ul>
-            <p><strong>Illustrateur :</strong>{currentCard.artist}</p>
+            <p><strong>Illustrateur :</strong> {currentCard.artist}</p>
           </div>
 
           <div className={styles.tradingPanel}>
@@ -197,7 +188,7 @@ export default function CardModal({ card, onClose, cardList = [], currentIndex =
             </button>
             <p>Prix moyen 30 jours :</p>
             <p>Prix moyen 7 jours :</p>
-            <ResponsiveContainer width="100%" aspect={16/9}>
+            <ResponsiveContainer width="100%" aspect={16 / 9}>
               <LineChart width={500} height={300} data={formattedPriceHistory}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" padding={{ left: 30, right: 30 }} />
@@ -208,9 +199,7 @@ export default function CardModal({ card, onClose, cardList = [], currentIndex =
               </LineChart>
             </ResponsiveContainer>
           </div>
-
         </div>
-          
       </div>
     </div>
   );

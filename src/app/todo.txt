@@ -55,6 +55,7 @@ Améliorations :
 - corriger le select de sorting sur la page d'importation
 - Gérer l'import des collection via json, csv ...
 - Ajout d'un bouton pour mettre à jour les cartes avec toutes les propriétés désirées
+- Renforcer la présence des server component : modifier la façon de trier les cartes ( https://www.youtube.com/watch?v=ukpgxEemXsk )
 
 Pages :
 
