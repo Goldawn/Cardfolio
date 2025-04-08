@@ -13,7 +13,6 @@ import CollectionActionBar from "../components/CollectionActionBar.js";
 import styles from "./page.module.css";
 
 export default function Collection() {
-  // const [collection, setCollection] = useState(loadCollection());
   const [collection, setCollection] = useState([]);
   const [sets, setSets] = useState([]);
   const [selectedSet, setSelectedSet] = useState();
@@ -22,16 +21,21 @@ export default function Collection() {
   const { currency } = useCurrencyContext();
 
   const cardsToFilter = selectedSetCards.length === 0
-    ? collection
-    : selectedSetCards.map(formatCard);
+  ? collection
+  : selectedSetCards.map((card) => {
+      const formatted = formatCard(card);
+      const owned = collection.find(c => c.id === formatted.id);
 
-  // const userId = "40bb6e2f-c254-4dbc-bb42-3937243c6975";
-  
+      return {
+        ...formatted,
+        quantity: owned?.quantity || 0,
+        priceHistory: owned?.priceHistory || [],
+        dbId: owned?.dbId,
+      };
+    });
+
   const { data: session, status } = useSession();
   const userId = session?.user?.id;
-  console.log(userId)
-  console.log("Session:", session);
-  console.log("Status:", status);
 
   const {
     sortOption,
@@ -90,22 +94,18 @@ export default function Collection() {
   }, [collection, currency]);
 
   useEffect(() => {
-    if (!userId) return; // ✅ on attend que la session soit prête
-  
+    if (!userId) return;
     const fetchCollectionFromAPI = async () => {
       try {
         const res = await fetch(`/api/users/${userId}/collection`);
         if (!res.ok) throw new Error("Erreur de chargement");
-  
+
         const data = await res.json();
-        console.log("Données brutes de la collection : ", data);
-  
         const enrichedCards = await Promise.all(
           data.map(async (item) => {
             const res = await fetch(`https://api.scryfall.com/cards/${item.scryfallId}`);
             const rawCard = await res.json();
             const formattedCard = formatCard(rawCard);
-            console.log("Carte formatée :", formattedCard);
             return {
               ...formattedCard,
               quantity: item.quantity,
@@ -114,13 +114,11 @@ export default function Collection() {
             };
           })
         );
-  
         setCollection(enrichedCards);
       } catch (err) {
         console.error("Erreur lors du fetch de la collection enrichie :", err);
       }
     };
-  
     fetchCollectionFromAPI();
   }, [userId]);
 
@@ -161,7 +159,7 @@ export default function Collection() {
   const updateQuantity = async (cardId, delta) => {
     const card = collection.find((c) => c.id === cardId);
     if (!card || !card.dbId) return;
-  
+
     try {
       const res = await fetch(`/api/users/${userId}/collection`, {
         method: "PATCH",
@@ -169,11 +167,9 @@ export default function Collection() {
         body: JSON.stringify({
           scryfallId: card.id,
           quantityDelta: delta,
-          // Optionnel : ajouter une nouvelle entrée au priceHistory
-          // newPriceEntry: { date: "2025-03-27", eur: 1.5 },
         }),
       });
-  
+
       if (res.status === 204) {
         setCollection((prev) => prev.filter((c) => c.id !== cardId));
       } else if (res.ok) {
@@ -194,16 +190,16 @@ export default function Collection() {
   const removeCard = async (cardId) => {
     const card = collection.find(c => c.id === cardId);
     if (!card || !card.dbId) return;
-  
+
     try {
       const res = await fetch(`/api/users/${userId}/collection`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ scryfallId: card.id }),
       });
-  
+
       if (!res.ok) throw new Error("Erreur lors de la suppression");
-  
+
       setCollection(prev => prev.filter(c => c.id !== cardId));
     } catch (err) {
       console.error("Erreur removeCard :", err);
@@ -288,21 +284,23 @@ export default function Collection() {
         />
 
         <div className={styles.cardContainer}>
-          {sortedAndFilteredCards.map((card, index) => {
-            const isOwned = collection.some((ownedCard) => ownedCard.id === card.id);
-            return (
-              <Card
-                key={card.id}
-                card={card}
-                owned={isOwned}
-                cardList={sortedAndFilteredCards}
-                currentIndex={index}
-                updateQuantity={updateQuantity}
-                onRemove={removeCard}
-                currency={currency}
-              />
-            );
-          })}
+          {sortedAndFilteredCards.map((card, index) => (
+            <Card
+              key={card.id}
+              card={card}
+              cardList={sortedAndFilteredCards}
+              currentIndex={index}
+              showName
+              showQuantity
+              showPrice
+              editableQuantity
+              showDeleteButton
+              updateQuantity={updateQuantity}
+              onRemove={removeCard}
+              currency={currency}
+              compareWithCollection={Boolean(selectedSet)}
+            />
+          ))}
         </div>
       </div>
     </div>

@@ -2,68 +2,146 @@ import { useEffect, useState } from "react";
 import styles from "./Card.module.css";
 import CardModal from "./CardModal";
 
-export default function Card({ card, undoAddToCollection, cardsInCollection, name=true, modal=true, className = "", cardList, currentIndex, isFrontAndBack, onAddToCollection, updateQuantity, onRemove, owned = false, currency = "eur" }) {
+export default function Card({
+  card,
+  currency = "eur",
+  className = "",
+  cardList,
+  currentIndex,
+
+  // Features (flags)
+  showName = true,
+  showSet = false,
+  showQuantity = false,
+  showWishlistedQuantity = false,
+  showPrice = false,
+  editableQuantity = false,
+  showAddToCollectionButton = false,
+  showAddToWishlistButton = false,
+  showDeleteButton = false,
+  compareWithCollection = false,
+  modal = true,
+  disabled = false,
+
+  // Actions (callbacks)
+  onAddToCollection,
+  onAddToWishlist,
+  onRemove,
+  updateQuantity,
+  undoAddToCollection,
+}) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Fonction pour récupérer le dernier prix connu
   const getLastPrice = (card, currency) => {
-    if (!card.priceHistory || card.priceHistory.length === 0) {
-      return 0;
-    }
+    if (!card.priceHistory || card.priceHistory.length === 0) return 0;
     return card.priceHistory.slice(-1)[0][currency] || 0;
   };
 
+  const cardName = card.name?.split(" // ")[0] || "Nom inconnu";
+  const lastPrice = getLastPrice(card, currency);
+  const totalValue = (lastPrice * (card.quantity || 1)).toFixed(2);
+
   const handleOpenModal = () => {
+    if (!modal || disabled) return;
     setIsModalOpen(true);
-  }
-  
+  };
+
   const handleCloseModal = () => setIsModalOpen(false);
 
-  // Sélection du nom correct
-  const cardName = isFrontAndBack ? card.name.split(" // ")[0] : card.name;
+  const handleClick = () => {
+    if (disabled) return;
+    if (undoAddToCollection) {
+      undoAddToCollection(card);
+    }
+  };
 
-  // Récupération du dernier prix
-  const lastPrice = getLastPrice(card, currency);
-  const totalValue = (lastPrice * card.quantity).toFixed(2);
+  console.log(card)
+
+  const isOwned = card.quantity > 0;
+  const cardClass = compareWithCollection && !isOwned ? styles.notOwned : "";
 
   return (
-    <div className={`${styles.card} ${className}`} onClick={ undoAddToCollection ? () => undoAddToCollection(card) : () => {}} >
-        <img 
-          className={ owned ? styles.owned : ""} 
-          src={card.image.small} alt={cardName} 
-          onClick={modal ? handleOpenModal : ()=>{}} 
-        />
+    <div className={`${styles.card} ${className}`} onClick={handleClick}>
+      <img
+        className={`${cardClass}`}
+        src={card.image.small}
+        alt={cardName}
+        onClick={handleOpenModal}
+      />
 
-      {name &&<h3>{cardName}</h3>}
+      {showName && <h3>{cardName}</h3>}
 
-      {onAddToCollection && <button onClick={() => onAddToCollection(card)}>Ajouter à la collection</button>}
+      {showSet && card.setCode && <p className={styles.set}>{card.setCode.toUpperCase()}</p>}
+    
+    <div className={styles.cardButtonContainer}>
+      {showAddToCollectionButton && onAddToCollection && (
+        <button className={styles.addCollectionButton} onClick={() => onAddToCollection(card)} disabled={disabled}>
+          Ajouter
+        </button>
+      )}
 
-      {updateQuantity && (
+      {showAddToWishlistButton && onAddToWishlist && (
+        <button className={styles.wishlistButton} title="Ajouter à la wishlist" onClick={() => onAddToWishlist(card)} disabled={disabled}>
+          Wishlist
+        </button>
+      )}
+    </div>
+
+      {showQuantity && <p>Quantité : {card.quantity}</p>}
+
+      {showWishlistedQuantity && (
+        <p className={styles.wishlistInfo}>
+            Souhaitée : {card.wishlistQuantity}
+        </p>
+      )}
+
+
+      {showPrice && (
         <>
-          <div className={styles.details}>
-            <p>Quantité : {owned ? card.quantity : 0}</p>
-            <p>Prix unitaire : {Number(lastPrice).toFixed(2)} {currency === "eur" ? "€" : "$"}</p>
-            <p>Valeur totale : {totalValue} {currency === "eur" ? "€" : "$"}</p>
-          </div>
-          <div className={styles.actionBox}>
-            <div className={styles.quantityBtnBox}>
-              <button className={styles.remove} onClick={() => updateQuantity(card.id, -1)}>-1</button>
-              <button className={styles.add} onClick={() => updateQuantity(card.id, 1)}>+1</button>
-            </div>
-          </div>
+          <p>Prix unitaire : {Number(lastPrice).toFixed(2)} {currency === "eur" ? "€" : "$"}</p>
+          <p>Valeur totale : {totalValue} {currency === "eur" ? "€" : "$"}</p>
         </>
       )}
 
-      {onRemove && <button className={styles.delete} onClick={() => onRemove(card.id)}>Supprimer</button>}
+      {editableQuantity && updateQuantity && (
+        <div className={styles.actionBox}>
+          <div className={styles.quantityBtnBox}>
+            <button
+              className={styles.remove}
+              onClick={() => updateQuantity(card.id, -1)}
+              disabled={disabled}
+            >
+              -1
+            </button>
+            <button
+              className={styles.add}
+              onClick={() => updateQuantity(card.id, 1)}
+              disabled={disabled}
+            >
+              +1
+            </button>
+          </div>
+        </div>
+      )}
 
-      {modal && isModalOpen &&
-        <CardModal 
-          card={card} 
+      {showDeleteButton && onRemove && (
+        <button
+          className={styles.delete}
+          onClick={() => onRemove(card.id)}
+          disabled={disabled}
+        >
+          Supprimer
+        </button>
+      )}
+
+      {modal && isModalOpen && (
+        <CardModal
+          card={card}
           onClose={handleCloseModal}
-          cardList={cardList} // toutes les cartes affichées
-          currentIndex={currentIndex} // position de la carte dans cette liste
+          cardList={cardList}
+          currentIndex={currentIndex}
         />
-        }
+      )}
     </div>
   );
 }

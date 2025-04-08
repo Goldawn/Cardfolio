@@ -72,13 +72,17 @@ export default function useCardFilters(cards = []) {
           result = parseFloat(a.priceHistory?.at(-1)?.eur || 0) - parseFloat(b.priceHistory?.at(-1)?.eur || 0);
           break;
         case "name":
-          result = a.name.localeCompare(b.name);
+          result = (a.name || "").localeCompare(b.name || "");
           break;
         case "date":
           result = new Date(a.addedAt) - new Date(b.addedAt);
           break;
         case "set":
-          result = a.setCode.localeCompare(b.setCode);
+          result = (a.setCode || "").localeCompare(b.setCode || "");
+          if (result === 0) {
+            // Si les sets sont identiques, on trie par numéro de collection
+            result = (parseInt(a.collectorNumber) || 0) - (parseInt(b.collectorNumber) || 0);
+          }
           break;
         case "color":
           result = (a.colors?.[0] || "").localeCompare(b.colors?.[0] || "");

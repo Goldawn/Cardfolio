@@ -31,8 +31,40 @@ export default function MTGHome() {
 
   const formattedCards = cards.length > 0 ? cards.map(formatCard) : [];
 
+  const [collection, setCollection] = useState([]);
+  const [wishlist, setWishlist] = useState([]);
+
   const { data: session, status } = useSession();
   const userId = session?.user?.id;
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const fetchData = async () => {
+      const [collRes, wishRes] = await Promise.all([
+        fetch(`/api/users/${userId}/collection`),
+        fetch(`/api/users/${userId}/wishlist/items`)
+      ]);
+
+      const collectionData = await collRes.json();
+      const wishlistData = await wishRes.json();
+
+      setCollection(collectionData);
+      setWishlist(wishlistData.items || []);
+    };
+
+    fetchData();
+  }, [userId]);
+
+  const enrichedCards = formattedCards.map((card) => {
+    const owned = collection.find(c => c.scryfallId === card.id);
+    const wished = wishlist.find(w => w.scryfallId === card.id);
+    return {
+      ...card,
+      quantity: owned?.quantity || 0,
+      wishlistQuantity: wished?.quantity || 0
+    };
+  });
 
   const {
     sortedAndFilteredCards,
@@ -48,7 +80,7 @@ export default function MTGHome() {
     setSortOption,
     sortOrderAsc,
     setSortOrderAsc
-  } = useCardFilters(formattedCards);
+  } = useCardFilters(enrichedCards);
 
   useEffect(() => {
     const loadSets = async () => {
@@ -262,10 +294,15 @@ export default function MTGHome() {
                 card={card}
                 cardList={sortedAndFilteredCards}
                 currentIndex={index}
-                hasOtherFace={card.layout !== "normal"}
+                showName
+                showQuantity
+                showWishlistedQuantity
+                showAddToCollectionButton
+                showAddToWishlistButton
                 onAddToCollection={() => handleAddToCollection(card)}
-                />
-              ))}
+                onAddToWishlist={() => console.log("Ajout à la wishlist à faire")}
+              />
+            ))}
           </div>
         </>
       )}
