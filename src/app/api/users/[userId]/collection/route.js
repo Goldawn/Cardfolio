@@ -70,7 +70,6 @@ export async function POST(request, { params }) {
   }
 }
 
-
 export async function PATCH(request, { params }) {
   const { userId } = params;
   const { scryfallId, quantityDelta, newPriceEntry } = await request.json();

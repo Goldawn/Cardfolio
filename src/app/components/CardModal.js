@@ -8,6 +8,7 @@ import useModalKeyboardNavigation from '../hooks/useModalKeyboardNavigation';
 import { useCurrencyContext } from "@/context/";
 
 export default function CardModal({ card, onClose, cardList = [], currentIndex = 0 }) {
+  console.log(card)
   const [flipped, setFlipped] = useState(false);
   const [currentCardIndex, setCurrentCardIndex] = useState(currentIndex);
   const currentCard = cardList[currentCardIndex] || card;

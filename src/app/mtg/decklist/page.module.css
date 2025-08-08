@@ -1,0 +1,11 @@
+.decklistItem {
+    width: 120px;
+    height: 150px;
+    background-color: rgba(32, 32, 32, 0.747);
+    border-radius: 5%;
+    box-shadow: 0 0 0px 5px black;;
+}
+
+.decklistItem:hover {
+    transform: scale(1.05);
+}

@@ -1,3 +1,7 @@
+:root {
+  --card-gap: 20px;
+}
+
 .wishlistPage {
   padding: 2rem;
   max-width: 1200px;
@@ -28,9 +32,13 @@
 .cardGrid {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: var(--card-gap);
   align-items:flex-start
 }
+
+/* .cardGrid > div:last-child {
+  margin-left: calc(var(--card-gap) - (var(--card-gap) - 10px));
+} */
 
 .newListForm {
   margin: 2rem 0;
@@ -60,4 +68,16 @@
 
 .newListForm button:hover {
   background-color: #444;
+}
+
+.addCardToWishlist {
+  display: flex;
+  position: relative;
+  transition: all 0.2s ease-out;
+}
+
+.addCardToWishlist.active {
+  background-color: rgba(0, 0, 0, 0.60);
+  padding: 20px 20px 30px 30px;
+  transition: all 0.2s ease-in;
 }

@@ -296,7 +296,7 @@ export default function MTGHome() {
                 currentIndex={index}
                 showName
                 showQuantity
-                showWishlistedQuantity
+                showWishlistQuantity
                 showAddToCollectionButton
                 showAddToWishlistButton
                 onAddToCollection={() => handleAddToCollection(card)}

@@ -4,7 +4,7 @@ import { useState } from "react";
 import styles from "./WishlistList.module.css";
 
 export default function WishlistList({ list, onRename, onDelete }) {
-  console.log(list)
+  // console.log(list)
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(list.name);
 

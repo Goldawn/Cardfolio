@@ -18,21 +18,24 @@ export default function Collection() {
   const [selectedSet, setSelectedSet] = useState();
   const [selectedSetCards, setSelectedSetCards] = useState([]);
   const [nextPage, setNextPage] = useState();
+  const [ hideNotOwned, setHideNotOwned ] = useState(false);
   const { currency } = useCurrencyContext();
 
-  const cardsToFilter = selectedSetCards.length === 0
+const cardsToFilter = selectedSetCards.length === 0
   ? collection
-  : selectedSetCards.map((card) => {
-      const formatted = formatCard(card);
-      const owned = collection.find(c => c.id === formatted.id);
+  : selectedSetCards
+      .map(card => {
+        const formatted = formatCard(card);
+        const owned = collection.find(c => c.id === formatted.id);
 
-      return {
-        ...formatted,
-        quantity: owned?.quantity || 0,
-        priceHistory: owned?.priceHistory || [],
-        dbId: owned?.dbId,
-      };
-    });
+        return {
+          ...formatted,
+          quantity: owned?.quantity || 0,
+          priceHistory: owned?.priceHistory || [],
+          dbId: owned?.dbId,
+        };
+      })
+      .filter(card => !hideNotOwned || card.quantity > 0);
 
   const { data: session, status } = useSession();
   const userId = session?.user?.id;
@@ -74,7 +77,12 @@ export default function Collection() {
       }
       uniqueCardsPerSet[card.setCode].add(card.id);
 
-      const lastPrice = card.priceHistory.length > 0 ? parseFloat(card.priceHistory.at(-1)[currency]) : 0;
+      // console.log(card.priceHistory)
+      let lastPrice = card.priceHistory.length > 0 ? parseFloat(card.priceHistory.at(-1)[currency]) : 0;
+      if (isNaN(lastPrice)) {
+        console.warn(`Prix invalide pour la carte ${card.name} (${card.id}): ${card.priceHistory.at(-1)[currency]}`);
+        lastPrice = 0;
+      }
       totalValue += lastPrice * card.quantity;
     });
 
@@ -92,6 +100,8 @@ export default function Collection() {
       uniqueCardsPerSet: uniqueCardsPerSetCounts,
     };
   }, [collection, currency]);
+
+  // console.log("Collection stats:", collectionStats);
 
   useEffect(() => {
     if (!userId) return;
@@ -156,6 +166,12 @@ export default function Collection() {
     }
   }, [nextPage]);
 
+  const toggleHideCards = () => {
+    setHideNotOwned(!hideNotOwned)
+  }
+
+  useEffect(() => { console.log(hideNotOwned)}, [hideNotOwned]);
+  
   const updateQuantity = async (cardId, delta) => {
     const card = collection.find((c) => c.id === cardId);
     if (!card || !card.dbId) return;
@@ -227,7 +243,7 @@ export default function Collection() {
       <div className={styles.cardManager}>
         <ul>
           <li>Collection</li>
-          <li>Decklists</li>
+          <li><Link href="/mtg/decklist">Decklists</Link></li>
           <li><Link href="/mtg/wishlist">Wishlist</Link></li>
           <li>Statistiques</li>
         </ul>
@@ -251,7 +267,11 @@ export default function Collection() {
           <span><strong>{collectionStats.totalCards}</strong> Cartes</span>
           <span><strong>{collectionStats.totalSets}</strong> Extensions</span>
           <span><strong>{collectionStats.totalValue}</strong> {currency}</span>
-          <span>Voir plus</span>
+          {/* <div> */}
+            <label onChange={toggleHideCards} htmlFor="hideNotOwned">Hide not owned
+              <input type="checkbox" name="hideNotOwned" id="hideNotOwned" checked={hideNotOwned} ></input>
+            </label> 
+          {/* </div> */}
         </p>
 
         {collection && (

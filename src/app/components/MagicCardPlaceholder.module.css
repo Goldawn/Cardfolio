@@ -1,16 +1,34 @@
+:root {
+    --border-width: 10px;
+}
+
 .cardPlaceholder {
-    width: 180px;
-    height: 258px;
-    box-shadow: 0 0 0 10px black;
+    width: 200px;
+    height: 278px;
     background-color: rgb(43, 43, 43);
-    border-radius: 2% / 1%;
-    margin-top: 10px;
+    border-radius: 5% / 3.5%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
     opacity: 85%;
     position: relative;
+    box-sizing: border-box;
+    padding: var(--border-width);
+}
+
+.cardPlaceholder.active {
+    padding: 0;
+    overflow: hidden;
+}
+
+.cardBorder {
+    position: absolute;
+    width: calc(100% - 2*var(--border-width));
+    height: calc(100% - 2*var(--border-width));
+    top: var(--border-width);
+    box-shadow: 0 0 0 var(--border-width) rgb(15, 15, 15);
+    border-radius: 3% / 2%;
 }
 
 .cardPlaceholder:hover {
@@ -41,4 +59,10 @@
     transform: translateY(-50%);
     font-size: 1.5em;
     text-align: center;
+}
+
+.previewImage {
+    width: 100%;
+    height: 100%;
+    border-radius: 5% / 3.5%;
 }

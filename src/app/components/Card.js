@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+"use client";
+
+import { useState } from "react";
 import styles from "./Card.module.css";
 import CardModal from "./CardModal";
 
@@ -13,7 +15,8 @@ export default function Card({
   showName = true,
   showSet = false,
   showQuantity = false,
-  showWishlistedQuantity = false,
+  showWishlistQuantity = false,
+  showDecklistQuantity = false,
   showPrice = false,
   editableQuantity = false,
   showAddToCollectionButton = false,
@@ -55,8 +58,6 @@ export default function Card({
     }
   };
 
-  console.log(card)
-
   const isOwned = card.quantity > 0;
   const cardClass = compareWithCollection && !isOwned ? styles.notOwned : "";
 
@@ -87,14 +88,10 @@ export default function Card({
       )}
     </div>
 
-      {showQuantity && <p>Quantité : {card.quantity}</p>}
-
-      {showWishlistedQuantity && (
-        <p className={styles.wishlistInfo}>
-            Souhaitée : {card.wishlistQuantity}
-        </p>
-      )}
-
+      {showQuantity && <p>Dans la collection : {card.quantity}</p>}
+      {showWishlistQuantity && <p>Dans la wishlist : {card.wishlistQuantity}</p>}
+      {showDecklistQuantity && <p>Dans la decklist : {card.decklistQuantity}</p>}
+      {/* <p className={styles.wishlistInfo} */}
 
       {showPrice && (
         <>
@@ -109,7 +106,7 @@ export default function Card({
             <button
               className={styles.remove}
               onClick={() => updateQuantity(card.id, -1)}
-              disabled={disabled}
+              disabled={disabled || card.wishlistQuantity <= 1} //Désactive si quantité ≤ 1
             >
               -1
             </button>

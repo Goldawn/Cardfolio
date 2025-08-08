@@ -27,7 +27,7 @@ main {
 }
 
 main:has( #page-module__Jli3nG__collectionPage) {
-  background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.8)), url(./assets/images/wallpapers/Ixalan\ wallpaper.jpg);
+  background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.8)), url(./assets/images/wallpapers/MotMtA-Nissa.png);
   background-size: cover;
   background-repeat: no-repeat;
   background-attachment: fixed;

@@ -1,77 +1,51 @@
-Carte Magic : 
-
-{
-    id
-    name
-    setCode
-    lang
-    quantity
-    addedAt
-    priceHistory: [
-        {
-            date:
-            currency_1
-            currency_2
-        }
-    ]
-    image
-    colorIdentity
-    colors
-    type
-    manaCost
-    rarity
-    oracleText
-    power
-    toughness
-    flavorText
-    artist
-    collectorNumber
-    legalities
-    layout != normal 
-    cardBack: {
-        name
-        typeLine
-        image
-        colors
-        manaCost
-        oracleText
-        flavorText
-        power
-        toughness
-    }
-}
-
-Améliorations :
+Améliorations globales (par ordre d'importance):
 
 - AJOUTER TYPESCRIPT
-- AJOUTER LA STACK
-- Naviguer dans la modale avec clavier
-- Ajouter le loader là où c'est nécessaire
-- Améliorer le hook useCardFilters avec filtres persistants si besoin, bouton de reinitialisation et filtres avancés.
+- Gérer l'import des collection via json, csv ...
 - Page stats, Evolution valeur de la collection, nb de cartes, Repartition collection par types/couleur/rareté, top des cartes les +chères, etc...
 - Moteur de suggestion en cas de recherche de carte ou de set (often played with via scryfall)
-- ajouter un cache pour améliorer performances dans la collection
-- Affichage des cartes en 3D, gestion des effet premium des cartes
-- corriger le select de sorting sur la page d'importation
-- Gérer l'import des collection via json, csv ...
-- Ajout d'un bouton pour mettre à jour les cartes avec toutes les propriétés désirées
 - Renforcer la présence des server component : modifier la façon de trier les cartes ( https://www.youtube.com/watch?v=ukpgxEemXsk )
+- ajouter un cache pour améliorer performances dans la collection
+- Migrer vers Better Auth
+- Ajouter le loader là où c'est nécessaire
+- Améliorer le hook useCardFilters avec filtres persistants si besoin, bouton de reinitialisation et filtres avancés.
+- Ajout d'un bouton pour mettre à jour les cartes avec toutes les propriétés désirées
+- Affichage des cartes en 3D, gestion des effet premium des cartes
 
-Pages :
+PAGES
 
-DeckBuilder
-Wishlist
-Profil utilisateur
+...::: Decklist :::...
+Pas encore avancé
+
+
+
+
+...::: WISHLIST :::...
+
+Objectif:
+
+- Une page wishlist affiche toutes les cartes que l'on a ajouté à la wishlist.
+- Lorsqu'un utilisateur veut ajouter une carte à la wishlist, il peut choisir dans quelle liste l'inclure ( par défaut un utilisateur a une liste de souhait, les cartes sont ajoutés dans celle ci, mais il peut également choisir de créer d'autres listes )
+- L'utilisateur peut modifier le nom et le contenu des liste
+- Lorsque l'utilisateur veut ajouter une carte à sa wishlist, il peut cocher la/les listes dans lesquelles il veut l'ajouter, ou même créer nouvelle liste où l'ajouter.
+- L'ajout des cartes à la wishlist est également disponible depuis la page d'importation.
+- Enfin, la wishlist possèdera des options de tri et de filtre propres à cette fonctionnalité ( exemple afficher les cartes par liste / afficher toutes les cartes )
+
+Avancement:
+
+la majorité des routes sont créées et la page fonctionne dans sa globalité.
+Choses à ajouter : 
+    - ajout rapide de carte (avec liste par défaut)
+    - css pour les boutons désactivés
+    - loader
+    - suivre les exemplaires dans la collection et afficher les bonnes valeurs (actuellement valeurs fixées à 1 par la fonction de formatCard)
+    - suivre les prix des cartes de la wishlist
+
+
+
+
+...::: Profil utilisateur :::...
+Pas encore avancé
 
 Ajout des autres jeux de cartes principaux
 
-
-
-WISHLIST :
-
-- Une page wishlist affiche toutes les cartes que l'on a ajouté à la wishlist.
-- Lorsqu'un utilisateur veut afficher une carte à la wishlist, il peut choisir dans quelle liste l'inclure ( par défaut un utilisateur a une liste de souhait, les cartes sont ajoutés dans celle ci, mais il peut également choisir de créer d'autres listes )
-- L'utilisateur peut modifier le nom et le contenu des liste
-- Lorsque l'utilisateur veut ajoute rune carte à sa wishlist, il peut cocher la/les listes dans lesquelle sil veut l'ajouter, ou même créer nouvelle liste où l'ajouter.
-- L'ajout des cartes à la wishlist est également disponible depuis la page d'importation.
-- Enfin, la wishlist possèdera des options de tri et de filtre propres à cette fonctionnalité ( exemple afficher les cartes par liste / afficher toutes les cartes )

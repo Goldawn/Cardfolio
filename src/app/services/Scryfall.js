@@ -14,7 +14,6 @@ export const fetchSetCards = async (setCode, lang = 'en') => {
     try {
       const response = await axios.get(
         `https://api.scryfall.com/cards/search?order=set&q=set%3A${setCode}+lang%3A${lang}&unique=prints`
-        // `https://api.scryfall.com/cards/search?order=set&q=set%3A${setCode}+lang%3A${lang}`
       );
       return response.data;
     } catch (error) {
@@ -32,8 +31,3 @@ export const fetchMoreCards = async (nextPage) => {
       return [];
     }
 };
-
-export const apiTest = async () => {
-  const response = await fetch('http://localhost:3000/api');
-  return response.json();
-}

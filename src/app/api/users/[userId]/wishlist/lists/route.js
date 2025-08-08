@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 
 // GET - Récupérer toutes les listes de wishlist d'un utilisateur
 export async function GET(request, { params }) {
-  const { userId } = params;
+  const { userId } = await params;
 
   try {
     const lists = await prisma.wishlistList.findMany({
@@ -34,7 +34,7 @@ export async function GET(request, { params }) {
 
 // POST - Créer une nouvelle liste de wishlist
 export async function POST(request, { params }) {
-  const { userId } = params;
+  const { userId } = await params;
   const { name } = await request.json();
 
   if (!name) {
@@ -58,7 +58,7 @@ export async function POST(request, { params }) {
 
 // PATCH - Renommer ou dupliquer une liste de souhaits
 export async function PATCH(request, { params }) {
-  const { userId } = params;
+  const { userId } = await params;
   const { listId, name, duplicate } = await request.json(); // 👈 name au lieu de newName
 
   if (!listId || !name) {
@@ -107,7 +107,7 @@ export async function PATCH(request, { params }) {
 
 // DELETE - Supprimer une liste de wishlist (et ses cartes associées)
 export async function DELETE(request, { params }) {
-  const { userId } = params;
+  const { userId } = await params;
   const { listId } = await request.json();
 
   if (!listId) {
