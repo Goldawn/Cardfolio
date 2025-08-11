@@ -24,6 +24,8 @@ main {
   background-size: cover;
   background-repeat: no-repeat;
   background-attachment: fixed;
+  /* display: flex;
+  justify-content: center; */
 }
 
 main:has( #page-module__Jli3nG__collectionPage) {

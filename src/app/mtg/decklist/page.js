@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import DeckCase from "../../components/DeckCase";
 import Card from "../../components/Card";
 import { formatCard } from "../../services/FormatCard";
+import Link from "next/link";
 import styles from "./page.module.css";
 
 export default function DecklistPage() {
@@ -77,16 +78,20 @@ export default function DecklistPage() {
             }
 
             {!loading && decklists.length > 0 && (
-                <div>
-                    {decklists.map((deck, id) => (
-                        <DeckCase 
-                            key={id}
-                            userId={userId}
-                            deck={deck}
-                        />
-                    ))
-                    }
-                </div>
+                <section id={styles.allDecks}>
+                    <ul className={styles.decklistContainer}>
+                        {decklists.map((deck, id) => (
+                            <li key={id}>
+                                <DeckCase 
+                                    userId={userId}
+                                    deck={deck}
+                                />
+                                <Link href={`/mtg/decklist/${deck.id}`}><h3>{deck.name}</h3></Link>
+                            </li>
+                        ))
+                        }
+                    </ul>
+                </section>
             )}
         </>
     )
