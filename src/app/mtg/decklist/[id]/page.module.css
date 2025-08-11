@@ -1,0 +1,32 @@
+#deckPage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: rgba(0, 0, 0, .35);
+    border-radius: 15px;
+    max-width: 90%;
+    width: 1860px;
+    padding: 50px;;
+}
+
+section#decklistOverview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* background-color: rgba(0, 0, 0, .35); */
+    border-radius: 15px;
+    width: 100%;
+}
+
+section#decklistOverview ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, max-content));
+    grid-gap: 20px;
+    width: 100%;
+}
+
+section#decklistOverview ul li {
+    list-style-type: none;
+    flex: 1;
+    text-align: center;
+}
