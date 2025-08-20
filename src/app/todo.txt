@@ -12,6 +12,8 @@ Améliorations globales (par ordre d'importance):
 - Ajout d'un bouton pour mettre à jour les cartes avec toutes les propriétés désirées
 - Affichage des cartes en 3D, gestion des effet premium des cartes
 
+Optimistic update
+
 PAGES
 
 ...::: Decklist :::...

@@ -72,8 +72,9 @@
     background-color: rgba(0, 0, 0, 0.61);
     gap: 10px;
     margin-top: 1rem;
+    flex-wrap: nowrap;
     display: flex;
-    flex-wrap: wrap;
+    overflow-x: auto;
   }
 
   .cardResultsItem {

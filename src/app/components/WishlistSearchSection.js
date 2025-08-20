@@ -112,11 +112,12 @@ export default function WishlistSearchSection({ userId, wishlistLists, StopAddin
       {loading && <p>Chargement des cartes...</p>}
 
       {searchResults.length > 0 && !loading && 
+      <>
+        <p>{searchResults.length} resultats</p>
         <div className={styles.cardResults}>
           {searchResults.map((card, index) => (
-            <div className={styles.cardResultsItem}>
+            <div key={card.id} className={styles.cardResultsItem}>
               <Card
-                key={card.id}
                 card={card}
                 currentIndex={index}
                 cardList={searchResults}
@@ -127,6 +128,7 @@ export default function WishlistSearchSection({ userId, wishlistLists, StopAddin
             </ div>
           ))}
         </div>
+      </>
       }
     </section>
   );

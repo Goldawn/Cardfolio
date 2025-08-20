@@ -1,0 +1,57 @@
+.splitButton {
+  display: inline-flex;
+  position: relative;
+  font-family: Arial, sans-serif;
+}
+
+.splitButtonLeft,
+.splitButtonRight {
+  border: 1px solid #ccc;
+  cursor: pointer;
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+button.splitButtonLeft {
+  border-right: none;
+  border-radius: 10px 0 0 10px;
+}
+
+button.splitButtonRight {
+  border-radius: 0 10px 10px 0;
+}
+
+.splitButtonLeft:hover,
+.splitButtonRight:hover {
+  background-color: #e5e5e5;
+}
+
+.splitButtonMenu {
+  position: absolute;
+  background-color: black;
+  top: 100%;
+  left: 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-top: 2px;
+  padding: 4px 0;
+  z-index: 100;
+  min-width: 160px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.splitButtonOption {
+  display: flex;
+  align-items: center;
+  padding: 6px 12px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.splitButtonOption:hover {
+  background-color: #f0f0f0;
+}
+
+.splitButtonOption input {
+  margin-right: 8px;
+}
