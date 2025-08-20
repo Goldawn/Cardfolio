@@ -205,6 +205,7 @@ export default function WishlistPage() {
 
   return (
     <div className={styles.wishlistPage}>
+
       <h1>Ma Wishlist</h1>
 
       <button onClick={handleTestRoute}>TEST DE LA ROUTE</button>

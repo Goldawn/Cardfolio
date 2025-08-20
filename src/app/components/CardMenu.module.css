@@ -1,0 +1,24 @@
+.cardManager {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.cardManager ul {
+  display: flex;
+  gap: 2px;
+}
+ 
+.cardManager ul li {
+  list-style-type: none;
+  background-color: rgb(17, 17, 17);
+  padding: 30px 20px;
+  flex: 1;
+  font-size: 1.3rem;
+  text-align: center;
+}
+
+.cardManager ul li:hover {
+  background-color: rgba(218, 218, 218, 0.65);
+  color: black;
+  font-weight: 600;
+}

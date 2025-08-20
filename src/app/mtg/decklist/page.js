@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import DeckCase from "../../components/DeckCase";
+import CardMenu from "../../components/CardMenu";
 import Card from "../../components/Card";
 import { formatCard } from "../../services/FormatCard";
 import Link from "next/link";
 import styles from "./page.module.css";
+import CardModal from "../../components/CardModal";
 
 export default function DecklistPage() {
     const { data: session, status } = useSession();
@@ -63,6 +65,8 @@ export default function DecklistPage() {
     return (
         <>
             <h1>DeckList</h1>
+
+            {/* <CardMenu /> */}
 
             {loading && <p>Chargement des listes...</p>}
             {!loading && decklists.length === 0 && 

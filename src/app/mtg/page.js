@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { useSession } from "next-auth/react";
-import { loadCollection, saveCollection } from "../services/Collection.js";
 import { fetchSets, fetchSetCards, fetchMoreCards } from '../services/Scryfall.js';
 import { formatCard } from "../services/FormatCard.js";
 import useCardFilters from "../hooks/useCardFilters.js";
@@ -10,6 +9,7 @@ import { useCurrencyContext } from "@/context/";
 import Link from "next/link";
 import Card from "../components/Card.js";
 import CollectionActionBar from "../components/CollectionActionBar.js";
+import { fetchCardPrice } from "../services/pricing.js";
 import styles from "./page.module.css";
 
 export default function Collection() {
@@ -235,19 +235,59 @@ const cardsToFilter = selectedSetCards.length === 0
     }
   };
 
+  const handleAddToCollection = async (card) => {
+    
+      const scryfallId = card.id;
+      const { usd, eur } = await fetchCardPrice(card.name);
+      const lastPrice = eur || usd || 0;
+      const currency = eur ? "eur" : "usd";
+      const newPriceEntry = {
+        date: new Date().toISOString().split("T")[0],
+        [currency]: lastPrice,
+      };
+
+      try {
+        const res = await fetch(`/api/users/${userId}/collection`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            scryfallId,
+            quantity: 1,
+            priceHistory: [newPriceEntry],
+          }),
+      });
+
+      if (res.ok) {
+        const createdItem = await res.json();
+
+        // On va chercher les données scryfall complètes
+        const scryfallRes = await fetch(`https://api.scryfall.com/cards/${createdItem.scryfallId}`);
+        const rawCard = await scryfallRes.json();
+        const formattedCard = formatCard(rawCard);
+
+        // On construit la carte enrichie avec dbId, quantité et historique des prix
+        const enrichedCard = {
+          ...formattedCard,
+          quantity: createdItem.quantity,
+          priceHistory: createdItem.priceHistory || [],
+          dbId: createdItem.id,
+        };
+
+        setCollection((prev) => [...prev, enrichedCard]);
+      }
+
+      } catch (err) {
+        console.error("Erreur handleAddToCollection :", err);
+      }
+    }
+    
+  
+
   if (status === "loading") return <p>Chargement de la session...</p>;
   if (status === "unauthenticated") return <p>Veuillez vous connecter pour accéder à cette page.</p>;
 
   return (
     <div id={styles.collectionPage}>
-      <div className={styles.cardManager}>
-        <ul>
-          <li>Collection</li>
-          <li><Link href="/mtg/decklist">Decklists</Link></li>
-          <li><Link href="/mtg/wishlist">Wishlist</Link></li>
-          <li>Statistiques</li>
-        </ul>
-      </div>
 
       <Link className={styles.addCardsBtn} href="/mtg/importer">
         Importer de nouvelles cartes
@@ -268,8 +308,8 @@ const cardsToFilter = selectedSetCards.length === 0
           <span><strong>{collectionStats.totalSets}</strong> Extensions</span>
           <span><strong>{collectionStats.totalValue}</strong> {currency}</span>
           {/* <div> */}
-            <label onChange={toggleHideCards} htmlFor="hideNotOwned">Hide not owned
-              <input type="checkbox" name="hideNotOwned" id="hideNotOwned" checked={hideNotOwned} ></input>
+            <label htmlFor="hideNotOwned">Hide not owned
+              <input type="checkbox" onChange={toggleHideCards} name="hideNotOwned" id="hideNotOwned" checked={hideNotOwned} ></input>
             </label> 
           {/* </div> */}
         </p>
@@ -313,7 +353,8 @@ const cardsToFilter = selectedSetCards.length === 0
               showName
               showQuantity
               showPrice
-              editableQuantity
+              showAddToCollectionButton
+              onAddToCollection={() => handleAddToCollection(card)}
               showDeleteButton
               updateQuantity={updateQuantity}
               onRemove={removeCard}

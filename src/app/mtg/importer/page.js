@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Fragment } from 'react';
 import { useSession } from "next-auth/react";
 import { fetchSets, fetchSetCards, fetchMoreCards } from '../../services/Scryfall.js';
 import Card from '../../components/Card.js';
+import SplitButton from '../../components/SplitButton.tsx';
 import Loader from '../../components/Loader.js';
 import { fetchCardPrice } from "../../services/pricing.js";
-import { loadCollection, updateQuantity, removeCard } from "../../services/Collection.js";
 import { formatCard } from "../../services/FormatCard.js";
 import useCardFilters from "../../hooks/useCardFilters.js";
 import CollectionActionBar from "../../components/CollectionActionBar.js";
@@ -289,6 +289,7 @@ export default function MTGHome() {
 
           <div id={styles.cardContainer}>
             {sortedAndFilteredCards.map((card, index) => (
+              <Fragment key={index}>
               <Card
                 key={card.id}
                 card={card}
@@ -299,9 +300,12 @@ export default function MTGHome() {
                 showWishlistQuantity
                 showAddToCollectionButton
                 showAddToWishlistButton
+                wishlistLists={lists} // celles que tu as fetch côté serveur
+                onAddToWishlist={(listId, card) => addToWishlist(listId, card)}
                 onAddToCollection={() => handleAddToCollection(card)}
-                onAddToWishlist={() => console.log("Ajout à la wishlist à faire")}
+                // onAddToWishlist={() => console.log("Ajout à la wishlist à faire")}
               />
+              </Fragment>
             ))}
           </div>
         </>
