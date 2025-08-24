@@ -13,7 +13,7 @@ export default function Navigation() {
     <nav>
       <ul id={styles.globalNavigation}>
         <li className={styles.navigationElement}><Link href="/" className={isActive("/") ? "active" : ""}>Home</Link></li>
-        <li className={styles.navigationElement}><Link href="/mtg" className={isActive("/mtg") ? "active" : ""}>MTG</Link></li>
+        <li className={styles.navigationElement}><Link href="/mtg/collection" className={isActive("/mtg") ? "active" : ""}>MTG</Link></li>
         <li className={styles.navigationElement}><Link href="/lorcana" className={isActive("/lorcana") ? "active" : ""}>Lorcana</Link></li>
         <li className={styles.navigationElement}><Link href="/pokemon" className={isActive("/pokemon") ? "active" : ""}>Pokémon</Link></li>
         <li className={styles.navigationElement}><Link href="" className={isActive("") ? "active" : ""}>+</Link></li>

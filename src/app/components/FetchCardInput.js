@@ -99,7 +99,7 @@ export default function FetchCardInput () {
       {searchResults.length > 0 && !loading && 
         <div className={styles.cardResults}>
           {searchResults.map((card, index) => (
-            <div className={styles.cardResultsItem}>
+            <div key={index} className={styles.cardResultsItem}>
               <Card
                 key={card.id}
                 card={card}

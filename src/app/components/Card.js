@@ -48,7 +48,7 @@ export default function Card({
   const totalValue = (lastPrice * (card.quantity || 1)).toFixed(2);
 
   const handleOpenModal = (e) => {
-    e.stopPropagation();                 // <-- évite de déclencher undoAdd
+    // e.stopPropagation();                 // <-- évite de déclencher undoAdd
     if (!modal || disabled) return;
     setIsModalOpen(true);
   };
@@ -62,13 +62,13 @@ export default function Card({
     }
   };
 
-  const stop = (e) => e.stopPropagation(); // utile pour les boutons
-
+  const stop = (e) => e.stopPropagation();
   const isOwned = card.quantity > 0;
   const cardClass = compareWithCollection && !isOwned ? styles.notOwned : "";
 
   // Default list: si tu as un flag "isDefault" sur tes listes, privilégie-le ici
-  const defaultListId = wishlistLists[0]?.id;
+  const defaultListId =
+  wishlistLists.find((l) => l.isDefault)?.id ?? wishlistLists[0]?.id;
 
   return (
     <div className={`${styles.card} ${className}`} onClick={handleRootClick}>
@@ -80,13 +80,13 @@ export default function Card({
       />
 
       {showName && <h3>{cardName}</h3>}
-
       {showSet && card.setCode && (
         <p className={styles.set}>{card.setCode.toUpperCase()}</p>
       )}
 
+      {/* Affichage du bouton d'ajout à la collection */}
       <div className={styles.cardButtonContainer} onClick={stop}>
-        {showAddToCollectionButton && onAddToCollection && card.quantity === 0 && (
+        {showAddToCollectionButton && onAddToCollection && !isOwned && (
           <button
             className={styles.addCollectionButton}
             onClick={() => onAddToCollection(card)}
@@ -137,7 +137,8 @@ export default function Card({
         </>
       )}
 
-      {updateQuantity && card.quantity > 0 && (
+      {/* Affichage du bouton de mise à jour de la quantité */}
+      {updateQuantity && isOwned && (
         <div className={styles.actionBox} onClick={stop}>
           <div className={styles.quantityBtnBox}>
             <button
@@ -158,11 +159,13 @@ export default function Card({
         </div>
       )}
 
-      {showDeleteButton && onRemove && card.quantity > 0 && (
+      {/* Affichage du bouton de suppression de la collection */}
+      {showDeleteButton && onRemove && isOwned && (
         <button
           className={styles.delete}
-          onClick={(e) => { e.stopPropagation(); onRemove(card.id); }}
+          onClick={() => onRemove(card.id)}
           disabled={disabled}
+          title="Supprimer de la collection"
         >
           Supprimer
         </button>

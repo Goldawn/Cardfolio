@@ -43,6 +43,7 @@ export const formatCard = (card) => {
     small: face?.image_uris?.small || null,
     normal: face?.image_uris?.normal || null,
     large: face?.image_uris?.large || null,
+    artCrop: face?.image_uris?.art_crop || null,
   });
 
   // Cas spécial des cartes réversibles
