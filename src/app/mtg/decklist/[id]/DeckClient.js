@@ -1,0 +1,377 @@
+"use client";
+
+import { useEffect, useState, useTransition, useMemo } from "react";
+import Card from "../../../components/Card";
+import { formatCard } from "../../../services/FormatCard";
+import DeckSettingsPanel from "../../../components/deck/DeckSettingsPanel";
+import AddFromCollection from "../../../components/deck/AddFromCollection";
+import ManualAdd from "../../../components/deck/ManualAdd";
+import { evaluateDeckLegality } from "../../../services/Legalities";
+import styles from "./page.module.css";
+
+// Règles synthétiques par format (affichées dans la bulle “?”)
+const FORMAT_RULES = {
+  commander: "100 cartes, singleton (1 exemplaire max), un commandant légendaire. Terrains de base non limités.",
+  paupercommander: "100 cartes, singleton, commandant (rarement common), tout le reste en commune. Terrains de base non limités.",
+  oathbreaker: "60 cartes, singleton, 1 planeswalker + 1 signature spell. Terrains de base non limités.",
+  gladiator: "100 cartes, singleton. Terrains de base non limités.",
+  brawl: "60 cartes, singleton, Standard only, 1 commandant légendaire. Terrains de base non limités.",
+  standardbrawl: "60 cartes, singleton, pool Standard. Terrains de base non limités.",
+  vintage: "60+ cartes, certaines cartes restreintes à 1 (ex: Ancestral).",
+  modern: "60+ cartes, max 4 exemplaires sauf cartes illimitées (Relentless Rats, Petitioners...).",
+  legacy: "60+ cartes, max 4 exemplaires sauf cartes illimitées (Relentless Rats, Petitioners...).",
+  pioneer: "60+ cartes, max 4 exemplaires sauf cartes illimitées (Relentless Rats, Petitioners...).",
+  standard: "60+ cartes, max 4 exemplaires sauf cartes illimitées (Relentless Rats, Petitioners...).",
+  historic: "60+ cartes, Arena.",
+  timeless: "60+ cartes, Arena (toutes cartes Arena).",
+  alchemy: "60+ cartes, Arena + cartes digitales.",
+  penny: "60+ cartes, budget (MTGO).",
+};
+
+export default function DeckClient({
+  deck,
+  initialDeckCards,              // [{ id, scryfallId, quantity }]
+  initialUserCollectionItems,     // [{ scryfallId, quantity }]
+  actions,                        // server actions
+}) {
+  // console.log(deck)
+  const [deckState, setDeckState] = useState(deck); // { id, name, format, showcasedCard }
+  const [deckCards, setDeckCards] = useState(initialDeckCards || []);
+  const [enriched, setEnriched] = useState([]);     // cartes formatées  { deckCardId, decklistQuantity }
+  const [tab, setTab] = useState("fromCollection"); // "fromCollection" | "manual" | "import"
+  const [isPending, startTransition] = useTransition();
+  const [deckColors, setDeckColors] = useState([]); // ["W","U","B","R","G","C"]
+
+  // -------- Enrichissement Scryfall des cartes du deck --------
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      if (!deckCards || deckCards.length === 0) {
+        setEnriched([]);
+        return;
+      }
+      try {
+        const out = await Promise.all(
+          deckCards.map(async (dc) => {
+            const res = await fetch(`https://api.scryfall.com/cards/${dc.scryfallId}`, { cache: "no-store" });
+            const raw = await res.json();
+            const formatted = formatCard(raw);
+            return {
+              ...formatted,
+              decklistQuantity: dc.quantity,
+              deckCardId: dc.id,
+            };
+          })
+        );
+        if (!cancelled) setEnriched(out);
+      } catch (e) {
+        console.error("Erreur enrichissement Scryfall deck:", e);
+        if (!cancelled) setEnriched([]);
+      }
+    };
+    load();
+    return () => { cancelled = true; };
+  }, [deckCards]);
+
+  // Recalcule les couleurs du deck à partir des cartes présentes
+  useEffect(() => {
+    const set = new Set();
+    // on s’appuie sur "enriched" + "deckCards" pour ne compter que les cartes présentes
+    const qtyById = new Map(deckCards.map(dc => [dc.scryfallId, dc.quantity || 0]));
+    enriched.forEach((c) => {
+      const qty = qtyById.get(c.id) || 0;
+      if (qty <= 0) return;
+      if (c.type.includes("Basic Land")) return;      // ignore lands de base
+      if (Array.isArray(c.colors)) {
+        c.colors.forEach(clr => set.add(clr || "C"));
+      }
+      // fallback "incolore" si pas de colors mais cout de mana présent
+      if ((!c.colors || c.colors.length === 0) && (c.manaCost || "").length > 0) {
+        set.add("C");
+      }
+    });
+    setDeckColors(Array.from(set));
+  }, [enriched, deckCards]);
+
+
+  // -------- LÉGALITÉ (résumé  marquage cartes) --------
+  const legality = useMemo(() => {
+    return evaluateDeckLegality(
+      { format: deckState.format },
+      deckCards,
+      enriched,
+     {
+       // Optionnel : si un jour tu as l’ID scryfall du commandant pour Pauper Commander
+       // commanderScryfallId: deckState.commanderScryfallId ?? null
+     }
+   );
+  }, [deckState.format, deckCards, enriched]);
+
+  const isCardProblematic = (card) => {
+    return legality.issues.some((i) => i.scryfallId === card.id);
+  };
+
+  // -------- Handlers deck (server actions) --------
+  const addCardToDeck = (scryfallId, qty = 1) => {
+    startTransition(async () => {
+      try {
+        const res = await actions.addCardToDeck(deck.id, scryfallId, qty);
+        if (!res?.item) return;
+        const item = res.item; // { id, scryfallId, quantity }
+        setDeckCards((prev) => {
+          const idx = prev.findIndex((d) => d.scryfallId === item.scryfallId);
+          if (idx === -1) return [{ id: item.id, scryfallId: item.scryfallId, quantity: item.quantity }, ...prev];
+          const copy = [...prev];
+          copy[idx] = { ...copy[idx], id: item.id, quantity: item.quantity };
+          return copy;
+        });
+      } catch (e) {
+        console.error("addCardToDeck error:", e);
+      }
+    });
+  }
+
+  const updateDeckCardQty = (deckCardId, nextQty) => {
+    startTransition(async () => {
+      try {
+        const res = await actions.updateDeckCardQty(deckCardId, nextQty);
+        if (!res) return;
+
+        if (res.kind === "deleted") {
+          setDeckCards((prev) => prev.filter((dc) => dc.id !== deckCardId));
+        } else if (res.kind === "updated" && res.item) {
+          setDeckCards((prev) =>
+            prev.map((dc) => (dc.id === deckCardId ? { ...dc, quantity: res.item.quantity } : dc))
+          );
+        }
+      } catch (e) {
+        console.error("updateDeckCardQty error:", e);
+      }
+    });
+  };
+
+  const removeCardFromDeck = (deckCardId) => {
+    startTransition(async () => {
+      try {
+        const res = await actions.removeCardFromDeck(deckCardId);
+        if (res?.kind === "deleted") {
+          setDeckCards((prev) => prev.filter((dc) => dc.id !== deckCardId));
+        }
+      } catch (e) {
+        console.error("removeCardFromDeck error:", e);
+      }
+    });
+  };
+
+  const setShowcased = (deckCardId, artUrl) => {
+    startTransition(async () => {
+      try {
+        const updated = await actions.setShowcasedCard(deckState.id, {
+         deckCardId,
+         artUrl,
+       });
+       setDeckState((prev) => ({
+         ...prev,
+         showcasedDeckCardId: updated.showcasedDeckCardId ?? null,
+         showcasedArt: updated.showcasedArt ?? null,
+       }));
+      } catch (e) {
+        console.error("setShowcased error:", e);
+      }
+    });
+  };
+
+  // Mise à jour locale depuis le panneau paramètres
+  const applyDeckLocalUpdate = (partial) => {
+    setDeckState((prev) => ({ ...prev, ...partial }));
+  };
+
+  return (
+    <div id={styles.deckPage}>
+      <div id={styles.deckManager} aria-busy={isPending}>
+        <section id={styles.decklistOverview} style={{ display: "grid", gap: 16 }}>
+          <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
+            <div style={{ flex: 1 }}>
+              <h1 style={{ marginTop: 0, display: "flex", gap: 8, alignItems: "center" }}>
+                {deckState.name}
+                <FormatInfo format={deckState.format} />
+              </h1>
+              <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
+                <FormatBadge format={deckState.format} />
+                <span>
+                  Taille : <strong>{legality.total}</strong> / {legality.minRequired} {legality.sizeOk ? "✅" : "❌"}
+                </span>
+                {legality.isSingleton && <span>(Singleton)</span>}
+                {legality.issues.length > 0 ? (
+                  <span style={{ color: "#c0392b" }}>
+                    {legality.issues.length} carte(s) posant problème
+                  </span>
+                ) : (
+                  <span style={{ color: "#27ae60" }}>Légal (à taille près)</span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <ul>
+            {enriched.map((card, index) => {
+              const onDec = () => updateDeckCardQty(card.deckCardId, Math.max(0, (card.decklistQuantity || 0) - 1));
+              const onInc = () => updateDeckCardQty(card.deckCardId, (card.decklistQuantity || 0) + 1);
+              const onDelete = () => removeCardFromDeck(card.deckCardId);
+
+              const artworkUrl =
+                card.image?.artCrop ||
+                card.cardBack?.image?.artCrop ||
+                card.image?.large ||
+                card.image?.normal ||
+                null;
+
+              const isShowcased = deckState.showcasedDeckCardId === card.deckCardId;
+
+              return (
+                <li className={styles.deckCardItem}
+                  key={card.id}
+                  style={{
+                    position: "relative",
+                    border: isCardProblematic(card) ? "1px solid #e67e22" : "none",
+                    borderRadius: 8,
+                    padding: isCardProblematic(card) ? 8 : 0,
+                    overflow: "hidden",
+                  }}
+                >
+                  {/* Étoile showcased */}
+                  <button
+                    className={isShowcased 
+                      ? `${styles.toggleShowcased} ${styles.showcased}` 
+                      : styles.toggleShowcased}
+                    title={isShowcased ? "Carte mise en avant" : "Définir comme showcased"}
+                    onClick={() => setShowcased(card.deckCardId, artworkUrl)}
+                  >
+                    {isShowcased ? "★" : "☆"}
+                  </button>
+                  <Card
+                    card={card}
+                    cardList={enriched}
+                    currentIndex={index}
+                    showDecklistQuantity
+                    showName
+                    // modal={false}
+                  />
+                  {isCardProblematic(card) && (
+                    <div style={{ color: "#e67e22", fontSize: 12, marginTop: 4 }}>
+                      {legality.issues.find(i => i.scryfallId === card.id)?.problems.join(" • ")}
+                    </div>
+                  )}
+                  {/* Petits contrôles dédiés au deck (sans toucher <Card/>) */}
+                  <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 8, flexWrap: "wrap" }}>
+                    <button onClick={onDec} disabled={isPending || deckState.isLocked || (card.decklistQuantity || 0) <= 1}>−1</button>
+                    {/* <span>Quantité dans le deck : <strong>{card.decklistQuantity}</strong></span> */}
+                    <button onClick={onInc} disabled={isPending || deckState.isLocked}>+1</button>
+                    <button onClick={onDelete} disabled={isPending || deckState.isLocked} style={{ backgroundColor: "rgb(192, 57, 43)", marginLeft: "" }}>
+                      Supprimer du deck
+                    </button>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+
+        {/* Onglets d’ajout */}
+        <nav style={{ display: "flex", gap: 8, margin: "16px 0" }}>
+          <button onClick={() => setTab("fromCollection")} disabled={tab === "fromCollection"}>Depuis la collection</button>
+          <button onClick={() => setTab("manual")} disabled={tab === "manual"}>Ajout manuel</button>
+          <button onClick={() => setTab("import")} disabled={tab === "import"}>Importer une liste</button>
+        </nav>
+
+        {tab === "fromCollection" && (
+          <AddFromCollection
+            deckId={deckState.id}
+            collectionItems={initialUserCollectionItems}
+            currentDeckCards={deckCards}
+            onAdd={addCardToDeck}
+          />
+        )}
+
+        {tab === "manual" && (
+          <ManualAdd
+            deckId={deckState.id}
+            onAdd={(scryfallId, qty) => addCardToDeck(scryfallId, qty)}
+          />
+        )}
+
+        {tab === "import" && (
+          <div style={{ opacity: 0.6, padding: 12, border: "1px dashed #ccc", borderRadius: 8 }}>
+            (À venir) Coller texte / Import CSV-JSON → preview → import
+          </div>
+        )}
+      </div>
+
+      <aside>
+        <DeckSettingsPanel
+          deck={deckState}
+          actions={{
+            renameDeck: actions.renameDeck,
+            setDeckFormat: actions.setDeckFormat,
+            setShowcasedCard: actions.setShowcasedCard,
+            deleteDeck: actions.deleteDeck,
+            toggleDeckLock: actions.toggleDeckLock,
+            updateDeckNotes: actions.updateDeckNotes,
+            duplicateDeck: actions.duplicateDeck,
+          }}
+          onLocalUpdate={applyDeckLocalUpdate}
+        />
+        <div style={{display:"flex", gap:6}}>
+          {deckColors.map(c => (
+            <span key={c} title={`Couleur ${c}`} style={{border:"1px solid #ddd", padding:"2px 6px", borderRadius:999}}>
+              {c}
+            </span>
+          ))}
+        </div>
+      </aside>
+    </div>
+  );
+}
+
+function FormatBadge({ format }) {
+  if (!format) return null;
+  return (
+    <span style={{
+      border: "1px solid #ddd",
+      borderRadius: 999,
+      padding: "2px 8px",
+      fontSize: 12,
+      color: "#555",
+      background: "#f6f7f8"
+    }}>
+      Format : <strong>{format}</strong>
+    </span>
+  );
+}
+
+function FormatInfo({ format }) {
+  const rules = FORMAT_RULES[(format || "").toLowerCase()];
+  if (!rules) return null;
+  return (
+    <span
+      title={rules}
+      style={{
+        display: "inline-flex",
+        width: 18,
+        height: 18,
+        alignItems: "center",
+        justifyContent: "center",
+        background: "#eef1f5",
+        border: "1px solid #cfd6e4",
+        color: "#3b4a68",
+        borderRadius: "50%",
+        cursor: "help",
+        padding: "5px",
+        fontWeight: 700,
+        fontSize: 14,
+      }}
+    >
+      ?
+    </span>
+  );
+}

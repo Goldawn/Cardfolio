@@ -1,5 +1,10 @@
 #deckPage {
     display: flex;
+    gap: 20px;
+}
+
+#deckManager {
+    display: flex;
     flex-direction: column;
     align-items: center;
     background-color: rgba(0, 0, 0, .35);
@@ -30,3 +35,29 @@ section#decklistOverview ul li {
     flex: 1;
     text-align: center;
 }
+
+li.deckCardItem:hover button.toggleShowcased {
+    display: inline-block;
+}
+
+button.toggleShowcased {
+    /* background: red; */
+    position: absolute;
+    background-color: #803373;
+    box-shadow: 0 0 20px 0px rgba(0, 0, 0, 0.3) inset;
+    top: 0;
+    right: 6;
+    border: none;
+    border-radius: none;
+    font-size: 1.8em;
+    color: rgb(206, 174, 87);
+    border-radius: 0;
+    padding: 25px 15px;
+    --c: 20%; /* control the curvature (works with percentage) */
+    mask: radial-gradient(70% var(--c) at bottom,#0000 calc(100% - 2px),#000);
+}
+
+button.toggleShowcased:not(.showcased) {
+    display: none
+}
+

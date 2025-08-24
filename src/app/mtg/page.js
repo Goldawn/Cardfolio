@@ -106,11 +106,13 @@ const cardsToFilter = selectedSetCards.length === 0
   useEffect(() => {
     if (!userId) return;
     const fetchCollectionFromAPI = async () => {
+      console.log("Fetching collection for user:", userId);
       try {
         const res = await fetch(`/api/users/${userId}/collection`);
         if (!res.ok) throw new Error("Erreur de chargement");
 
         const data = await res.json();
+        console.log("Collection DATA :", data)
         const enrichedCards = await Promise.all(
           data.map(async (item) => {
             const res = await fetch(`https://api.scryfall.com/cards/${item.scryfallId}`);

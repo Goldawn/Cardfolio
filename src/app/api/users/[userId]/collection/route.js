@@ -1,23 +1,16 @@
 import { prisma } from "@/lib/prisma";
 
 export async function GET(request, { params }) {
-  const { userId } = params;
+  const { userId } = await params;
 
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      include: {
-        collection: true,
-      },
-    });
+    const defaultCollection = await prisma.collection.findFirst({
+    where: { userId },
+    orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }],
+    include: { items: true }, // <- CollectionItem[]
+  });
 
-    if (!user) {
-      return new Response(JSON.stringify({ error: "User not found" }), {
-        status: 404,
-      });
-    }
-
-    return Response.json(user.collection);
+    return Response.json(defaultCollection.items);
   } catch (error) {
     console.error("Erreur API collection :", error);
     return new Response(JSON.stringify({ error: "Internal Server Error" }), {
