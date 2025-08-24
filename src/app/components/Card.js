@@ -4,6 +4,7 @@ import { useState } from "react";
 import styles from "./Card.module.css";
 import CardModal from "./CardModal";
 import SplitButton from "./SplitButton.tsx";
+import { on } from "events";
 
 export default function Card({
   card,
@@ -30,6 +31,7 @@ export default function Card({
 
   // Actions (callbacks)
   onAddToCollection,
+  onCreateWishlist,
   onAddToWishlist,
   onAddToDeck,
   onRemove,
@@ -96,11 +98,12 @@ export default function Card({
           </button>
         )}
 
-        {showAddToWishlistButton && onAddToWishlist && wishlistLists.length > 0 && (
+        {showAddToWishlistButton && onAddToWishlist && (
           <SplitButton
-            lists={wishlistLists}
+            lists={wishlistLists || []}
             defaultListId={defaultListId}
             onQuickAdd={(listId) => onAddToWishlist(listId, card)}
+            onCreateWishlist={onCreateWishlist}
             card={card}
           />
         )}

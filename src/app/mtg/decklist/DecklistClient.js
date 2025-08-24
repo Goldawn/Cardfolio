@@ -29,9 +29,7 @@ export default function DecklistsClient({ initialDecks, actions }) {
 
   return (
     <>
-      <h1>DeckList</h1>
-
-      {/* Formulaire création si aucun deck */}
+    {/* Formulaire création si aucun deck */}
       {decklists.length === 0 && (
         <div>
           <input

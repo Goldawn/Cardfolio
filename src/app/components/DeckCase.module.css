@@ -1,5 +1,5 @@
 :root {
-    --main-color: #174b1a;
+    --main-color: #12384e;
 }
 
 .singleDeck {
@@ -22,7 +22,7 @@
     transform-style: preserve-3d;
     transform: rotateY(30deg);
     transition: .2s ease-in;
-    z-index: 1;  
+    z-index: 1;
 }
 
 .frontFace {
@@ -87,7 +87,7 @@
     radial-gradient(var(--s) at var(--p) calc(-1*sin(var(--a))*var(--s)),
     #0000 100%,#000 calc(100% + 1px)) 0 calc(var(--r)*(1 - sin(var(--a)))) no-repeat,
     linear-gradient(90deg,#000 calc(var(--p) - var(--_d)),#0000 0 calc(var(--p) + var(--_d)),#000 0);
-    box-shadow: 0 -5px 5px 5px var(--main-color) inset;
+    box-shadow: 0 0px 5px 10px var(--main-color) inset;
 }
 
 .boxShadow {
@@ -109,7 +109,7 @@
     height: 50%;
     position: absolute;
     z-index: 1;
-    filter: drop-shadow(0px 3px 3px rgba(0, 0, 0, 0.2));
+    filter: drop-shadow(0px 3px 3px rgba(0, 0, 0, 0.5));
     border-top: 1px solid rgba(0, 0, 0, 0.3);
     border-left: 1px solid rgba(0, 0, 0, 0.3);
     border-right: 1px solid rgba(0, 0, 0, 0.3);
@@ -128,11 +128,11 @@
         linear-gradient(0deg, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.25) 100%),
         var(--cover, url("/assets/images/card_art/abro-34-titania-s-command.jpg"));
     /* background-size: 140px; */
-    background-size: 220px;
+    background-size: 235px;
     background-position: top;
-    background-position: 50% -10%;
+    background-position: 51% -22%;
     background-repeat: no-repeat;
-    box-shadow: 0 5px 5px 5px var(--main-color) inset;
+    box-shadow: 0 8px 5px 8px var(--main-color) inset;
 }
 
 .singleDeckBox:hover .frontOpening::before {

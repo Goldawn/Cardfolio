@@ -62,9 +62,12 @@ export default async function DecklistPage() {
   }
 
   return (
-    <DecklistClient
-      initialDecks={initialDecks}
-      actions={{ createDeck: createDeckAction }}
-    />
+    <>
+      <h1>My decks</h1>
+      <DecklistClient
+        initialDecks={initialDecks}
+        actions={{ createDeck: createDeckAction }}
+      />
+    </>
   );
 }

@@ -1,60 +1,110 @@
-# 🧙‍♂️ Cardfolio - Version 0.1.1
+# 🧙‍♂️ Cardfolio - Version 0.2.0
 
-**Cardfolio** est une application web permettant de gérer et visualiser une collection de cartes **Magic: The Gathering**.  
-Cette version 0.1.1 introduit une **connexion à une base de données SQLite via Prisma**, assurant une gestion persistente et robuste de la collection.
+**Cardfolio** est une application web complète pour gérer, visualiser et planifier votre collection de cartes **Magic: The Gathering**.  
+Cette version **0.2.0** marque un **jalon majeur** : l’arrivée des **decklists**, des **wishlists**, et d’une meilleure intégration de la base de données avec **Prisma**.
 
 ---
 
-## ✨ Fonctionnalités
+## ✨ Fonctionnalités principales
 
-### 📦 Gestion de collection (connectée à la base de données)
-- Importation de cartes depuis un set Magic: The Gathering (via l'API Scryfall)
-- Ajout de cartes à sa collection avec suivi de la **quantité possédée** et de l'**historique des prix**
-- Suppression et modification des quantités via l'interface
-- Les cartes sont désormais **stockées dans une base de données Prisma**
+### 📦 Gestion complète de la collection
+- Importation des cartes directement via l’API **Scryfall**
+- Ajout de cartes avec suivi des **quantités possédées**
+- Historique automatique des **prix** pour chaque carte
+- Modification des quantités en direct
+- Suppression des cartes de la collection
+- Stockage persistant via **Prisma + SQLite**
 
-### 🔍 Filtres et tri dynamiques
-- Recherche par **nom de carte**
-- Filtres :
+---
+
+### 🗂 Gestion des decks (**NOUVEAU**)
+- Création, modification et suppression de **decklists**
+- Ajout / retrait de cartes d’un deck
+- Gestion des **quantités** pour chaque carte
+- **Carte mise en avant (showcased)** : définissez une carte vedette par deck, utilisée pour personnaliser son visuel
+- Calcul automatique des **couleurs du deck** via les cartes présentes
+- Gestion des **formats** (Commander, Standard, Modern, Pioneer, etc.)
+- Vérification automatique de la **légalité des decks** :
+  - Support des règles de singleton (Commander, Brawl, etc.)
+  - Limitation à **4 exemplaires** pour les formats classiques
+  - Gestion des cartes à copies illimitées (ex. *Relentless Rats*, *Dragon’s Approach*…)
+- Notes personnelles sur chaque deck
+- Dupliquer facilement un deck
+- Verrouiller/déverrouiller un deck pour éviter les modifications accidentelles
+
+---
+
+### 🧾 Gestion des wishlists (**NOUVEAU**)
+- Créez une ou plusieurs listes de souhaits
+- Ajoutez rapidement des cartes à une liste existante
+- Si aucune liste n’existe, **création automatique** d’une **wishlist par défaut**
+- Sélection dynamique de la liste cible via un menu déroulant interactif
+- Ajout massif des **cartes manquantes d’un deck** à une wishlist
+- Organisation des cartes désirées par liste
+
+---
+
+### 🔍 Filtres et tri avancés
+- Recherche rapide par **nom de carte**
+- Filtres multiples :
   - **Couleur** (WUBRG + Incolore et Multicolore)
   - **Type** (Créature, Terrain, Éphémère, etc.)
   - **Rareté** (Commun, Peu Commun, Rare, Mythique)
-- Tri par :
+- Tri possible par :
   - Nom
   - Prix
   - Date d’ajout
   - Extension
   - Couleur
 
-### 📊 Statistiques de collection
-- Nombre total de cartes
-- Nombre d’extensions représentées
-- **Valeur totale estimée** (EUR / USD)
-- Affichage du ratio possédé / total pour chaque extension
+---
+
+### 📊 Statistiques détaillées
+- Suivi du **nombre total de cartes**
+- Comptage des **extensions représentées**
+- **Valeur totale estimée** de la collection (EUR / USD)
+- Aperçu du **ratio possédé / total** par extension
+- *Prochainement* : statistiques détaillées par **deck**
+
+---
 
 ### 🧑‍💻 Authentification sécurisée
 - Connexion via **Google** ou **GitHub**
-- Chaque utilisateur dispose de sa propre collection (données isolées)
-
-### 📁 Devise dynamique
-- Bascule entre les prix **EUR** et **USD**
-
-### 🔍 Modale de carte avancée
-- Zoom sur une carte avec toutes ses infos (mana cost, oracle text, type, etc.)
-- Support des **cartes double-face / transformables**
-- Affichage du **graphique d’évolution des prix** dans le temps
-- Navigation entre les cartes avec **flèches précédente / suivante**
+- Chaque utilisateur dispose de **ses propres données isolées** :
+  - Collection
+  - Decklists
+  - Wishlists
 
 ---
 
-## 🧱 Nouveauté : Prisma + base de données + nextAuth
-
-Cardfolio utilise désormais **Prisma ORM** avec une base de données **SQLite** (stockée localement par défaut).  
-Chaque utilisateur pourra prochainement avoir sa propre collection, wishlist, et ses decklists.
+### 🌍 Gestion de la devise
+- Basculer entre **EUR** et **USD** à tout moment
+- Les prix sont récupérés automatiquement via **Scryfall**
 
 ---
 
-## 🚀 Lancer le projet en local
+### 🖼 Modale de carte enrichie
+- Zoom complet sur la carte
+- Affichage du **coût de mana**, du **texte oracle** et de toutes les infos essentielles
+- Gestion complète des **cartes recto-verso, transformables et flip**
+- Graphique d’évolution du prix de la carte dans le temps
+- Navigation rapide avec les flèches
+
+---
+
+## 🧱 Technologies utilisées
+
+- **React (Next.js 15)** avec App Router
+- **NextAuth.js v5** pour l’authentification
+- **Prisma** (ORM + SQLite, PostgreSQL support à venir)
+- **Context API** pour la gestion globale de la devise
+- **Recharts** pour les graphiques
+- **Scryfall API** pour toutes les données cartes
+- **CSS Modules** pour les styles
+
+---
+
+## 🚀 Installation & démarrage
 
 ### 1. Cloner et installer les dépendances
 
@@ -92,33 +142,39 @@ npm run dev
 
 ---
 
-## ⚖️ Prochaines étapes (v0.2+)
-> Ces fonctionnalités sont prévues pour les prochaines versions :
+#### 🔮 Roadmap (v0.3+)
 
-- Deck Builder et gestion de decks
-- Wishlist et cartes à acquérir
-- Plus de stats et visualisations graphiques
-- Export/Import JSON ou CSV
-- Suggestions de cartes basées sur la collection
-- Responsive mobile
+Fonctionnalités prévues pour les prochaines versions :
 
-## 🛠️ Technologies utilisées
+📤 Export/Import des decks (JSON, CSV, Arena, Moxfield…)
 
-- **React (Next.js)** avec App Router
-- **NextAuth.js v5** pour l’authentification
-- **Prisma** (ORM avec SQLite)
-- **Context API** pour la gestion globale de la devise
-- **Recharts** pour les graphiques
-- **Scryfall API** pour les données cartes
-- **CSS Modules** pour le style
+📌 Ajout rapide de toutes les cartes manquantes dans une wishlist spécifique
 
-## 📄 Licence
+📊 Statistiques détaillées par deck : manabases, courbes de mana, coûts moyens…
 
-Ce projet est sous licence **MIT**.
+📱 Amélioration de l’expérience mobile
 
----
+🔗 Intégration avec des plateformes tierces (Moxfield, Archidekt…)
 
-## 💡 Remarques
+📄 Licence
 
-Cardfolio est encore en phase de construction 🚧  
+Ce projet est sous licence MIT.
+
+#### 💡 Remarques
+
+Cardfolio est encore en phase de construction 🚧
 Toute suggestion ou contribution est la bienvenue !
+
+#### 🔖 Changelog rapide
+
+##### v0.2.0 — Decklists + Wishlists (actuel)
+- Ajout de la gestion complète des decks
+- Ajout du système de wishlist avec création dynamique
+- Vérification des légalités selon les formats
+- Gestion des couleurs des decks automatique
+- Amélioration de l’UX générale et persistance robuste des données
+##### v0.1.1 — Prisma + Auth
+- Connexion à Prisma + base SQLite
+- Intégration de NextAuth
+- Importation des cartes depuis Scryfall
+- Gestion basique de la collection et affichage des prix
