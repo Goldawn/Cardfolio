@@ -32,6 +32,7 @@ export default function DeckClient({
   deck,
   initialDeckCards,              // [{ id, scryfallId, quantity }]
   initialUserCollectionItems,     // [{ scryfallId, quantity }]
+  wishlistLists,
   actions,                        // server actions
 }) {
   // console.log(deck)
@@ -310,6 +311,9 @@ export default function DeckClient({
       <aside>
         <DeckSettingsPanel
           deck={deckState}
+          deckCards={deckCards}
+          collectionItems={initialUserCollectionItems}
+          wishlistLists={wishlistLists}
           actions={{
             renameDeck: actions.renameDeck,
             setDeckFormat: actions.setDeckFormat,
@@ -318,6 +322,8 @@ export default function DeckClient({
             toggleDeckLock: actions.toggleDeckLock,
             updateDeckNotes: actions.updateDeckNotes,
             duplicateDeck: actions.duplicateDeck,
+            createWishlist: actions.createWishlist,
+            addManyToWishlist: actions.addManyToWishlist,
           }}
           onLocalUpdate={applyDeckLocalUpdate}
         />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import AddMissingToWishlistModal from "./AddMissingToWishlistModal";
 import styles from "./DeckSettingsPanel.module.css";
 
 const FORMAT_OPTIONS = [
@@ -11,14 +12,18 @@ const FORMAT_OPTIONS = [
 
 export default function DeckSettingsPanel({
   deck,                     // { id, name, format, showcasedCard }
+  deckCards,
   actions,                  // { renameDeck, setDeckFormat, setShowcasedCard, deleteDeck }
   onLocalUpdate,            // (partial) => void (pour rafraîchir le state local du deck)
+  collectionItems,
+  wishlistLists
 }) {
 
   // console.log("deck", deck);
   const [isPending, startTransition] = useTransition();
   const [name, setName] = useState(deck.name || "");
   const [format, setFormat] = useState(deck.format || "commander");
+  const [missingOpen, setMissingOpen] = useState(false);
 
   const submitName = () => {
     if (!name.trim() || name === deck.name) return;
@@ -58,7 +63,8 @@ export default function DeckSettingsPanel({
         }}
         title={deck.isLocked ? "Déverrouiller" : "Verrouiller"}
       >
-        {deck.isLocked ? "🔒 Verrouillé" : "🔓 Déverrouillé"}
+        {/* {deck.isLocked ? "🔒 Verrouillé" : "🔓 Déverrouillé"} */}
+        {deck.isLocked ? "🔒" : "🔓"}
       </button>
 
       <button
@@ -88,7 +94,22 @@ export default function DeckSettingsPanel({
       </label>
 
       <button disabled title="Bientôt">Exporter le deck (à venir)</button>
-      <button disabled title="Bientôt">Ajouter les cartes manquantes à la wishlist (à venir)</button>
+       <button onClick={() => setMissingOpen(true)}>
+          Ajouter les cartes manquantes à une wishlist
+        </button>
+
+        <AddMissingToWishlistModal
+          open={missingOpen}
+          onClose={() => setMissingOpen(false)}
+          deck={deck}
+          deckCards={deckCards}
+          collectionItems={collectionItems}
+          wishlistLists={wishlistLists}
+          actions={{
+            createWishlist: actions.createWishlist,
+            addManyToWishlist: actions.addManyToWishlist,
+          }}
+        />
 
       <label>
         <span>Nom</span>

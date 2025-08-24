@@ -28,3 +28,29 @@ export async function getAuthenticatedUser({ redirect = false, throwError = fals
 
   return session.user;
 }
+
+export async function assertWishlistOwnership(listId) {
+  "use server";
+  const authed = await getAuthenticatedUser({ throwError: true });
+  const owned = await prisma.wishlistList.findFirst({
+    where: { id: listId, userId: authed.id },
+    select: { id: true },
+  });
+  if (!owned) {
+    throw new Error("Wishlist introuvable ou non autorisée.");
+  }
+  return owned.id;
+}
+
+export async function assertDeckOwnership(targetDeckId) {
+  "use server";
+  const authed = await getAuthenticatedUser({ throwError: true });
+  const owned = await prisma.decklist.findFirst({
+    where: { id: targetDeckId, userId: authed.id },
+    select: { id: true },
+  });
+  if (!owned) {
+    throw new Error("Deck introuvable ou non autorisé.");
+  }
+  return owned.id;
+}
