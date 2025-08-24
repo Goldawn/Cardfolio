@@ -198,6 +198,22 @@ export default async function MTGImportPage() {
   return JSON.parse(JSON.stringify({ kind: "updated", item: updated }));
 }
 
+  /**  Crée une nouvelle wishlist */
+  async function createWishlistAction(name = "wishlist") {
+    "use server";
+
+    const user = await getAuthenticatedUser({ throwError: true });
+    const created = await prisma.wishlistList.create({
+      data: {
+        name: name?.trim() || "wishlist",
+        userId: user.id,
+      },
+      select: { id: true, name: true },
+    });
+    // structure homogène avec le state client
+    return { list: { ...created, items: [] } };
+  }
+
   /** Ajoute à une wishlist */
   async function addToWishlistAction(listId, scryfallId, quantity = 1) {
     "use server";
@@ -276,7 +292,8 @@ export default async function MTGImportPage() {
         addToCollection: addToCollectionAction,
         // undoAddToCollection: undoAddToCollectionAction,
         updateCollectionQuantity: updateCollectionQuantityAction,
-        removeFromCollection: removeFromCollectionAction, 
+        removeFromCollection: removeFromCollectionAction,
+        createWishlist: createWishlistAction,
         addToWishlist: addToWishlistAction,
       }}
     />

@@ -261,27 +261,6 @@ const handleRecentCardClick = (cardId) => {
     });
   };
 
-  // const handleUndoAdd = (cardToRemove) => {
-  //   startTransition(async () => {
-  //     try {
-  //       const result = await actions.undoAddToCollection(cardToRemove.id);
-  //       console.log("Undo result:", result);
-  //       if (result?.kind === "deleted") {
-  //         setCollection((prev) => prev.filter((c) => c.scryfallId !== cardToRemove.id));
-  //       } else if (result?.kind === "updated" && result.item) {
-  //         setCollection((prev) =>
-  //           prev.map((c) =>
-  //             c.scryfallId === cardToRemove.id ? { ...c, quantity: result.item.quantity } : c
-  //           )
-  //         );
-  //       }
-  //       setRecentlyAddedToCollection((prev) => prev.filter((c) => c.id !== cardToRemove.id));
-  //     } catch (err) {
-  //       console.error("Erreur undoAdd (server action) :", err);
-  //     }
-  //   });
-  // };
-
     // ---- Met à jour la quantité d'une carte dans la collection (Server Action) ----
   const handleUpdateQuantity = (cardId, delta) => {
   startTransition(async () => {
@@ -322,6 +301,25 @@ const handleRecentCardClick = (cardId) => {
 };
 
   // ---- Wishlist (Server Action) ----
+  const handleCreateWishlist = async (name = "wishlist") => {
+    try {
+      const res = await actions.createWishlist(name); // doit retourner { list: { id, name, items: [] } } ou au moins { id, name }
+      const { list } = res || {};
+      if (!list?.id) return null;
+
+      setWishlistLists((prev) => {
+        const exists = prev.some(l => l.id === list.id);
+        if (exists) return prev;
+        // s’assurer que list.items existe
+        return [...prev, { ...list, items: list.items ?? [] }];
+      });
+      return list.id;
+    } catch (e) {
+      console.error("Erreur createWishlist:", e);
+      return null;
+    }
+  };
+
   const handleAddToWishlist = (listId, card) => {
     if (!listId) return; // aucune liste dispo
     startTransition(async () => {
@@ -452,7 +450,8 @@ const handleRecentCardClick = (cardId) => {
                   updateQuantity={handleUpdateQuantity}
                   wishlistLists={wishlistLists}
                   onAddToCollection={() => handleAddToCollection(card)}
-                  onAddToWishlist={(listId) => handleAddToWishlist(listId, card)}
+                  onCreateWishlist={handleCreateWishlist}
+                  onAddToWishlist={handleAddToWishlist}
                   onRemove={handleRemoveFromCollection}
                   disabled={isPending}
                 />
