@@ -9,6 +9,7 @@ import { auth } from "@/lib/auth";
  * @param {boolean} options.throwError Si true, lance une erreur si pas connecté.
  * @returns {Promise<Object|null>}
  */
+
 export async function getAuthenticatedUser({ redirect = false, throwError = false } = {}) {
   const session = await auth();
 
