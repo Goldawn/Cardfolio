@@ -3,24 +3,11 @@ import Image from "next/image";
 
 import HautBas from "../assets/images/icons/haut-bas.png"
 
-import White from "../assets/images/icons/W.svg";
-import Blue from "../assets/images/icons/U.svg";
-import Black from "../assets/images/icons/B.svg";
-import Red from "../assets/images/icons/R.svg";
-import Green from "../assets/images/icons/G.svg";
-import Colorless from "../assets/images/icons/C.svg";
-import Multicolor from "../assets/images/icons/M.svg";
-
-import Artifact from "../assets/images/icons/Artifact.svg";
-import Battle from "../assets/images/icons/Battle.svg";
-import Commander from "../assets/images/icons/Commander.svg";
-import Creature from "../assets/images/icons/Creature.svg";
-import Enchantment from "../assets/images/icons/Enchantment.svg";
-import Instant from "../assets/images/icons/Instant.svg";
-import Land from "../assets/images/icons/Land.svg";
-import Planeswalker from "../assets/images/icons/Planeswalker.png";
-import Sorcery from "../assets/images/icons/Sorcery.svg";
-
+import {
+  colorFilterElements,
+  typeFilterElements,
+  rarityFilterElements,
+} from "@/lib/mtgIcons";
 
 export default function CollectionActionBar({
   selectedColors,
@@ -34,35 +21,6 @@ export default function CollectionActionBar({
   sortOrderAsc,
   toggleSortOrder,
 }) {
-
-    const colorFilterElements = [
-    { name: "White", letter: "W", icon: White },
-    { name: "Blue", letter: "U", icon: Blue },
-    { name: "Black", letter: "B", icon: Black },
-    { name: "Red", letter: "R", icon: Red },
-    { name: "Green", letter: "G", icon: Green },
-    { name: "Colorless", letter: "C", icon: Colorless },
-    { name: "Multicolor", letter: "M", icon: Multicolor },
-    ];
-
-  const TypeFilterElements = [
-    { name: "Creature", icon: Creature },
-    { name: "Instant", icon: Instant },
-    { name: "Sorcery", icon: Sorcery },
-    { name: "Enchantment", icon: Enchantment },
-    { name: "Artifact", icon: Artifact },
-    { name: "Battle", icon: Battle },
-    { name: "Commander", icon: Commander },
-    { name: "Planeswalker", icon: Planeswalker },
-    { name: "Land", icon: Land },
-  ];
-  
-  const rarityFilterElements = [
-    { name: "common", icon: "" },
-    { name: "uncommon", icon: "" },
-    { name: "rare", icon: "" },
-    { name: "mythic", icon: "" },
-  ];
 
   return (
     <div className={styles.collectionActionBar}>
@@ -79,7 +37,7 @@ export default function CollectionActionBar({
       </div>
 
       <div className={styles.filterBar}>
-        {TypeFilterElements.map((type) => (
+        {typeFilterElements.map((type) => (
           <div
             key={type.name}
             className={`${styles.typeIcon} ${selectedTypes.includes(type.name) ? styles.active : ""}`}

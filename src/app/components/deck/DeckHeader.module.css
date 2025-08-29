@@ -1,0 +1,164 @@
+.deckHeaderBanner {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  padding-right: 10px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 12px;
+  overflow: hidden;
+  align-items: stretch;
+}
+
+.bannerArt {
+  position: relative;
+  flex: 0 0 25%;
+  max-width: 250px;
+}
+
+.bannerArt img {
+ position: absolute;
+ inset: 0;
+ display: block;
+ width: 100%;
+ height: 100%;
+ object-fit: cover;
+}
+
+.bannerBody {
+  width: 100%;
+  padding: 10px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bannerTitleRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.bannerTitle {
+  margin: 0;
+  font-size: 1.6rem;
+  line-height: 1.2;
+  /* text-transform: capitalize; */
+}
+
+.bannerSubRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.formatBadge {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #ddd;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 0.8em;
+  color: #555;
+  background: #f6f7f8;
+  line-height: 1.2;
+  cursor: help;
+  margin-right: 15px;
+}
+
+.formatBadge strong { color: #333; }
+
+.colorPip {
+  display: inline-flex;
+  border-radius: 999px;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  border: 1px solid rgba(0,0,0,0.15);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.25);
+}
+
+.typeCounts {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  padding: 0;
+}
+.typeCountItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 4px 8px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.typeCountItem img {
+    background: white;
+    border-radius: 50%;
+    padding: 2px;
+}
+
+.typeIcon { font-size: 14px; line-height: 1; }
+.typeLabel { font-size: 12px; opacity: 0.9; }
+.typeNumber { font-weight: 700; margin-left: 2px; }
+
+.rarityCounts {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  padding: 0;
+}
+.rarityItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 4px 8px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+.rarityDot {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  display: inline-block;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.35);
+}
+.rarityLabel {
+  font-size: 12px;
+  opacity: 0.9;
+}
+.rarityNumber {
+  font-weight: 700;
+  margin-left: 2px;
+}
+
+.bannerChart {
+    width: 100%;
+    height: 150px;
+    max-width: 200px;
+    margin: 10px 0;
+    box-sizing: border-box;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+      background: rgba(0, 0, 0, 0.5);
+}
+
+.bannerChart {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chartBlock {
+  height: 150px;
+  width: 100%;
+  max-width: 150px;
+  margin: 10px 0;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import manaSymbols from '../assets/mock/mana.json';
+import {formatAndParseText} from "../../lib/mtgCards"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import styles from './CardModal.module.css';
 import useModalKeyboardNavigation from '../hooks/useModalKeyboardNavigation';
@@ -42,23 +43,6 @@ export default function CardModal({ card, onClose, cardList = [], currentIndex =
       document.body.style.overflow = "auto";
     };
   }, []);
-
-  const formatAndParseText = (text) => {
-    if (!text) return null;
-    return text.split("\n").map((line, lineIndex) => (
-      <span key={lineIndex}>
-        {line.split(/(\{[^}]+\})/g).filter(Boolean).map((symbol, symbolIndex) => {
-          const foundSymbol = manaSymbols.data.find(entry => entry.symbol === symbol);
-          return foundSymbol ? (
-            <img key={`${lineIndex}-${symbolIndex}`} src={foundSymbol.svg_uri} alt={symbol} />
-          ) : (
-            symbol
-          );
-        })}
-        <br />
-      </span>
-    ));
-  };
 
   const isFrontAndBack = ["flip", "transform", "modal_dfc"].includes(currentCard.layout);
   const isDualFaceLayout = ["split", "adventure", "reversible_card"].includes(currentCard.layout);

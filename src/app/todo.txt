@@ -17,10 +17,13 @@ Optimistic update
 PAGES
 
 ...::: Decklist :::...
-Pas encore avancé
 
-
-
+    Améliorer UX pour ajouter/importer cartes
+    Retravailler le panneau aside  des deckSettings
+    modifier la table des decks pour ajouter le sidedeck
+    vérifier les styles dans les différentes options d'Affichage
+    implémenter drag and drop des cartes
+    ajouter la modale
 
 ...::: WISHLIST :::...
 

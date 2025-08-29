@@ -1,0 +1,603 @@
+:root{
+  --rarity-common:   #9aa0a6;  /* gris */
+  --rarity-uncommon: #62a0ea;  /* bleu */
+  --rarity-rare:     #fbc02d;  /* or */
+  --rarity-mythic:   #f57c00;  /* orange */
+  --rarity-special:  #e91e63;  /* rose/violet */
+  --rarity-other:    rgba(255,255,255,.14); /* discret */
+}
+
+/* ============ Shell / Toolbar ============ */
+.wrapper { display: grid; gap: 12px; }
+.panel { width: 100%; }
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+.tab {
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.05);
+  color: #fff;
+  font-size: 13px;
+  border-radius: 999px;
+  padding: 6px 10px;
+}
+.activeTab { background: rgba(255,255,255,0.15); }
+
+.toolbarActions { display: flex; align-items: center; gap: 8px; }
+
+/* Groupe de boutons colonnes */
+.colsGroup {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.colsBtn {
+  min-width: 32px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  font-size: 12px;
+  line-height: 28px;
+  transition: transform .12s ease, border-color .12s ease, background-color .12s ease;
+}
+
+.colsBtn:hover:not([disabled]) {
+  transform: translateY(-1px);
+}
+
+.colsBtnActive {
+  border-color: #7abaff;
+  background: rgba(122,186,255,0.18);
+  color: #dff0ff;
+}
+
+.colsBtn[disabled] {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.editToggle,
+.legalityToggle {
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+.editOn {
+  background: rgba(255,200,0,0.15);
+  border-color: #ffd21f;
+  color: #ffd21f;
+}
+.legalityOn {
+  background: rgba(230,126,34,0.15);
+  border-color: #e67e22;
+  color: #e67e22;
+}
+
+/* Tri (select) */
+.sortWrapper { display: inline-flex; align-items: center; gap: 6px; }
+.sortLabel { font-size: 12px; opacity: .9; }
+.sortSelect {
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #fff 50%),
+    linear-gradient(135deg, #fff 50%, transparent 50%);
+  background-position:
+    calc(100% - 14px) calc(50% - 3px),
+    calc(100% - 8px)  calc(50% - 3px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  padding-right: 26px;
+}
+
+/* ============ Alerte Légalité (commun) ============ */
+:root {
+  --legality-color: 230 80 34;
+}
+
+.rowProblem { border-left: 3px solid rgb(var(--legality-color)); }
+.problemLine {
+  color: rgb(var(--legality-color));
+  font-size: 12px;
+  padding: 6px 8px;
+  background: rgba(230, 80, 34, 0.10);
+  background: rgb(var(--legality-color) / 0.10);
+  border-left: 3px solid rgb(var(--legality-color));
+}
+
+/* ============ VUE 1 : GRID (tuile + pastille) ============ */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 12px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.cardItem { position: relative; border-radius: 8px; overflow: hidden; }
+
+.toggleShowcased {
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 28px; height: 28px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(0,0,0,0.4);
+  color: #ddd;
+  z-index: 2;
+  padding: 0;
+}
+.showcased { color: #ffd700; border-color: #ffd700; }
+
+.thumb {
+  position: relative;
+  width: var(--tile-w, 100%);
+  aspect-ratio: 63 / 88;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.05);
+}
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.noArt    { width: 100%; height: 100%; background: rgba(255,255,255,0.06); }
+
+.qtyBadge {
+  position: absolute;
+  left: 5px; top: 5px;
+  background: rgba(0,0,0,0.85);
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 1;
+  border: 1px solid rgba(255,255,255,0.5);
+}
+
+.inlineControls { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.danger { background: rgb(192,57,43); color: #fff; }
+
+/* ====== GRID tri par CMC : colonnes + overlap ====== */
+.gridByMV {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 7), minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+  width: 100%;
+}
+.gridColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.overlapList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.overlapItem { width: var(--tile-w, 180px); }
+.overlapItem:not(:first-child) {
+  margin-top: calc(-1 * var(--overlap, 200px));
+}
+
+/* ============ VUE 2 : LIST (table en 2 colonnes) ============ */
+.listCols {
+  display: grid;
+  grid-template-columns: repeat(var(--list-cols, 2), minmax(0, 1fr));
+  gap: 16px;
+}
+
+/* Optionnel: responsive */
+@media (max-width: 900px) {
+  .listCols { grid-template-columns: 1fr; }
+}
+.listCol { display: grid; gap: 16px; }
+.fullRow { grid-column: 1 / -1; }
+
+.listTable { width: 100%; border-collapse: collapse; }
+.listTable th, .listTable td {
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.listTable tr { position: relative }
+.listTable tr:last-child td { border-bottom: none; }
+.listTable img { width: 80px; height: 50px; object-fit: cover; }
+
+.titleAndManacost img { width: 14px; height: 14px; }
+
+.titleWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+}
+.listName {
+  font-weight: 600;
+  line-height: 1.2;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.manaCost { display: inline-flex; align-items: center; gap: 5px; line-height: 1; opacity: .95; }
+
+.qtyCell { white-space: nowrap; }
+.qtyValue { display: inline-block; min-width: 20px; text-align: center; }
+.qtyValueStatic { display: inline-block; min-width: 24px; text-align: center; font-weight: 700; }
+
+.typeLine { font-size: 12px; opacity: .8; }
+.cmcCell { white-space: nowrap; }
+
+.cmcMana span{
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;         /* petit espace entre symboles */
+  line-height: 1;
+  vertical-align: middle;
+}
+
+/* Taille uniforme des icônes (svg ou img) */
+.cmcMana img,
+.cmcMana svg {
+  width: 14px;
+  height: 14px;
+  display: inline-block;
+}
+.cmcMana br { display: none; }
+
+/* Les images SVG/PNG insérées par le formatter */
+.cmcCell :global(img),
+.cmcCell :global(svg) {
+  width: 14px;                 /* même taille pour toutes les icônes */
+  height: 14px;
+  display: inline-block;
+  vertical-align: middle;
+  flex: 0 0 auto;
+}
+
+.actionsCell { text-align: right; white-space: nowrap; }
+.starBtn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 999px;
+  width: 28px; height: 28px;
+  display: inline-grid; place-items: center;
+  font-size: 16px; line-height: 1;
+  margin-right: 6px;
+  transition: transform .12s ease, border-color .12s ease, color .12s ease;
+  padding: 0;
+}
+.starEmpty { color: #9aa0a6; }
+.starFull  { color: #ffd21f; }
+.starBtn[aria-pressed="true"] { border-color: currentColor; }
+
+/* Masonry 2 colonnes pour DeckListView (mv / type / color) */
+.listMasonry {
+  column-count: 2;
+  column-gap: 16px;
+}
+.listMasonry .typeSection {
+  display: inline-block;
+  width: 100%;
+  margin: 0 0 16px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+}
+@media (max-width: 900px) {
+  .listMasonry { column-count: 1; }
+}
+
+/* ============ VUE 3 : COMPACT (réutilise listTable) ============ */
+/* (rien de spécifique en plus : utilise .listTable, .qtyCell, etc.) */
+
+/* ============ VUE 4 : PILES (groupées par MV + ligne lands) ============ */
+.pilesByMV {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 7), minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+  width: 100%;
+}
+.mvColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.pilesList {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-direction: column; gap: 12px; align-items: center;
+}
+/* Flow horizontal pour tri par nom */
+.pilesFlow {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: flex-start;
+}
+/* Rangée de piles pour sections type/couleur */
+.pilesRow {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-wrap: wrap; gap: 12px 16px;
+}
+
+.landsSection { grid-column: 1 / -1; margin-top: 8px; }
+.landsHeader {
+  font-size: 13px; font-weight: 700; opacity: .9;
+  padding: 4px 0 6px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 10px;
+}
+.landsRow { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 12px 16px; }
+
+/* Carte empilée (pile) */
+.pileItem {
+  position: relative;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 10px;
+  background: transparent;
+  max-width: calc(var(--card-w, 140px) + 20px);
+}
+.stackThumb { position: relative; } /* dimensions via style inline */
+.stackLayer {
+  position: absolute; top: 0; left: 0;
+  border-radius: 8px; overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+}
+.stackLayer img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.stackPlaceholder { width: 100%; height: 100%; background: rgba(255,255,255,0.06); }
+.stackBadge {
+  position: absolute; bottom: 6px; right: 6px;
+  background: rgba(0,0,0,0.7); color: #fff;
+  padding: 2px 6px; border-radius: 999px; font-size: 12px;
+}
+.pileMeta { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; }
+.pileName { font-weight: 600; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+@media (max-width: 900px) { .pilesByMV { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .pilesByMV { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.rarityBarCell {
+  width: 4px;
+  padding: 0;
+
+}
+.rarityBarHead {
+  width: 3px;
+  padding: 0;
+}
+
+/* Colonne ultra-étroite en fin de ligne */
+.rarityCell {
+  position: relative;
+  width: 4px;
+  padding: 0;
+}
+
+/* La « barre » elle-même, hauteur = 100% de la ligne */
+.rarityBar {
+  position: absolute;
+  inset: 0;             /* équivaut à top:0; right:0; bottom:0; left:0 */
+  border-radius: 0 2px 2px 0;
+  pointer-events: none; /* pour ne pas perturber les hovers de ligne */
+}
+
+/* Couleurs par rareté */
+.rarityCommon   { background: var(--rarity-common); }
+.rarityUncommon { background: var(--rarity-uncommon); }
+.rarityRare     { background: var(--rarity-rare); }
+.rarityMythic   { background: var(--rarity-mythic); }
+.raritySpecial  { background: var(--rarity-special); }
+.rarityOther    { background: var(--rarity-other); }
+
+/* ============ VUE 5 : LISTE PAR TYPE (masonry “column-width”) ============ */
+.sectionsMasonry {
+  column-width: 420px;
+  column-gap: 16px;
+  column-fill: balance;
+}
+.sectionsMasonry .typeSection {
+  display: inline-block;
+  width: 100%;
+  margin: 0 0 16px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 8px 10px;
+
+  break-inside: avoid;
+  page-break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+}
+@media (max-width: 900px) {
+  .sectionsMasonry { column-width: auto; column-count: 1; }
+}
+
+/* En-tête + table de section (réutilisé par sections/listMasonry) */
+.sectionHeader {
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px 10px 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 8px;
+  /* background-color: rgba(0, 0, 0, 0.5); */
+}
+.sectionIcon { display: inline-block; }
+.sectionTitle { margin: 0; font-size: 14px; font-weight: 700; }
+.sectionBadge {
+  margin-left: auto;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 999px;
+  padding: 2px 6px;
+  font-size: 12px;
+}
+
+.sectionTable { width: 100%; border-collapse: collapse; }
+.sectionTable td:not(.rarityBarCell) { border-bottom: 1px solid rgba(255,255,255,0.06); padding: 6px; }
+.sectionTable tr:last-child td { border-bottom: none; }
+
+.cellThumb { width: 40px; }
+.artThumbSmall { width: 32px; height: 32px; object-fit: cover; display: block; border-radius: 4px; }
+.noArtSmall { width: 32px; height: 32px; background: rgba(255,255,255,0.06); border-radius: 4px; }
+
+.titleCell { padding-left: 4px; }
+.manaCost img, .manaCost svg { width: 14px; height: 14px; }
+
+
+/* ===== Hover Preview Modal ===== */
+
+/* Popover global, rendu une seule fois dans DeckCardsTabs */
+.previewPopover {
+  position: fixed;
+  width: 180px;
+  height: 250px;
+  z-index: 9999;
+  transform: translateY(-50%);   /* ancré au milieu de la ligne */
+  pointer-events: none;           /* n'intercepte pas la souris -> pas de flicker */
+  animation: fadeIn .12s ease-out;
+}
+
+.previewCard {
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  background: #111;
+}
+
+.previewImg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;              /* occupe tout l'espace */
+}
+
+/* utile si tu veux une légère LUT sombre autour (facultatif) */
+/* .previewPopover::before { content:""; position:fixed; inset:0; background:rgba(0,0,0,.05); } */
+
+@keyframes fadeIn {
+  from { opacity: 0 }
+  to   { opacity: 1 }
+}
+
+
+/* === Largeurs de colonnes unifiées (List + Compact) === */
+:root{
+  --col-thumb:   60px;  /* vignette */
+  --col-qty:     30px;  /* qté */
+  --col-cmc:     60px;  /* mana cost (icônes) */
+  --col-actions: 40px; /* étoiles / boutons */
+  --col-rarity:  3px;   /* barre rareté */
+}
+
+/* même algo de sizing partout */
+.listTable,
+.sectionTable {
+  table-layout: fixed;
+}
+
+/* alignement vertical homogène */
+.listTable td, .listTable th,
+.sectionTable td, .sectionTable th {
+  /* padding: 8px 10px; */
+  vertical-align: middle;
+  box-sizing: border-box;
+}
+
+/* La colonne vignette (seulement ListView) :
+   on la cible quand la table est dans le conteneur .listCols */
+.listCols .listTable td:first-child:not(.qtyCell),
+.listCols .listTable th:first-child {
+  width: var(--col-thumb);
+  padding-right: 8px;
+}
+
+.listCols .listTable td:first-child img {
+  width: 60px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 6px;
+  display: block;
+}
+
+/* Colonnes étroites */
+.qtyCell     { width: var(--col-qty);     white-space: nowrap; background-color: rgba(43, 43, 43, 0.6);}
+.cmcCell     { width: var(--col-cmc);     white-space: nowrap; }
+.actionsCell { width: var(--col-actions); white-space: nowrap; text-align: right; padding-right: 15px;}
+.rarityCell  { width: var(--col-rarity);  padding: 0; position: relative; }
+.rarityBarHead { width: var(--col-rarity); padding: 0; }
+
+/* La cellule “titre + manaCost” prend le restant */
+.titleAndManacost,
+.nameCell {
+  overflow: hidden;
+}
+
+.cmcMana { display: inline-flex; align-items: center; gap: 4px; line-height: 1; }
+.cmcMana img, .cmcMana svg { width: 14px; height: 14px; flex: 0 0 auto; display: inline-block; }
+.cmcMana br { display: none; }
+
+/* Boutons d'édition compacts (pour que la petite colonne de qté suffise) */
+.qtyCell button {
+  width: 22px;
+  height: 22px;
+  line-height: 20px;
+  padding: 0;
+  border-radius: 6px;
+  font-size: 14px;
+  margin: 0; /* évite d'élargir la cellule */
+}
+.qtyValue, .qtyValueStatic {
+  min-width: 24px;
+}
+
+/* Étoile plus petite pour réduire la colonne actions */
+.starBtn {
+  width: 24px;
+  height: 24px;
+  font-size: 14px;
+  margin-right: 0;
+}
+
+/* Barre de rareté ultra-fine qui occupe 100% de la ligne */
+.rarityBar { inset: 0; border-radius: 0 2px 2px 0; }
+
+/* Headers : resserre légèrement l’espace pour coller aux nouvelles largeurs */
+.listTable th, .sectionTable th {
+  padding: 6px 10px;
+}
+
+/* Sélecteur de secours : si la ligne n'a pas de classes, on assure un minimum d’uniformité
+   (utile pour des tableaux de section qui réutilisent .listTable) */
+.listTable td.rarityCell,
+.sectionTable td.rarityCell { position: relative; }
+
+/* Masonry à colonnes variables (1..3) */
+.masonryCols {
+  column-count: var(--cols, 2);
+  column-gap: 16px;
+}
+.masonryCols .typeSection {
+  display: inline-block;
+  width: 100%;
+  margin: 0 0 16px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+}
