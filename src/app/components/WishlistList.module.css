@@ -1,33 +1,75 @@
 .wishlistList {
-  border: 1px solid #ccc;
-  padding: 1rem;
-  border-radius: 8px;
-  transition: background 0.2s;
-}
-.wishlistList:hover {
-  background: #242424;
-}
-
-.addCardContainer {
-  margin-top: 1rem;
   display: flex;
-  gap: 0.5rem;
   align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.04);
 }
 
-.addCardContainer input {
-  flex: 1;
-  padding: 0.4rem;
-  border-radius: 4px;
-  border: 1px solid #ccc;
+.title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.addCardContainer button {
-  padding: 0.4rem 0.8rem;
-  border: none;
-  background-color: #262626;
-  color: white;
-  border-radius: 4px;
-  cursor: pointer;
+.countBadge {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(0,0,0,0.25);
+  color: #e6f1ff;
 }
-  
+
+.actions {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.actions button {
+  border: 1px solid rgba(255,255,255,0.20);
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+.danger {
+  border-color: rgba(230, 80, 34, 0.35);
+  color: #ffb899;
+}
+
+.editContainer {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.editContainer input {
+  flex: 1 1 auto;
+  min-width: 200px;
+  height: 34px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+}
+
+.editContainer button {
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(122,186,255,.4);
+  background: rgba(122,186,255,.15);
+  color: #dff0ff;
+  font-size: 12px;
+}

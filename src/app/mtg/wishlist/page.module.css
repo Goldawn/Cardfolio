@@ -1,83 +1,77 @@
-:root {
-  --card-gap: 20px;
-}
+/* ===== Wishlist Page ===== */
 
 .wishlistPage {
-  padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  display: grid;
+  gap: 16px;
 }
 
-.wishlistHeader {
+.headerRow {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
-}
-
-.wishlistHeader h1 {
-  font-size: 2rem;
-}
-
-.wishlistListSection {
-  margin-top: 2rem;
-}
-
-.wishlistSection {
-  margin-top: 2rem;
-  padding-top: 1rem;
-  border-top: 2px solid #444;
-}
-
-.cardGrid {
-  display: flex;
+  justify-content: space-between;
+  gap: 12px;
   flex-wrap: wrap;
-  gap: var(--card-gap);
-  align-items:flex-start
 }
 
-/* .cardGrid > div:last-child {
-  margin-left: calc(var(--card-gap) - (var(--card-gap) - 10px));
-} */
+.title {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  margin: 0;
+}
 
 .newListForm {
-  margin: 2rem 0;
-  display: flex;
+  display: inline-flex;
+  gap: 8px;
   align-items: center;
-  gap: 1rem;
 }
 
 .newListForm input {
-  padding: 0.5rem;
-  font-size: 1rem;
-  flex: 1;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  height: 34px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  min-width: 220px;
 }
 
 .newListForm button {
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
-  background-color: #262626;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(122,186,255,.4);
+  background: rgba(122,186,255,.15);
+  color: #dff0ff;
+  font-size: 13px;
 }
 
-.newListForm button:hover {
-  background-color: #444;
+.listsContainer {
+  display: grid;
+  gap: 24px;
 }
 
-.addCardToWishlist {
-  display: flex;
+.wishlistSection {
+  display: grid;
+  gap: 12px;
+}
+
+/* Grille des cartes + tuile d'ajout */
+.cardGrid {
+  --tile-min: 180px; /* largeur mini d'une carte */
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--tile-min), 1fr));
+  gap: 12px;
+  align-items: start;
+}
+
+/* Tuile qui contient le placeholder + le tiroir */
+.addCardTile {
   position: relative;
-  transition: all 0.2s ease-out;
+  min-height: 260px; /* hauteur approximative d'une carte */
 }
 
-.addCardToWishlist.active {
-  background-color: rgba(0, 0, 0, 0.60);
-  padding: 20px 20px 30px 30px;
-  transition: all 0.2s ease-in;
+/* État actif pour gérer le z-index quand le tiroir est ouvert */
+.addCardTile.active {
+  z-index: 10;
 }

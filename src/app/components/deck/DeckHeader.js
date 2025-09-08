@@ -201,11 +201,11 @@ const COLOR_FILL = {
                         data={colorDist.data}
                         dataKey="value"
                         // nameKey="key"
-                        paddingAngle={3}
+                        // paddingAngle={1}
                         innerRadius="45%"
                         outerRadius="80%"
                         isAnimationActive={false}
-                        stroke={false}
+                        stroke={0}
                         >
                         {colorDist.data.map((entry) => (
                             <Cell key={entry.key} fill={COLOR_FILL[entry.key] || "#999"} />

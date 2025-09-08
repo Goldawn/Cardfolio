@@ -14,6 +14,19 @@ Améliorations globales (par ordre d'importance):
 
 Optimistic update
 
+BDD :
+    model deck :
+        -add sidedeck
+    model Magic card :
+        - Extra : Foil / altered / signed
+        - lang: String
+        - condition : Poor / played / light played / good / excellent / near mint / mint (unique)
+    Model Pokemon Card :
+        - Extra : Reverse Holo / signed / altered
+
+    bonus : ajouter tag aux cartes (exemple : "à vendre", "à échanger", "classeur blanc", etc...)
+
+
 PAGES
 
 ...::: Decklist :::...
@@ -53,4 +66,3 @@ Choses à ajouter :
 Pas encore avancé
 
 Ajout des autres jeux de cartes principaux
-
