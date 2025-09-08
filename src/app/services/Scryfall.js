@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+const BASE = "https://api.scryfall.com";
+
 export const fetchSets = async () => {
   try {
     const response = await axios.get('https://api.scryfall.com/sets');

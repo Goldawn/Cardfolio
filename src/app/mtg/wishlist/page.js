@@ -40,7 +40,6 @@ export default function WishlistPage() {
   }, [userId, status]);
 
   useEffect(() => {
-    console.log(lists)
     const fetchAllCards = async () => {
       if (!userId || lists.length === 0) return;
 
@@ -54,8 +53,8 @@ export default function WishlistPage() {
 
             const enriched = await Promise.all(
               items.map(async (item) => {
-                const res = await fetch(`https://api.scryfall.com/cards/${item.scryfallId}`);
-                const raw = await res.json();
+                const r = await fetch(`https://api.scryfall.com/cards/${item.scryfallId}`);
+                const raw = await r.json();
                 const formatted = formatCard(raw);
                 return {
                   ...formatted,
@@ -102,12 +101,9 @@ export default function WishlistPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ listId, name: newName }),
       });
-
       const updated = await res.json();
       setLists((prev) =>
-        prev.map((list) =>
-          list.id === listId ? { ...list, name: updated.name } : list
-        )
+        prev.map((list) => (list.id === listId ? { ...list, name: updated.name } : list))
       );
     } catch (err) {
       console.error("Erreur renommage liste :", err);
@@ -128,9 +124,7 @@ export default function WishlistPage() {
     }
   };
 
-  const handleOpenAddCard = (listId) => {
-    setActiveListId(listId);
-  };
+  const handleOpenAddCard = (listId) => setActiveListId(listId);
 
   const handleCloseAddCard = () => {
     setActiveListId(null);
@@ -138,86 +132,56 @@ export default function WishlistPage() {
   };
 
   const handleHoverCard = (listId, imageUrl) => {
-    setHoveredCardImageByList((prev) => ({
-      ...prev,
-      [listId]: imageUrl,
-    }));
+    setHoveredCardImageByList((prev) => ({ ...prev, [listId]: imageUrl }));
   };
 
   const removeCard = async (wishlistId, cardId) => {
-    if (!cardId, !wishlistId) return;
-
+    if (!cardId || !wishlistId) return;
     try {
       const res = await fetch(`/api/users/${userId}/wishlist/lists/${wishlistId}/items`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ scryfallId: cardId }),
       });
-
       if (!res.ok) throw new Error("Erreur lors de la suppression");
-
       fetchWishlistLists();
     } catch (err) {
       console.error("Erreur removeCard :", err);
     }
   };
 
-  // doublon avec les fonctions sur les autres pages
   const updateQuantity = async (wishlistId, cardId, delta) => {
     if (!cardId || !wishlistId) return;
     try {
       const res = await fetch(`/api/users/${userId}/wishlist/lists/${wishlistId}/items`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          scryfallId: cardId,
-          quantityDelta: delta,
-        }),
+        body: JSON.stringify({ scryfallId: cardId, quantityDelta: delta }),
       });
-
       if (!res.ok) throw new Error("Erreur lors de la modification");
-
       fetchWishlistLists();
     } catch (err) {
       console.error("Erreur updateQuantity :", err);
     }
   };
 
-  const handleTestRoute = async () => {
-    console.log("TEST DE LA ROUTE");
-    try {
-      const res = await fetch(`/api/users/${userId}/card`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          scryfallIds: ["b6c129a7-59d3-499e-8279-f374266150be"],
-        }),
-      });
-      const data = await res.json();
-      console.log(data)
-    } catch (error) {
-      console.error("Erreur updateQuantity :", error);
-    }
-  }
-
   if (status === "loading") return <p>Chargement de la session...</p>;
   if (status === "unauthenticated") return <p>Veuillez vous connecter.</p>;
 
   return (
     <div className={styles.wishlistPage}>
+      <div className={styles.headerRow}>
+        <h1 className={styles.title}>Ma Wishlist</h1>
 
-      <h1>Ma Wishlist</h1>
-
-      <button onClick={handleTestRoute}>TEST DE LA ROUTE</button>
-
-      <div className={styles.newListForm}>
-        <input
-          type="text"
-          placeholder="Nom de la nouvelle liste"
-          value={newListName}
-          onChange={(e) => setNewListName(e.target.value)}
-        />
-        <button onClick={handleCreateList}>➕ Créer la liste</button>
+        <div className={styles.newListForm}>
+          <input
+            type="text"
+            placeholder="Nom de la nouvelle liste"
+            value={newListName}
+            onChange={(e) => setNewListName(e.target.value)}
+          />
+          <button onClick={handleCreateList}>➕ Créer la liste</button>
+        </div>
       </div>
 
       {loading && <p>Chargement des listes...</p>}
@@ -225,15 +189,14 @@ export default function WishlistPage() {
 
       {!loading && lists.length > 0 && (
         <div className={styles.listsContainer}>
-
           {lists.map((list) => (
-            <div key={list.id} className={styles.wishlistSection}>
+            <section key={list.id} className={styles.wishlistSection}>
               <WishlistList
                 list={list}
-                userId={userId}
                 onRename={(newName) => handleRenameList(list.id, newName)}
                 onDelete={() => handleDeleteList(list.id)}
               />
+
               <div className={styles.cardGrid}>
                 {(cardsByList[list.id] || []).map((card, index) => (
                   <Card
@@ -242,9 +205,8 @@ export default function WishlistPage() {
                     card={card}
                     currentIndex={index}
                     cardList={cardsByList[list.id]}
-                    name={true}
-                    modal={true}
-                    // showQuantity
+                    name
+                    modal
                     showWishlistQuantity
                     showDeleteButton
                     onRemove={(cardId) => removeCard(list.id, cardId)}
@@ -253,7 +215,11 @@ export default function WishlistPage() {
                   />
                 ))}
 
-                <div className={`${styles.addCardToWishlist} ${activeListId === list.id ? styles.active : ""}`}>
+                <div
+                  className={`${styles.addCardTile} ${
+                    activeListId === list.id ? styles.active : ""
+                  }`}
+                >
                   <MagicCardPlaceholder
                     test={() => handleOpenAddCard(list.id)}
                     image={hoveredCardImageByList[list.id]}
@@ -271,12 +237,10 @@ export default function WishlistPage() {
                   )}
                 </div>
               </div>
-            </div>
+            </section>
           ))}
-
         </div>
       )}
-
     </div>
   );
 }

@@ -1,165 +1,196 @@
+/* CardModal.module.css */
+
+/* ===== Overlay + animation ===== */
 .overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.8);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background:
+    radial-gradient(1200px 800px at 70% 20%, rgba(255,255,255,0.08), transparent 60%),
+    rgba(0,0,0,0.78);
+  backdrop-filter: blur(6px) saturate(115%);
+  z-index: 1000;
+  animation: fadeIn .18s ease-out;
 }
 
+/* ===== Boîte du modal ===== */
 .modal {
-    background-color: #292929;
-    overflow: auto;
-    width: 90%;
-    max-width: 1200px;
-    max-height: 95vh;
-    width: 90%;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-    position: relative;
+  position: relative;
+  width: min(1200px, 92vw);
+  max-height: 92vh;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03));
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+  overflow: hidden;              /* pour arrondis + scroll internes */
+  animation: popIn .16s ease-out;
 }
 
+/* ===== Bouton fermer ===== */
 .closeButton {
-    position: absolute;
-    top: 0;
-    right: 0;
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
+  position: absolute;
+  top: 10px; right: 10px;
+  width: 32px; height: 32px;
+  display: grid; place-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(0,0,0,0.45);
+  color: #e8eaed;
+  cursor: pointer;
+  transition: transform .12s ease, background-color .12s ease, border-color .12s ease;
 }
+.closeButton:hover { transform: translateY(-1px); background: rgba(0,0,0,0.6); border-color: rgba(255,255,255,0.28); }
+.closeButton:focus-visible { outline: 2px solid #7abaff; outline-offset: 2px; }
 
+/* ===== Layout interne ===== */
 .content {
-    display: flex;
-    padding: 35px;
-    gap: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 24px;
 }
 
-.content > div {
-    flex: 1;
+/* 3 colonnes : visuel / détails / trading
+   - le visuel a une largeur fixe (pour garder un ratio agréable)
+   - les détails prennent l’espace restant
+   - le panneau trading a une largeur minimale fixe */
+.imageContainer,
+.cardContainer {             /* le bloc visuel */
+  flex: 0 0 min(36vw, 360px);
+  width: min(36vw, 360px);
+  aspect-ratio: 63 / 88;
+  margin: 0 auto;
+}
+.details {                   /* colonne centrale */
+  flex: 1 1 420px;
+  min-width: 0;              /* évite les débordements */
+  max-height: calc(92vh - 24px*2 - 16px); /* scrolle si besoin */
+  overflow: auto;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.tradingPanel {              /* colonne droite */
+  flex: 0 1 280px;
+  min-width: 240px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
+/* Responsive : passe en 1 colonne sous 980px */
+@media (max-width: 980px) {
+  .content { flex-direction: column; }
+  .imageContainer, .cardContainer { width: 100%; max-width: 420px; }
+  .details { max-height: none; }
+  .tradingPanel { width: 100%; min-width: 0; }
+}
+
+/* ===== Bloc quantité (sous l’image si présent) ===== */
 .cardQuantityPanel {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    border-radius: 5px;
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
 }
-
 .quantityBox {
-    background-color: rgba(255, 255, 255, 0.05);
-    width: 100%;
-    text-align: center;
-    padding: 10px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  text-align: center;
+  padding: 10px;
+  font-weight: 600;
 }
-
-.imageContainer {
-    width: 100%;
-    aspect-ratio: 350/490;
-    /* width: 350px;
-    height: 490px; */
+.qtyControls {
+  display: inline-flex;
+  gap: 8px;
 }
-
-.imageContainer .image {
-    border-radius: 5% / 3.5% ;
+.qtyControls button {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(0,0,0,0.35);
+  color: #fff;
+  cursor: pointer;
 }
+.qtyControls button:disabled { opacity: .55; cursor: not-allowed; }
 
-/* Conteneur de la carte pour l'effet 3D */
-.cardContainer {
-    perspective: 1000px; /* Ajoute de la profondeur */
-    /* width: 350px;
-    height: 490px; */
-    margin: auto;
-    position: relative;
-    width: 100%;
-    aspect-ratio: 350/490;
-}
-
-/* La carte qui tourne */
+/* ===== Carte 3D (flip) ===== */
+.cardContainer { perspective: 1000px; position: relative; }
 .card {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    transform-style: preserve-3d;
-    transition: transform 0.6s ease;
+  position: relative;
+  width: 100%; height: 100%;
+  transform-style: preserve-3d;
+  transition: transform .6s ease;
 }
+.card.flipped { transform: rotateY(180deg); }
 
-/* Appliquer la rotation lorsque flipped est activé */
-.card.flipped {
-    transform: rotateY(180deg);
-}
-
-/* Faces de la carte */
 .cardFace {
-    position: absolute;
-    width: 100%;
-    /* height: 100%; */
-    aspect-ratio: 71.8/100;
-    border-radius: 5% / 3.5% ; 
-    background-size: cover;
-    background-position: center;
-    backface-visibility: hidden;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
+  position: absolute; inset: 0;
+  border-radius: 6% / 4%;
+  background-size: cover;
+  background-position: center;
+  backface-visibility: hidden;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
 }
+.cardFace:nth-child(2) { transform: rotateY(180deg); }
 
-/* Face arrière */
-.cardFace:nth-child(2) {
-    transform: rotateY(180deg);
-}
-
-/* Bouton pour tourner la carte */
 .flipButton {
-    position: absolute;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 8px 12px;
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: background 0.3s ease;
+  position: absolute;
+  bottom: 10px; left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(0,0,0,0.55);
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  transition: transform .12s ease, background-color .12s ease, border-color .12s ease;
 }
+.flipButton:hover { transform: translateX(-50%) translateY(-1px); background: rgba(0,0,0,0.7); border-color: rgba(255,255,255,0.28); }
 
-.flipButton:hover {
-    background: rgba(255, 255, 255, 0.3);
+/* ===== Images (fallback) ===== */
+.imageContainer .image { border-radius: 6% / 4%; display: block; width: 100%; height: 100%; object-fit: cover; }
+
+/* ===== Détails ===== */
+.details img { width: 17px; vertical-align: text-bottom; } /* fix: text-bottoms -> text-bottom */
+.details h3, .details h4 {
+  margin: 8px 0 6px;
+  font-size: 14px;
+  font-weight: 700;
 }
-
-.details {
-    overflow: auto;
-    background-color: rgba(255, 255, 255, 0.05);
-}
-
-.details img {
-    width: 17px;
-    vertical-align: text-bottoms;
-}
-
+.details p, .details li, .details div { font-size: 13px; line-height: 1.45; }
+.details ul { margin: 6px 0 10px; padding-left: 18px; }
 .details ul.legalities {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    list-style-type: none;
-    column-gap: 15px;
+  display: flex; flex-wrap: wrap; gap: 8px 12px;
+  list-style: none; padding: 0; margin: 8px 0;
+}
+.details ul.legalities li {
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.06);
+  font-size: 12px;
 }
 
-.tradingPanel {
-    background-color: rgba(255, 255, 255, 0.05);
-    display: flex;
-    flex-direction: column;
-}
+/* ===== Petits helpers visuels ===== */
+.cardTransition { animation: fadeIn .3s ease-in-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes popIn  { from { opacity: 0; transform: scale(.985); } to { opacity: 1; transform: scale(1); } }
 
-.cardTransition {
-    animation: fadeIn 0.3s ease-in-out;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateX(10px); }
-    to { opacity: 1; transform: translateX(0); }
+/* Accessibilité focus */
+:where(.flipButton, .qtyControls button, .closeButton):focus-visible {
+  outline: 2px solid #7abaff;
+  outline-offset: 2px;
 }

@@ -1,83 +1,189 @@
-.searchSection {
-    /* padding: 1rem; */
-    padding: 0 20px;
-    border-radius: 12px;
-    margin-bottom: 2rem;
-    max-width: 600px;;
-    /* position: relative; */
-  }
-  
-  .closeButton {
-    position: absolute;
-    top: 0;
-    right: 0;
-    margin-bottom: 1rem;
-    background: none;
-    font-size: 1.5rem;
-  }
+/* Popover ancré : ne masque plus le placeholder, reste à l’écran */
+.drawer {
+  position: fixed;
+  width: 520px;
+  max-width: 95vw;
+  max-height: 80vh;
+  /* IMPORTANT: pas de overflow hidden pour ne pas rogner les modales internes */
+  overflow: visible;
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 12px;
+  background: rgba(25, 27, 32, 0.96);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.55);
+  /* éviter transform dans l’animation pour ne pas créer de containing block */
+  animation: fadeInOpacity .12s ease-out;
+  z-index: 9999;
+}
 
-  .searchBox {
-    display: flex;
-    gap: 5px;
-  }
+/* Flèche directionnelle */
+.drawer::after {
+  content: "";
+  position: absolute;
+  width: 10px; height: 10px;
+  background: rgba(25, 27, 32, 0.96);
+  border-left: 1px solid rgba(255,255,255,0.16);
+  border-top: 1px solid rgba(255,255,255,0.16);
+  transform: rotate(45deg);
+}
 
-  .searchBox > * {
-    height: 40px;
-  }
-  
-  .searchSection input {
-    width: 100%;
-    padding: 0.5rem;
-    font-size: 1rem;
-    margin-bottom: 0.5rem;
-  }
-  
-  .searchBox button {
-    padding: 0.5rem 1rem;
-    font-size: 1rem;
-    background: #1e40af;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-  }
-  
-  .searchSection button:hover {
-    background: #1d4ed8;
-  }
-  
-  .suggestionList {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 1rem 0;
-    background: rgb(0, 0, 0);
-    border: 1px solid #ccc;
-    max-height: 200px;
-    overflow-y: auto;
-    border-radius: 6px;
-  }
-  
-  .suggestionList li {
-    padding: 0.5rem;
-    cursor: pointer;
-  }
-  
-  .suggestionList li:hover {
-    background: #e0e7ff;
-  }
-  
-  .cardResults {
-    width: 100%;
-    padding: 20px;
-    background-color: rgba(0, 0, 0, 0.61);
-    gap: 10px;
-    margin-top: 1rem;
-    flex-wrap: nowrap;
-    display: flex;
-    overflow-x: auto;
-  }
+.placeRight::after { left: -6px; top: 20px; }
+.placeLeft::after  { right: -6px; top: 20px; transform: rotate(225deg); }
+.placeBottom::after { top: -6px; left: 24px; transform: rotate(135deg); }
 
-  .cardResultsItem {
+@keyframes fadeInOpacity {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
 
-  } 
-  
+/* Barre du haut */
+.topBar {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+}
+
+.inputWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 10px;
+  font-size: 14px;
+  opacity: .8;
+}
+
+.inputWrap input {
+  width: 100%;
+  height: 36px;
+  padding: 6px 34px 6px 28px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+}
+
+.clearBtn {
+  position: absolute;
+  right: 6px;
+  height: 26px;
+  width: 26px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+}
+
+.searchBtn {
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(122,186,255,.4);
+  background: rgba(122,186,255,.15);
+  color: #dff0ff;
+  font-size: 13px;
+}
+
+.closeBtn {
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+}
+
+/* Suggestions */
+.suggestionList {
+  max-height: 220px;
+  overflow: auto;
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  background: rgba(25, 27, 32, 0.96);
+}
+
+.suggestionList li {
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.suggestionList li:hover,
+.active {
+  background: rgba(122,186,255,.12);
+  color: #e6f1ff;
+}
+
+/* Contenu scrollable (et seulement ici) */
+.contentArea {
+  padding: 10px;
+  display: grid;
+  gap: 10px;
+  max-height: 60vh; /* la zone qui scrolle */
+  overflow: auto;
+}
+
+.resultsHeader {
+  font-size: 12px;
+  opacity: .9;
+  padding: 4px 2px 8px;
+}
+
+/* Grille des résultats */
+.cardResults {
+  --tile-min: 170px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--tile-min), 1fr));
+  gap: 10px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow: visible; /* important si le composant Card déborde */
+}
+
+.cardResultsItem {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 10px;
+  padding: 8px;
+  display: grid;
+  gap: 8px;
+  overflow: visible; /* ne pas clipper les overlays internes du composant Card */
+}
+
+.btnRow {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btnRow button {
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(122,186,255,.4);
+  background: rgba(122,186,255,.15);
+  color: #dff0ff;
+  font-size: 12px;
+}
+
+.loading,
+.empty {
+  text-align: center;
+  padding: 24px 6px;
+  opacity: .9;
+}
+
+@media (max-width: 720px) {
+  .drawer { max-width: 100vw; }
+}

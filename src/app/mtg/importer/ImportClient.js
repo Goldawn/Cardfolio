@@ -8,10 +8,10 @@ import { fetchCardPrice } from "../../services/pricing.js";
 import { formatCard } from "../../services/FormatCard.js";
 import useCardFilters from "../../hooks/useCardFilters.js";
 import CollectionActionBar from "../../components/CollectionActionBar.js";
+import FetchCardInput from "../../components/FetchCardInput.js";
 import styles from "./page.module.css";
 
 export default function ImportClient({
-  userId,
   initialCollection,
   initialWishlistLists,
   actions, // { addToCollection, undoAddToCollection, addToWishlist, removeFromCollection }
