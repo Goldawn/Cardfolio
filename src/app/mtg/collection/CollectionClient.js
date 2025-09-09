@@ -10,9 +10,9 @@ import {
 } from '../../services/Scryfall.js'
 import { formatCard } from '../../services/FormatCard.js'
 import useCardFilters from '../../hooks/useCardFilters.js'
-import Card from '../../components/Card.js'
-import CollectionActionBar from '../../components/CollectionActionBar.js'
-import Loader from '../../components/Loader.js'
+import Card from '../../components/Card'
+import CollectionActionBar from '../../components/CollectionActionBar'
+import Loader from '../../components/Loader'
 import { fetchCardPrice } from '../../services/pricing.js'
 import SetBar from '../../components/SetBar' // ✅ intégré
 import styles from './page.module.css'

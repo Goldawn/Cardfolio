@@ -6,13 +6,13 @@ import {
   fetchSetCards,
   fetchMoreCards,
 } from '../../services/Scryfall.js'
-import Card from '../../components/Card.js'
-import Loader from '../../components/Loader.js'
+import Card from '../../components/Card'
+import Loader from '../../components/Loader'
 import { fetchCardPrice } from '../../services/pricing.js'
 import { formatCard } from '../../services/FormatCard.js'
 import useCardFilters from '../../hooks/useCardFilters.js'
-import CollectionActionBar from '../../components/CollectionActionBar.js'
-import FetchCardInput from '../../components/FetchCardInput.js'
+import CollectionActionBar from '../../components/CollectionActionBar'
+import FetchCardInput from '../../components/FetchCardInput'
 import styles from './page.module.css'
 
 export default function ImportClient({
