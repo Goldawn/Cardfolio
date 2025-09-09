@@ -1,6 +1,23 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type React from 'react'
 
-const DEFAULTS = {
+interface HoverPreviewOptions {
+  width?: number
+  height?: number
+  gap?: number
+  enterDelay?: number
+  leaveDelay?: number
+}
+
+interface PreviewState {
+  open: boolean
+  url: string
+  name: string
+  top: number
+  left: number
+}
+
+const DEFAULTS: Required<HoverPreviewOptions> = {
   width: 180,
   height: 250,
   gap: 8,
@@ -8,24 +25,24 @@ const DEFAULTS = {
   leaveDelay: 60,
 }
 
-export function useHoverPreview(opts = {}) {
+export function useHoverPreview(opts: HoverPreviewOptions = {}) {
   const { width, height, gap, enterDelay, leaveDelay } = {
     ...DEFAULTS,
     ...opts,
   }
 
-  const [preview, setPreview] = useState({
+  const [preview, setPreview] = useState<PreviewState>({
     open: false,
     url: '',
     name: '',
     top: 0,
     left: 0,
   })
-  const enterRef = useRef(null)
-  const leaveRef = useRef(null)
+  const enterRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const leaveRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const computePositionFromRect = useCallback(
-    rect => {
+    (rect: DOMRect) => {
       const midY = rect.top + rect.height / 2 + window.scrollY
       const vw = window.innerWidth || document.documentElement.clientWidth || 0
       const preferRight = rect.right + gap + width <= vw
@@ -44,9 +61,9 @@ export function useHoverPreview(opts = {}) {
   )
 
   const openAtRect = useCallback(
-    ({ url, name = '', rect }) => {
+    ({ url, name = '', rect }: { url: string; name?: string; rect: DOMRect }) => {
       if (!url || !rect) return
-      clearTimeout(leaveRef.current)
+      if (leaveRef.current) clearTimeout(leaveRef.current)
       const { top, left } = computePositionFromRect(rect)
       enterRef.current = setTimeout(() => {
         setPreview({ open: true, url, name, top, left })
@@ -56,7 +73,7 @@ export function useHoverPreview(opts = {}) {
   )
 
   const close = useCallback(() => {
-    clearTimeout(enterRef.current)
+    if (enterRef.current) clearTimeout(enterRef.current)
     leaveRef.current = setTimeout(
       () => setPreview(p => ({ ...p, open: false })),
       leaveDelay
@@ -65,8 +82,8 @@ export function useHoverPreview(opts = {}) {
 
   // Fournit des handlers prêts à poser sur une <tr>
   const getRowHoverHandlers = useCallback(
-    ({ url, name }) => ({
-      onMouseEnter: e => {
+    ({ url, name }: { url: string; name: string }) => ({
+      onMouseEnter: (e: React.MouseEvent<HTMLElement>) => {
         if (!url) return
         const rect = e.currentTarget.getBoundingClientRect()
         openAtRect({ url, name, rect })
@@ -78,13 +95,13 @@ export function useHoverPreview(opts = {}) {
 
   // ESC pour fermer
   useEffect(() => {
-    const onKey = e =>
+    const onKey = (e: KeyboardEvent) =>
       e.key === 'Escape' && setPreview(p => ({ ...p, open: false }))
     window.addEventListener('keydown', onKey)
     return () => {
       window.removeEventListener('keydown', onKey)
-      clearTimeout(enterRef.current)
-      clearTimeout(leaveRef.current)
+      if (enterRef.current) clearTimeout(enterRef.current)
+      if (leaveRef.current) clearTimeout(leaveRef.current)
     }
   }, [])
 

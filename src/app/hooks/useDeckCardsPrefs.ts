@@ -1,5 +1,24 @@
 import { useEffect, useMemo, useState } from 'react'
 
+type ViewType = 'grid' | 'list' | 'compact' | 'piles' | 'listByType'
+type SortKey = 'mv' | 'name' | 'type' | 'color'
+
+interface ColsByView {
+  compact: number
+  list: number
+  grid: number
+  piles: number
+  listByType: number
+}
+
+interface DeckCardsPrefs {
+  view: ViewType
+  edit: boolean
+  legality: boolean
+  sortKey: SortKey
+  colsByView: ColsByView
+}
+
 /** Clés LS actuelles (nouvelles) */
 const LS_PREFIX = 'deckCards.'
 const LS_KEYS = {
@@ -11,7 +30,7 @@ const LS_KEYS = {
 }
 
 /** Defaults */
-const DEFAULTS = {
+const DEFAULTS: DeckCardsPrefs = {
   view: 'grid', // "grid" | "list" | "compact" | "piles" | "listByType"
   edit: false,
   legality: false,
@@ -27,7 +46,7 @@ const DEFAULTS = {
 }
 
 /** Utilitaires LS sûrs + migration */
-function readJSON(key, fallback) {
+function readJSON<T>(key: string, fallback: T): T {
   try {
     const raw = localStorage.getItem(key)
     if (raw == null) return fallback
@@ -36,12 +55,12 @@ function readJSON(key, fallback) {
     return fallback
   }
 }
-function writeJSON(key, value) {
+function writeJSON(key: string, value: any): void {
   try {
     localStorage.setItem(key, JSON.stringify(value))
   } catch {}
 }
-function readBool(key, fallback) {
+function readBool(key: string, fallback: boolean): boolean {
   try {
     const raw = localStorage.getItem(key)
     if (raw == null) return fallback
@@ -50,7 +69,7 @@ function readBool(key, fallback) {
     return fallback
   }
 }
-function writeBool(key, value) {
+function writeBool(key: string, value: boolean): void {
   try {
     localStorage.setItem(key, value ? '1' : '0')
   } catch {}
@@ -107,7 +126,16 @@ function migrateOldKeys() {
  * - Centralise les colonnes par vue avec helpers get/set
  * - Expose un “isColsEnabled(view, sortKey)” pour activer/désactiver les boutons
  */
-export function useDeckCardsPrefs() {
+export function useDeckCardsPrefs(): {
+  prefs: DeckCardsPrefs
+  setView: (view: ViewType) => void
+  setEdit: (edit: boolean) => void
+  setLegality: (legality: boolean) => void
+  setSortKey: (sortKey: SortKey) => void
+  setCols: (view: ViewType, cols: number) => void
+  getCols: (view: ViewType) => number
+  isColsEnabled: (view: ViewType, sortKey: SortKey) => boolean
+} {
   // migration one-shot
   useEffect(() => migrateOldKeys(), [])
 
@@ -135,25 +163,25 @@ export function useDeckCardsPrefs() {
   useEffect(() => writeJSON(LS_KEYS.cols, colsByView), [colsByView])
 
   // helpers colonnes
-  const clampCols = n => Math.max(1, Math.min(3, Number(n) || 1))
+  const clampCols = (n: any): number => Math.max(1, Math.min(3, Number(n) || 1))
   const setColsFor = useMemo(
-    () => (view, n) =>
+    () => (view: ViewType, n: any) =>
       setColsByView(prev => ({ ...prev, [view]: clampCols(n) })),
     []
   )
   const getColsFor = useMemo(
-    () => view => clampCols(colsByView?.[view] ?? 2),
+    () => (view: ViewType): number => clampCols(colsByView?.[view] ?? 2),
     [colsByView]
   )
 
-  // Politique d’activation des boutons colonnes (à centraliser ici)
+  // Politique d'activation des boutons colonnes (à centraliser ici)
   const isColsEnabled = useMemo(
-    () => (view, key) => {
+    () => (view: ViewType, key: SortKey): boolean => {
       // compact & list : toujours permis
       if (view === 'compact' || view === 'list') return true
       // grid & piles : seulement quand tri par type/couleur
       if (view === 'grid' && (key === 'type' || key === 'color')) return true
-      if (view === 'stack' && (key === 'type' || key === 'color')) return true
+      if (view === 'piles' && (key === 'type' || key === 'color')) return true
       // listByType : up to you (ex: autorisé)
       if (view === 'listByType') return true
       return false
@@ -163,20 +191,20 @@ export function useDeckCardsPrefs() {
 
   return {
     // state
-    active,
-    setActive,
-    editMode,
-    setEditMode,
-    showLegality,
-    setShowLegality,
-    sortKey,
-    setSortKey,
-
-    // colonnes
-    colsByView,
-    getColsFor,
-    setColsFor,
-    isColsEnabled,
+    prefs: {
+      view: active,
+      edit: editMode,
+      legality: showLegality,
+      sortKey: sortKey,
+      colsByView: colsByView
+    },
+    setView: setActive,
+    setEdit: setEditMode,
+    setLegality: setShowLegality,
+    setSortKey: setSortKey,
+    setCols: setColsFor,
+    getCols: getColsFor,
+    isColsEnabled: isColsEnabled,
   }
 }
 

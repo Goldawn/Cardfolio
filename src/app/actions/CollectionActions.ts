@@ -2,7 +2,7 @@ import 'server-only'
 import { prisma } from '@/lib/prisma'
 import { getAuthenticatedUser } from '@/lib/getAuthenticatedUser'
 
-async function getDefaultCollectionId() {
+async function getDefaultCollectionId(): Promise<string | null> {
   'use server'
   // ✅ Revalide l'utilisateur côté action pour éviter d'utiliser un userId capturé
   const actionUser = await getAuthenticatedUser({ throwError: true })
@@ -14,7 +14,7 @@ async function getDefaultCollectionId() {
   return row?.id ?? null
 }
 
-export async function addToCollectionAction(scryfallId, newPriceEntry) {
+export async function addToCollectionAction(scryfallId: string, newPriceEntry: any): Promise<any> {
   'use server'
   const actionUser = await getAuthenticatedUser({ throwError: true })
   const userId = actionUser.id

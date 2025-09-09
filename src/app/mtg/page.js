@@ -8,7 +8,7 @@ import {
   fetchMoreCards,
 } from '../services/Scryfall.js'
 import { formatCard } from '../services/FormatCard.js'
-import useCardFilters from '../hooks/useCardFilters.js'
+import useCardFilters from '../hooks/useCardFilters'
 import { useCurrencyContext } from '@/context/'
 import Link from 'next/link'
 import Card from '../components/Card'

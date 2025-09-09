@@ -1,4 +1,4 @@
-const saveData = (key, value) => {
+const saveData = (key: string, value: string): void => {
   if (localStorage) {
     localStorage.setItem(key, value)
   } else {
@@ -6,7 +6,7 @@ const saveData = (key, value) => {
   }
 }
 
-const loadData = key => {
+const loadData = (key: string): string | null => {
   if (localStorage) {
     if (key in localStorage) {
       return localStorage.getItem(key)
@@ -14,9 +14,10 @@ const loadData = key => {
   } else {
     alert('Web Storage is not supported')
   }
+  return null
 }
 
-const deleteData = key => {
+const deleteData = (key: string): void => {
   if (localStorage) {
     if (key in localStorage) {
       return localStorage.removeItem(key)

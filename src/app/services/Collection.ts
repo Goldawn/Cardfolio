@@ -1,20 +1,21 @@
 'use client'
-import { fetchCardPrice } from './pricing.js'
-import { formatCard } from './FormatCard.js'
+import { fetchCardPrice } from './pricing'
+import { formatCard } from './FormatCard'
+import type { GameCard } from '@/types'
 
 // Sauvegarder la collection dans le localStorage
-export const saveCollection = (collection, card) => {
+export const saveCollection = (collection: GameCard[], card: GameCard): void => {
   localStorage.setItem('mtgCollection', JSON.stringify(collection))
 }
 
 // Charger la collection depuis le localStorage
-export const loadCollection = () => {
+export const loadCollection = (): GameCard[] => {
   const collection = localStorage.getItem('mtgCollection')
   return collection ? JSON.parse(collection) : []
 }
 
 // Ajouter une carte à la collection
-export const addCardToCollection = async card => {
+export const addCardToCollection = async (card: GameCard): Promise<void> => {
   const collection = loadCollection()
   const today = new Date().toISOString().split('T')[0] // Date du jour
 
@@ -22,7 +23,7 @@ export const addCardToCollection = async card => {
   const existingCard = collection.find(item => item.id === card.id)
   if (existingCard) {
     // Si elle existe, augmenter la quantité
-    existingCard.quantity += 1
+    existingCard.quantity = (existingCard.quantity || 0) + 1
   } else {
     // Récupérer le prix actuel de la carte
     const price = await fetchCardPrice(card.name)
@@ -46,36 +47,36 @@ export const addCardToCollection = async card => {
   saveCollection(collection, card)
 }
 
-export const getLastPrice = (card, currency) => {
+export const getLastPrice = (card: GameCard, currency: 'usd' | 'eur'): number => {
   if (!card.priceHistory || card.priceHistory.length === 0) {
     return 0
   }
   return card.priceHistory.slice(-1)[0][currency] || 0
 }
 
-export const updateQuantity = (cardId, delta) => {
+export const updateQuantity = (cardId: string, delta: number): void => {
   const collection = loadCollection()
   const updatedCollection = collection.map(card =>
     card.id === cardId
-      ? { ...card, quantity: Math.max(1, card.quantity + delta) }
+      ? { ...card, quantity: Math.max(1, (card.quantity || 0) + delta) }
       : card
   )
-  saveCollection(updatedCollection)
+  saveCollection(updatedCollection, {} as GameCard)
 }
 
-export const removeCard = cardId => {
+export const removeCard = (cardId: string): void => {
+  const collection = loadCollection()
   const updatedCollection = collection.filter(card => card.id !== cardId)
-  saveCollection(updatedCollection)
+  saveCollection(updatedCollection, {} as GameCard)
 }
 
-export const filterCollection = (collection, filters) => {
-  const filteredCollection = collection.filter
-
-  return filteredCollection
+export const filterCollection = (collection: GameCard[], filters: any): GameCard[] => {
+  // TODO: Implémenter la logique de filtrage
+  return collection
 }
 
-export const sortCollection = (collection, sortOption, sortOrder) => {
-  const sortedCollection = []
+export const sortCollection = (collection: GameCard[], sortOption: string, sortOrder: 'asc' | 'desc'): GameCard[] => {
+  const sortedCollection: GameCard[] = []
 
   return sortedCollection
 }
