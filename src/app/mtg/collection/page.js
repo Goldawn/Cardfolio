@@ -25,7 +25,7 @@ export default async function CollectionPage() {
 
   if (!def) {
     def = await prisma.collection.create({
-      data: { userId, name: "Main", isDefault: true },
+      data: { userId, name: 'Main', isDefault: true },
       include: { items: true },
     })
   }

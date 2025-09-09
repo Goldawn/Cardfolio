@@ -1,7 +1,17 @@
 // Normalized MTG card helpers — single source of truth
 // ----------------------------------------------------
-import React from 'react'
+import React, { ReactNode } from 'react'
 import manaSymbols from '../app/assets/mock/mana.json'
+import { 
+  MTGCard, 
+  MTGColor, 
+  MTGCardType, 
+  CardRarity, 
+  CMCBucket,
+  MTG_COLOR_ORDER,
+  MTG_TYPE_ORDER,
+  MTG_BUCKETS
+} from '@/types'
 
 /** ------- Mana helpers ------- **/
 
@@ -10,10 +20,8 @@ import manaSymbols from '../app/assets/mock/mana.json'
  * - Nombres => valeur
  * - Hybrides/Phyrexian/Non numériques => 1
  * - X/Y/Z => 0
- * @param {string|undefined|null} manaCost
- * @returns {number}
  */
-export function parseManaCostNumeric(manaCost) {
+export function parseManaCostNumeric(manaCost?: string | null): number {
   if (!manaCost) return 0
   const tokens = String(manaCost).match(/\{[^}]+\}/g) || []
   let sum = 0
@@ -36,11 +44,9 @@ export function parseManaCostNumeric(manaCost) {
 }
 
 /**
- * Rend le coût de mana en icônes (conserve la compat avec l’ancien formatAndParseText).
- * @param {string|undefined|null} manaCost
- * @returns {React.ReactNode}
+ * Rend le coût de mana en icônes (conserve la compat avec l'ancien formatAndParseText).
  */
-export function renderManaCost(manaCost) {
+export function renderManaCost(manaCost?: string | null): ReactNode {
   if (!manaCost) return null
   return String(manaCost)
     .split('\n')
@@ -68,7 +74,7 @@ export function renderManaCost(manaCost) {
     ))
 }
 
-export const formatAndParseText = text => {
+export const formatAndParseText = (text?: string | null): ReactNode => {
   if (!text) return null
   return text.split('\n').map((line, lineIndex) => (
     <span key={lineIndex}>
@@ -95,11 +101,9 @@ export const formatAndParseText = text => {
 }
 
 /**
- * MV/CMC d’une carte (prend les champs numériques si présents, sinon parse la string de mana).
- * @param {any} card
- * @returns {number}
+ * MV/CMC d'une carte (prend les champs numériques si présents, sinon parse la string de mana).
  */
-export function getMV(card) {
+export function getMV(card: any): number {
   const cand = [card?.manaValue, card?.cmc, card?.convertedManaCost].find(
     v => v !== undefined && v !== null && Number.isFinite(Number(v))
   )
@@ -108,36 +112,23 @@ export function getMV(card) {
 }
 
 /** Buckets CMC utilisés partout */
-export const BUCKETS = ['1-', '2', '3', '4', '5', '6', '7+']
+export const BUCKETS = MTG_BUCKETS
+
 /**
  * Label de bucket pour un MV.
- * @param {number} mv
- * @returns {"1-"|"2"|"3"|"4"|"5"|"6"|"7+"}
  */
-export function bucketLabel(mv) {
-  return mv <= 1 ? '1-' : mv >= 7 ? '7+' : String(mv)
+export function bucketLabel(mv: number): CMCBucket {
+  return mv <= 1 ? '1-' : mv >= 7 ? '7+' : String(mv) as CMCBucket
 }
 
 /** ------- Type helpers ------- **/
 
-export const TYPE_ORDER = [
-  'creature',
-  'instant',
-  'sorcery',
-  'enchantment',
-  'artifact',
-  'planeswalker',
-  'battle',
-  'land',
-  'other',
-]
+export const TYPE_ORDER = MTG_TYPE_ORDER
 
 /**
- * Type principal (catégories cohérentes avec l’UI).
- * @param {any} card
- * @returns {string}
+ * Type principal (catégories cohérentes avec l'UI).
  */
-export function primaryTypeOf(card) {
+export function primaryTypeOf(card: any): MTGCardType {
   const t = (card?.type || card?.typeLine || '').toLowerCase()
   if (t.includes('land')) return 'land'
   if (t.includes('creature')) return 'creature'
@@ -150,27 +141,24 @@ export function primaryTypeOf(card) {
   return 'other'
 }
 
-/** @param {any} card */
-export const isLand = card => primaryTypeOf(card) === 'land'
+export const isLand = (card: any): boolean => primaryTypeOf(card) === 'land'
 
 /** ------- Color helpers ------- **/
 
-export const COLOR_ORDER = ['W', 'U', 'B', 'R', 'G', 'M', 'C']
+export const COLOR_ORDER = MTG_COLOR_ORDER
 
 /**
- * Extrait W/U/B/R/G d’une string de mana (hybrides compris).
- * @param {string|undefined|null} manaCost
- * @returns {Array<"W"|"U"|"B"|"R"|"G">}
+ * Extrait W/U/B/R/G d'une string de mana (hybrides compris).
  */
-export function colorsFromManaCost(manaCost) {
+export function colorsFromManaCost(manaCost?: string | null): MTGColor[] {
   if (!manaCost) return []
   const tokens = String(manaCost).match(/\{[^}]+\}/g) || []
-  const set = new Set()
+  const set = new Set<MTGColor>()
   for (const tok of tokens) {
     const sym = tok.slice(1, -1).toUpperCase()
-    if (['W', 'U', 'B', 'R', 'G'].includes(sym)) set.add(sym)
+    if (['W', 'U', 'B', 'R', 'G'].includes(sym)) set.add(sym as MTGColor)
     sym.split('/').forEach(s => {
-      if (['W', 'U', 'B', 'R', 'G'].includes(s)) set.add(s)
+      if (['W', 'U', 'B', 'R', 'G'].includes(s)) set.add(s as MTGColor)
     })
   }
   return Array.from(set)
@@ -179,11 +167,9 @@ export function colorsFromManaCost(manaCost) {
 /**
  * Bucket de couleur (W/U/B/R/G/M/C) avec priorité :
  * colors → colorIdentity/color_identity → manaCost → C
- * @param {any} card
- * @returns {"W"|"U"|"B"|"R"|"G"|"M"|"C"}
  */
-export function colorBucketOf(card) {
-  let cols = []
+export function colorBucketOf(card: any): MTGColor {
+  let cols: string[] = []
   if (Array.isArray(card?.colors) && card.colors.length) cols = card.colors
   else if (Array.isArray(card?.colorIdentity) && card.colorIdentity.length)
     cols = card.colorIdentity
@@ -198,16 +184,15 @@ export function colorBucketOf(card) {
 
   if (norm.length === 0) return 'C'
   if (norm.length >= 2) return 'M'
-  return norm[0]
+  return norm[0] as MTGColor
 }
 
 /** ------- Rarity helpers ------- **/
 
 /**
- * @param {any} card
- * @returns {"common"|"uncommon"|"rare"|"mythic"|"special"|"other"}
+ * Extrait la rareté normalisée d'une carte
  */
-export function rarityKeyOf(card) {
+export function rarityKeyOf(card: any): CardRarity {
   const r = (card?.rarity || card?.printedRarity || card?.rarityKey || '')
     .toString()
     .toLowerCase()
@@ -225,10 +210,8 @@ export function rarityKeyOf(card) {
 
 /**
  * Image petite (pour table / list).
- * @param {any} card
- * @returns {string|null}
  */
-export function getArtSmall(card) {
+export function getArtSmall(card: any): string | null {
   return (
     card?.image?.artCrop ||
     card?.cardBack?.image?.artCrop ||
@@ -239,10 +222,8 @@ export function getArtSmall(card) {
 
 /**
  * Image grande (pour preview hover).
- * @param {any} card
- * @returns {string|null}
  */
-export function getArtLarge(card) {
+export function getArtLarge(card: any): string | null {
   return (
     card?.image?.large ||
     card?.image?.normal ||
@@ -253,11 +234,9 @@ export function getArtLarge(card) {
 }
 
 /**
- * Payload pour setShowcased (resté proche de l’existant).
- * @param {any} card
- * @returns {string|null}
+ * Payload pour setShowcased (resté proche de l'existant).
  */
-export function getShowcasePayload(card) {
+export function getShowcasePayload(card: any): string | null {
   return (
     card?.image?.artCrop ||
     card?.cardBack?.image?.artCrop ||
@@ -268,9 +247,10 @@ export function getShowcasePayload(card) {
 
 /** ------- Tiny utils ------- **/
 
-/** @param {any} card */ export const getName = card =>
+export const getName = (card: any): string =>
   String(card?.name || card?.printedName || '')
-/** @param {any} card */ export const getQty = card =>
+
+export const getQty = (card: any): number =>
   Number(card?.decklistQuantity || 0)
 
 /** ------- Default export (optionnel) ------- **/

@@ -18,6 +18,8 @@ import Land from '../app/assets/images/icons/Land.svg'
 import Planeswalker from '../app/assets/images/icons/Planeswalker.png'
 import Sorcery from '../app/assets/images/icons/Sorcery.svg'
 
+import { MTGColor, MTGCardType, CardRarity } from '@/types'
+
 // 1) Registre brut
 export const ICON = {
   W,
@@ -36,10 +38,25 @@ export const ICON = {
   Land,
   Planeswalker,
   Sorcery,
+} as const
+
+export interface ColorMeta {
+  label: string
+  icon: any
+}
+
+export interface TypeMeta {
+  label: string
+  icon: any
+}
+
+export interface RarityMeta {
+  label: string
+  color: string
 }
 
 // 2) Métadonnées "Deck Header"
-export const COLOR_META = {
+export const COLOR_META: Record<MTGColor, ColorMeta> = {
   W: { label: 'Blanc', icon: W },
   U: { label: 'Bleu', icon: U },
   B: { label: 'Noir', icon: B },
@@ -49,7 +66,7 @@ export const COLOR_META = {
   M: { label: 'Multicolore', icon: M },
 }
 
-export const TYPE_META = {
+export const TYPE_META: Record<MTGCardType, TypeMeta> = {
   land: { label: 'Terrain', icon: Land },
   creature: { label: 'Créature', icon: Creature },
   instant: { label: 'Éphémère', icon: Instant },
@@ -58,10 +75,10 @@ export const TYPE_META = {
   enchantment: { label: 'Enchantement', icon: Enchantment },
   planeswalker: { label: 'Planeswalker', icon: Planeswalker },
   battle: { label: 'Bataille', icon: Battle },
-  commander: { label: 'Commandant', icon: Commander },
+  other: { label: 'Autre', icon: Artifact }, // fallback
 }
 
-export const RARITY_META = {
+export const RARITY_META: Record<CardRarity, RarityMeta> = {
   common: { label: 'Commune', color: '#95a5a6' }, // gris
   uncommon: { label: 'Peu commune', color: '#bdc3c7' }, // argent
   rare: { label: 'Rare', color: '#f1c40f' }, // or
@@ -70,8 +87,14 @@ export const RARITY_META = {
   other: { label: 'Autre', color: '#7f8c8d' },
 }
 
+export interface FilterElement {
+  name: string
+  letter?: string
+  icon: any
+}
+
 // 3) Listes pour les filtres (équivalent de ActionBarConfig)
-export const colorFilterElements = [
+export const colorFilterElements: FilterElement[] = [
   { name: 'White', letter: 'W', icon: W },
   { name: 'Blue', letter: 'U', icon: U },
   { name: 'Black', letter: 'B', icon: B },
@@ -81,7 +104,7 @@ export const colorFilterElements = [
   { name: 'Multicolor', letter: 'M', icon: M },
 ]
 
-export const typeFilterElements = [
+export const typeFilterElements: FilterElement[] = [
   { name: 'Artifact', icon: Artifact },
   { name: 'Battle', icon: Battle },
   { name: 'Commander', icon: Commander },
@@ -93,7 +116,7 @@ export const typeFilterElements = [
   { name: 'Sorcery', icon: Sorcery },
 ]
 
-export const rarityFilterElements = [
+export const rarityFilterElements: FilterElement[] = [
   { name: 'common', icon: '' },
   { name: 'uncommon', icon: '' },
   { name: 'rare', icon: '' },

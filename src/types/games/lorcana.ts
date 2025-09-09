@@ -1,8 +1,8 @@
 // Types spécifiques Lorcana
 // ==========================
 
-import { BaseCard } from '../base';
-import { Collection, Decklist } from '../collections';
+import { BaseCard } from '../base'
+import { Collection, Decklist } from '../collections'
 
 export type LorcanaColor =
   | 'Amber'
@@ -10,26 +10,26 @@ export type LorcanaColor =
   | 'Emerald'
   | 'Ruby'
   | 'Sapphire'
-  | 'Steel';
+  | 'Steel'
 export type LorcanaCardType =
   | 'Action'
   | 'Action - Song'
   | 'Character'
   | 'Item'
-  | 'Location';
-export type LorcanaFormat = 'Constructed' | 'Sealed' | 'Draft';
+  | 'Location'
+export type LorcanaFormat = 'Constructed' | 'Sealed' | 'Draft'
 
 export type LorcanaGameData = {
-  cost?: number;
-  inkwell?: boolean;
-  types?: LorcanaCardType[];
-  abilities?: string[];
-  strength?: number;
-  willpower?: number;
-  lore?: number;
-  setNumber?: string;
-  flavor?: string;
-};
+  cost?: number
+  inkwell?: boolean
+  types?: LorcanaCardType[]
+  abilities?: string[]
+  strength?: number
+  willpower?: number
+  lore?: number
+  setNumber?: string
+  flavor?: string
+}
 
 export type LorcanaCard = BaseCard<
   LorcanaGameData,
@@ -37,8 +37,8 @@ export type LorcanaCard = BaseCard<
   LorcanaCardType,
   LorcanaFormat
 > & {
-  gameType: 'lorcana';
-};
+  gameType: 'lorcana'
+}
 
-export type LorcanaCollection = Collection<'lorcana'>;
-export type LorcanaDecklist = Decklist<'lorcana', LorcanaColor, LorcanaFormat>;
+export type LorcanaCollection = Collection<'lorcana'>
+export type LorcanaDecklist = Decklist<'lorcana', LorcanaColor, LorcanaFormat>

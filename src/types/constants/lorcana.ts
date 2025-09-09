@@ -8,7 +8,7 @@ export const LORCANA_COLOR_ORDER = [
   'Ruby',
   'Sapphire',
   'Steel',
-] as const;
+] as const
 
 export const LORCANA_CARD_TYPE_ORDER = [
   'Action',
@@ -16,4 +16,4 @@ export const LORCANA_CARD_TYPE_ORDER = [
   'Character',
   'Item',
   'Location',
-] as const;
+] as const

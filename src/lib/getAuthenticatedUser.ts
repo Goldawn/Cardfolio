@@ -1,19 +1,19 @@
 import { auth } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
+
+export interface GetAuthenticatedUserOptions {
+  redirect?: boolean
+  throwError?: boolean
+}
 
 /**
  * Récupère l'utilisateur authentifié.
  * Si l'utilisateur n'est pas connecté, renvoie `null` ou lance une exception selon le paramètre.
- *
- * @param {Object} options
- * @param {boolean} options.redirect Si true, redirige vers /login en cas d'absence de session.
- * @param {boolean} options.throwError Si true, lance une erreur si pas connecté.
- * @returns {Promise<Object|null>}
  */
-
 export async function getAuthenticatedUser({
   redirect = false,
   throwError = false,
-} = {}) {
+}: GetAuthenticatedUserOptions = {}): Promise<any | null> {
   const session = await auth()
 
   if (!session || !session.user) {
@@ -35,7 +35,7 @@ export async function getAuthenticatedUser({
   return session.user
 }
 
-export async function assertWishlistOwnership(listId) {
+export async function assertWishlistOwnership(listId: string): Promise<string> {
   'use server'
   const authed = await getAuthenticatedUser({ throwError: true })
   const owned = await prisma.wishlistList.findFirst({
@@ -48,7 +48,9 @@ export async function assertWishlistOwnership(listId) {
   return owned.id
 }
 
-export async function assertDeckOwnership(targetDeckId) {
+export async function assertDeckOwnership(
+  targetDeckId: string
+): Promise<string> {
   'use server'
   const authed = await getAuthenticatedUser({ throwError: true })
   const owned = await prisma.decklist.findFirst({

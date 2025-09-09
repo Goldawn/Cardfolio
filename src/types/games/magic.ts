@@ -1,10 +1,10 @@
 // Types spécifiques Magic: The Gathering
 // ======================================
 
-import { BaseCard, CardImages } from '../base';
-import { Collection, Decklist } from '../collections';
+import { BaseCard, CardImages } from '../base'
+import { Collection, Decklist } from '../collections'
 
-export type MTGColor = 'W' | 'U' | 'B' | 'R' | 'G' | 'C' | 'M';
+export type MTGColor = 'W' | 'U' | 'B' | 'R' | 'G' | 'C' | 'M'
 export type MTGCardType =
   | 'creature'
   | 'instant'
@@ -14,7 +14,7 @@ export type MTGCardType =
   | 'planeswalker'
   | 'battle'
   | 'land'
-  | 'other';
+  | 'other'
 export type MTGFormat =
   | 'commander'
   | 'standard'
@@ -30,32 +30,32 @@ export type MTGFormat =
   | 'standardbrawl'
   | 'timeless'
   | 'alchemy'
-  | 'penny';
+  | 'penny'
 
 export type MTGGameData = {
-  manaCost?: string;
-  manaValue?: number;
-  cmc?: number;
-  convertedManaCost?: number;
-  type?: string;
-  typeLine?: string;
-  oracleText?: string;
-  flavorText?: string;
-  power?: string;
-  toughness?: string;
-  colorIdentity?: MTGColor[];
-  card_faces?: MTGCardFace[];
-};
+  manaCost?: string
+  manaValue?: number
+  cmc?: number
+  convertedManaCost?: number
+  type?: string
+  typeLine?: string
+  oracleText?: string
+  flavorText?: string
+  power?: string
+  toughness?: string
+  colorIdentity?: MTGColor[]
+  card_faces?: MTGCardFace[]
+}
 
 export type MTGCardFace = {
-  name?: string;
-  mana_cost?: string;
-  type_line?: string;
-  oracle_text?: string;
-  power?: string;
-  toughness?: string;
-  image_uris?: CardImages;
-};
+  name?: string
+  mana_cost?: string
+  type_line?: string
+  oracle_text?: string
+  power?: string
+  toughness?: string
+  image_uris?: CardImages
+}
 
 export type MTGCard = BaseCard<
   MTGGameData,
@@ -63,8 +63,8 @@ export type MTGCard = BaseCard<
   MTGCardType,
   MTGFormat
 > & {
-  gameType: 'magic';
-};
+  gameType: 'magic'
+}
 
-export type MTGCollection = Collection<'magic'>;
-export type MTGDecklist = Decklist<'magic', MTGColor, MTGFormat>;
+export type MTGCollection = Collection<'magic'>
+export type MTGDecklist = Decklist<'magic', MTGColor, MTGFormat>

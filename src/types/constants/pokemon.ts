@@ -13,13 +13,9 @@ export const POKEMON_TYPE_ORDER = [
   'Fairy',
   'Dragon',
   'Colorless',
-] as const;
+] as const
 
-export const POKEMON_CARD_TYPE_ORDER = [
-  'Pokémon',
-  'Trainer',
-  'Energy',
-] as const;
+export const POKEMON_CARD_TYPE_ORDER = ['Pokémon', 'Trainer', 'Energy'] as const
 
 export const POKEMON_STAGE_ORDER = [
   'Basic',
@@ -33,4 +29,4 @@ export const POKEMON_STAGE_ORDER = [
   'V',
   'VMAX',
   'VSTAR',
-] as const;
+] as const

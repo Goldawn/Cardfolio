@@ -1,7 +1,8 @@
-// app/lib/mtgFormats.js
+// app/lib/mtgFormats.ts
+import { MTGFormat } from '@/types'
 
 /** Clé canonique -> libellé utilisateur */
-export const FORMAT_LABELS = {
+export const FORMAT_LABELS: Record<MTGFormat, string> = {
   commander: 'Commander',
   paupercommander: 'Pauper Commander',
   oathbreaker: 'Oathbreaker',
@@ -20,7 +21,7 @@ export const FORMAT_LABELS = {
 }
 
 /** Descriptions FR (affichage, tooltips) */
-export const FORMAT_DESCRIPTIONS = {
+export const FORMAT_DESCRIPTIONS: Record<MTGFormat, string> = {
   commander:
     '100 cartes, singleton (1 exemplaire max), un commandant légendaire. Terrains de base non limités.',
   paupercommander:
@@ -46,11 +47,24 @@ export const FORMAT_DESCRIPTIONS = {
   penny: '60+ cartes, budget (MTGO).',
 }
 
+export interface FormatRules {
+  minMain: number
+  singleton: boolean
+  maxCopies: number
+  commanderLike?: boolean
+  signatureSpell?: boolean
+  pool?: string
+  arena?: boolean
+  restrictedList?: boolean
+  unlimitedExceptions?: boolean
+  rarityRule?: string
+}
+
 /**
  * Métadonnées minimales pour la validation/affichage.
- * NB: on reste volontairement générique sur les “exceptions illimitées”.
+ * NB: on reste volontairement générique sur les "exceptions illimitées".
  */
-export const FORMAT_RULES = {
+export const FORMAT_RULES: Record<MTGFormat, FormatRules> = {
   commander: {
     minMain: 100,
     singleton: true,
@@ -122,12 +136,14 @@ export const FORMAT_RULES = {
 }
 
 /** Helpers pratiques (UI) */
-export function getFormatLabel(key) {
+export function getFormatLabel(key: MTGFormat): string {
   return FORMAT_LABELS[key] ?? key
 }
-export function getFormatDescription(key) {
+
+export function getFormatDescription(key: MTGFormat): string {
   return FORMAT_DESCRIPTIONS[key] ?? ''
 }
-export function getFormatMeta(key) {
+
+export function getFormatMeta(key: MTGFormat): FormatRules | null {
   return FORMAT_RULES[key] ?? null
 }

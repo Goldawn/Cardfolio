@@ -9,13 +9,9 @@ export const YUGIOH_ATTRIBUTE_ORDER = [
   'LIGHT',
   'WATER',
   'WIND',
-] as const;
+] as const
 
-export const YUGIOH_CARD_TYPE_ORDER = [
-  'Monster',
-  'Spell',
-  'Trap',
-] as const;
+export const YUGIOH_CARD_TYPE_ORDER = ['Monster', 'Spell', 'Trap'] as const
 
 export const YUGIOH_MONSTER_TYPE_ORDER = [
   'Aqua',
@@ -43,4 +39,4 @@ export const YUGIOH_MONSTER_TYPE_ORDER = [
   'Winged Beast',
   'Wyrm',
   'Zombie',
-] as const;
+] as const

@@ -1,8 +1,8 @@
 // Types spécifiques Pokemon
 // ==========================
 
-import { BaseCard } from '../base';
-import { Collection, Decklist } from '../collections';
+import { BaseCard } from '../base'
+import { Collection, Decklist } from '../collections'
 
 export type PokemonType =
   | 'Grass'
@@ -15,18 +15,18 @@ export type PokemonType =
   | 'Metal'
   | 'Fairy'
   | 'Dragon'
-  | 'Colorless';
-export type PokemonCardType = 'Pokémon' | 'Trainer' | 'Energy';
-export type PokemonFormat = 'Standard' | 'Expanded' | 'Legacy' | 'Unlimited';
+  | 'Colorless'
+export type PokemonCardType = 'Pokémon' | 'Trainer' | 'Energy'
+export type PokemonFormat = 'Standard' | 'Expanded' | 'Legacy' | 'Unlimited'
 
 export type PokemonGameData = {
-  hp?: number;
-  types?: PokemonType[];
-  weaknesses?: PokemonWeakness[];
-  resistances?: PokemonResistance[];
-  retreatCost?: number;
-  attacks?: PokemonAttack[];
-  abilities?: PokemonAbility[];
+  hp?: number
+  types?: PokemonType[]
+  weaknesses?: PokemonWeakness[]
+  resistances?: PokemonResistance[]
+  retreatCost?: number
+  attacks?: PokemonAttack[]
+  abilities?: PokemonAbility[]
   stage?:
     | 'Basic'
     | 'Stage 1'
@@ -38,33 +38,33 @@ export type PokemonGameData = {
     | 'GX'
     | 'V'
     | 'VMAX'
-    | 'VSTAR';
-  evolvesFrom?: string;
-  evolvesTo?: string[];
-};
+    | 'VSTAR'
+  evolvesFrom?: string
+  evolvesTo?: string[]
+}
 
 export type PokemonWeakness = {
-  type: PokemonType;
-  value: string;
-};
+  type: PokemonType
+  value: string
+}
 
 export type PokemonResistance = {
-  type: PokemonType;
-  value: string;
-};
+  type: PokemonType
+  value: string
+}
 
 export type PokemonAttack = {
-  name: string;
-  cost: PokemonType[];
-  damage?: string;
-  text?: string;
-};
+  name: string
+  cost: PokemonType[]
+  damage?: string
+  text?: string
+}
 
 export type PokemonAbility = {
-  name: string;
-  text: string;
-  type: 'Pokémon Power' | 'Poké-Body' | 'Poké-Power' | 'Ability';
-};
+  name: string
+  text: string
+  type: 'Pokémon Power' | 'Poké-Body' | 'Poké-Power' | 'Ability'
+}
 
 export type PokemonCard = BaseCard<
   PokemonGameData,
@@ -72,8 +72,8 @@ export type PokemonCard = BaseCard<
   PokemonCardType,
   PokemonFormat
 > & {
-  gameType: 'pokemon';
-};
+  gameType: 'pokemon'
+}
 
-export type PokemonCollection = Collection<'pokemon'>;
-export type PokemonDecklist = Decklist<'pokemon', PokemonType, PokemonFormat>;
+export type PokemonCollection = Collection<'pokemon'>
+export type PokemonDecklist = Decklist<'pokemon', PokemonType, PokemonFormat>

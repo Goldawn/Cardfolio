@@ -15,7 +15,7 @@ export const FLESH_AND_BLOOD_CLASS_ORDER = [
   'Shapeshifter',
   'Merchant',
   'Generic',
-] as const;
+] as const
 
 export const FLESH_AND_BLOOD_CARD_TYPE_ORDER = [
   'Hero',
@@ -26,4 +26,4 @@ export const FLESH_AND_BLOOD_CARD_TYPE_ORDER = [
   'Reaction',
   'Instant',
   'Token',
-] as const;
+] as const

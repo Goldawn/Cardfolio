@@ -1,13 +1,20 @@
-// app/lib/deckStats.js
+// app/lib/deckStats.ts
+import { MTGCard, MTGColor } from '@/types'
+import {
+  ManaCurveData,
+  ManaCurveSplitData,
+  ColorDistributionData,
+  ColorDistribution,
+} from '@/types/utils/statistics'
 
 // Détecte si la carte est un terrain (pour exclure de la courbe)
-export function isLand(card) {
+export function isLand(card: any): boolean {
   const t = (card?.type || card?.typeLine || '').toLowerCase()
   return t.includes('land')
 }
 
 // Récupère un "mana value" fiable en combinant plusieurs sources possibles
-export function getManaValue(card) {
+export function getManaValue(card: any): number {
   // champs "classiques"
   const direct = card?.manaValue ?? card?.cmc ?? card?.convertedManaCost ?? null
 
@@ -33,7 +40,7 @@ export function getManaValue(card) {
 }
 
 // Parse une string de coût Scryfall: "{1}{U}{U}", "{X}{G}", "{2/U}", "{U/P}", etc.
-export function parseManaCost(manaCostStr) {
+export function parseManaCost(manaCostStr?: string | null): number | null {
   if (!manaCostStr || typeof manaCostStr !== 'string') return null
   const tokens = manaCostStr.match(/\{[^}]+\}/g) || []
   let total = 0
@@ -66,21 +73,32 @@ export function parseManaCost(manaCostStr) {
       continue
     }
 
-    // Fallback: on ignore (tap/untap n’apparaissent normalement pas ici)
+    // Fallback: on ignore (tap/untap n'apparaissent normalement pas ici)
   }
 
   return total
 }
 
+export interface ManaCurveOptions {
+  excludeLands?: boolean
+  cap?: number
+  mergeLow?: boolean
+}
+
+export interface ColorDistributionOptions {
+  excludeLands?: boolean
+  splitMulticolor?: boolean
+  includeColorless?: boolean
+}
+
 /**
  * Calcule la courbe de mana (0..cap puis "cap+").
- * @param {Array} cards  - cartes "enriched" avec decklistQuantity, type/typeLine, manaValue/cmc/mana_cost...
- * @param {Object} opts  - { excludeLands: true, cap: 7 }
- * @returns {Array<{ mv: string, count: number }>}
  */
-
 // retourne un tableau avec la repartition des cartes par manacost et par type de cartes : Créature/non créature et de 1- à 7+
-export function computeManaCurveSplit(cards, opts = {}) {
+export function computeManaCurveSplit(
+  cards: MTGCard[],
+  opts: ManaCurveOptions = {}
+): ManaCurveSplitData[] {
   const { excludeLands = true, cap = 7, mergeLow = true } = opts
 
   const bucketC = new Array(cap + 1).fill(0) // créatures 0..cap (cap = exactement cap)
@@ -89,10 +107,10 @@ export function computeManaCurveSplit(cards, opts = {}) {
   let overN = 0 // non-créatures > cap
 
   ;(cards || []).forEach(card => {
-    const qty = Number(card?.decklistQuantity ?? card?.quantity ?? 0)
+    const qty = Number(card?.quantity ?? 0)
     if (!qty) return
 
-    const typeLine = (card?.type || card?.typeLine || '').toLowerCase()
+    const typeLine = (card?.gameData?.type || card?.gameData?.typeLine || '').toLowerCase()
     if (excludeLands && typeLine.includes('land')) return
 
     const isCreature = typeLine.includes('creature')
@@ -110,19 +128,19 @@ export function computeManaCurveSplit(cards, opts = {}) {
     }
   })
 
-  const data = []
+  const data: ManaCurveSplitData[] = []
 
   if (mergeLow) {
     // "1-" : 0 et 1 combinés
     data.push({
-      mv: '1-',
+      cost: '1-',
       creatures: (bucketC[0] || 0) + (bucketC[1] || 0),
       nonCreatures: (bucketN[0] || 0) + (bucketN[1] || 0),
     })
     // 2..cap-1
     for (let i = 2; i < cap; i++) {
       data.push({
-        mv: String(i),
+        cost: String(i),
         creatures: bucketC[i],
         nonCreatures: bucketN[i],
       })
@@ -131,7 +149,7 @@ export function computeManaCurveSplit(cards, opts = {}) {
     // 0..cap-1 séparés
     for (let i = 0; i < cap; i++) {
       data.push({
-        mv: String(i),
+        cost: String(i),
         creatures: bucketC[i],
         nonCreatures: bucketN[i],
       })
@@ -140,7 +158,7 @@ export function computeManaCurveSplit(cards, opts = {}) {
 
   // "cap+" = exactement cap + tout ce qui est > cap
   data.push({
-    mv: `${cap}+`,
+    cost: `${cap}+`,
     creatures: bucketC[cap] + overC,
     nonCreatures: bucketN[cap] + overN,
   })
@@ -149,7 +167,10 @@ export function computeManaCurveSplit(cards, opts = {}) {
 }
 
 // retourne un tableau avec la repartition des cartes par manacost, de 1- à 7+
-export function computeManaCurve(cards, opts = {}) {
+export function computeManaCurve(
+  cards: MTGCard[],
+  opts: ManaCurveOptions = {}
+): ManaCurveData[] {
   const { excludeLands = true, cap = 7 } = opts
 
   // 0..cap (cap = exactement 7), capPlus = strictement > 7
@@ -157,7 +178,7 @@ export function computeManaCurve(cards, opts = {}) {
   let capPlus = 0
 
   ;(cards || []).forEach(card => {
-    const qty = Number(card?.decklistQuantity ?? card?.quantity ?? 0)
+    const qty = Number(card?.quantity ?? 0)
     if (!qty) return
     if (excludeLands && isLand(card)) return
 
@@ -172,48 +193,54 @@ export function computeManaCurve(cards, opts = {}) {
     }
   })
 
-  const data = []
-  for (let i = 0; i < cap; i++) data.push({ mv: String(i), count: buckets[i] })
-  data.push({ mv: `${cap}+`, count: buckets[cap] + capPlus }) // ✅ 7 + (strictement >cap) + exactement cap
+  const data: ManaCurveData[] = []
+  for (let i = 0; i < cap; i++)
+    data.push({ cost: String(i), count: buckets[i] })
+  data.push({ cost: `${cap}+`, count: buckets[cap] + capPlus }) // ✅ 7 + (strictement >cap) + exactement cap
 
   return data
 }
 
-export function getCardColors(card) {
+export function getCardColors(card: any): MTGColor[] {
   // Priorité : "colors" (coût réel) puis "color_identity"
   let cols = card?.colors ?? card?.colorIdentity ?? card?.color_identity ?? null
 
   if (typeof cols === 'string') cols = cols.split('') // ex: "WU" -> ["W","U"]
   if (!Array.isArray(cols)) cols = []
 
-  const set = new Set(
+  const set = new Set<MTGColor>(
     cols
-      .map(c => String(c).toUpperCase())
-      .filter(c => ['W', 'U', 'B', 'R', 'G'].includes(c))
+      .map((c: any) => String(c).toUpperCase())
+      .filter((c: string) => ['W', 'U', 'B', 'R', 'G'].includes(c)) as MTGColor[]
   )
 
   return set.size ? Array.from(set) : ['C'] // incolore si rien
 }
 
 //retourne un tableau avec la répartition des cartes par couleur
-export function computeColorDistribution(cards, opts = {}) {
+export function computeColorDistribution(
+  cards: MTGCard[],
+  opts: ColorDistributionOptions = {}
+): ColorDistribution<MTGColor> {
   const {
     excludeLands = true,
     splitMulticolor = true,
     includeColorless = true,
   } = opts
 
-  const totals = {
+  const totals: Record<MTGColor, number> = {
     W: 0,
     U: 0,
     B: 0,
     R: 0,
     G: 0,
-    ...(includeColorless ? { C: 0 } : {}),
+    C: 0,
+    M: 0,
+    ...(includeColorless ? {} : { C: 0, M: 0 }),
   }
 
   ;(cards || []).forEach(card => {
-    const qty = Number(card?.decklistQuantity ?? card?.quantity ?? 0)
+    const qty = Number(card?.quantity ?? 0)
     if (!qty) return
     if (excludeLands && isLand(card)) return
 
@@ -226,10 +253,10 @@ export function computeColorDistribution(cards, opts = {}) {
     })
   })
 
-  const order = includeColorless
+  const order: MTGColor[] = includeColorless
     ? ['W', 'U', 'B', 'R', 'G', 'C']
     : ['W', 'U', 'B', 'R', 'G']
-  const data = order
+  const data: ColorDistributionData<MTGColor>[] = order
     .map(k => ({ key: k, value: Number(totals[k].toFixed(2)) }))
     .filter(d => d.value > 0)
 

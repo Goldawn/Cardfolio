@@ -1,8 +1,8 @@
 // Types spécifiques Flesh and Blood
 // ==================================
 
-import { BaseCard } from '../base';
-import { Collection, Decklist } from '../collections';
+import { BaseCard } from '../base'
+import { Collection, Decklist } from '../collections'
 
 export type FleshAndBloodClass =
   | 'Guardian'
@@ -17,7 +17,7 @@ export type FleshAndBloodClass =
   | 'Illusionist'
   | 'Shapeshifter'
   | 'Merchant'
-  | 'Generic';
+  | 'Generic'
 
 export type FleshAndBloodCardType =
   | 'Hero'
@@ -27,7 +27,7 @@ export type FleshAndBloodCardType =
   | 'Attack'
   | 'Reaction'
   | 'Instant'
-  | 'Token';
+  | 'Token'
 
 export type FleshAndBloodFormat =
   | 'Blitz'
@@ -38,32 +38,32 @@ export type FleshAndBloodFormat =
   | 'Commoner'
   | 'Clash'
   | 'Pro Tour'
-  | 'Living Legend';
+  | 'Living Legend'
 
 export type FleshAndBloodGameData = {
-  class?: FleshAndBloodClass;
-  cost?: number;
-  pitch?: number;
-  defense?: number;
-  attack?: number;
-  life?: number;
-  intellect?: number;
-  type?: string;
-  text?: string;
-  flavorText?: string;
-  keywords?: string[];
-  subType?: string;
-  superType?: string;
-  rarity?: string;
-  set?: string;
-  setNumber?: string;
-  artist?: string;
-  legalities?: Record<string, string>;
-  restrictions?: string[];
-  banned?: boolean;
-  suspended?: boolean;
-  livingLegend?: boolean;
-};
+  class?: FleshAndBloodClass
+  cost?: number
+  pitch?: number
+  defense?: number
+  attack?: number
+  life?: number
+  intellect?: number
+  type?: string
+  text?: string
+  flavorText?: string
+  keywords?: string[]
+  subType?: string
+  superType?: string
+  rarity?: string
+  set?: string
+  setNumber?: string
+  artist?: string
+  legalities?: Record<string, string>
+  restrictions?: string[]
+  banned?: boolean
+  suspended?: boolean
+  livingLegend?: boolean
+}
 
 export type FleshAndBloodCard = BaseCard<
   FleshAndBloodGameData,
@@ -71,8 +71,12 @@ export type FleshAndBloodCard = BaseCard<
   FleshAndBloodCardType,
   FleshAndBloodFormat
 > & {
-  gameType: 'flesh-and-blood';
-};
+  gameType: 'flesh-and-blood'
+}
 
-export type FleshAndBloodCollection = Collection<'flesh-and-blood'>;
-export type FleshAndBloodDecklist = Decklist<'flesh-and-blood', FleshAndBloodClass, FleshAndBloodFormat>;
+export type FleshAndBloodCollection = Collection<'flesh-and-blood'>
+export type FleshAndBloodDecklist = Decklist<
+  'flesh-and-blood',
+  FleshAndBloodClass,
+  FleshAndBloodFormat
+>

@@ -1,8 +1,8 @@
 // Types spécifiques Yu-Gi-Oh!
 // ============================
 
-import { BaseCard } from '../base';
-import { Collection, Decklist } from '../collections';
+import { BaseCard } from '../base'
+import { Collection, Decklist } from '../collections'
 
 export type YugiohAttribute =
   | 'DARK'
@@ -11,12 +11,9 @@ export type YugiohAttribute =
   | 'FIRE'
   | 'LIGHT'
   | 'WATER'
-  | 'WIND';
+  | 'WIND'
 
-export type YugiohCardType =
-  | 'Monster'
-  | 'Spell'
-  | 'Trap';
+export type YugiohCardType = 'Monster' | 'Spell' | 'Trap'
 
 export type YugiohMonsterType =
   | 'Aqua'
@@ -43,42 +40,42 @@ export type YugiohMonsterType =
   | 'Warrior'
   | 'Winged Beast'
   | 'Wyrm'
-  | 'Zombie';
+  | 'Zombie'
 
 export type YugiohFormat =
   | 'Advanced'
   | 'Traditional'
   | 'Speed Duel'
-  | 'Rush Duel';
+  | 'Rush Duel'
 
 export type YugiohGameData = {
-  attribute?: YugiohAttribute;
-  level?: number;
-  rank?: number;
-  linkRating?: number;
-  monsterType?: YugiohMonsterType;
-  type?: string;
-  atk?: number;
-  def?: number;
-  linkMarkers?: string[];
-  pendulumScale?: number;
-  pendulumEffect?: string;
-  effect?: string;
-  flavorText?: string;
-  archetype?: string;
-  materials?: string;
-  fusionMaterials?: string;
-  ritualSpell?: string;
-  ritualMonster?: string;
-  xyzMaterials?: string;
-  linkMaterials?: string;
-  synchroMaterials?: string;
-  tuner?: boolean;
-  nonTuner?: string;
-  spellType?: string;
-  trapType?: string;
-  property?: string;
-};
+  attribute?: YugiohAttribute
+  level?: number
+  rank?: number
+  linkRating?: number
+  monsterType?: YugiohMonsterType
+  type?: string
+  atk?: number
+  def?: number
+  linkMarkers?: string[]
+  pendulumScale?: number
+  pendulumEffect?: string
+  effect?: string
+  flavorText?: string
+  archetype?: string
+  materials?: string
+  fusionMaterials?: string
+  ritualSpell?: string
+  ritualMonster?: string
+  xyzMaterials?: string
+  linkMaterials?: string
+  synchroMaterials?: string
+  tuner?: boolean
+  nonTuner?: string
+  spellType?: string
+  trapType?: string
+  property?: string
+}
 
 export type YugiohCard = BaseCard<
   YugiohGameData,
@@ -86,8 +83,8 @@ export type YugiohCard = BaseCard<
   YugiohCardType,
   YugiohFormat
 > & {
-  gameType: 'yugioh';
-};
+  gameType: 'yugioh'
+}
 
-export type YugiohCollection = Collection<'yugioh'>;
-export type YugiohDecklist = Decklist<'yugioh', YugiohAttribute, YugiohFormat>;
+export type YugiohCollection = Collection<'yugioh'>
+export type YugiohDecklist = Decklist<'yugioh', YugiohAttribute, YugiohFormat>
