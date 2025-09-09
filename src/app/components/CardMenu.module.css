@@ -7,7 +7,7 @@
   display: flex;
   gap: 2px;
 }
- 
+
 .cardManager ul li {
   list-style-type: none;
   background-color: rgb(17, 17, 17);

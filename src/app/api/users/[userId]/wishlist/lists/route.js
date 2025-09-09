@@ -1,8 +1,8 @@
-import { prisma } from "@/lib/prisma";
+import { prisma } from '@/lib/prisma'
 
 // GET - Récupérer toutes les listes de wishlist d'un utilisateur
 export async function GET(request, { params }) {
-  const { userId } = await params;
+  const { userId } = await params
 
   try {
     const lists = await prisma.wishlistList.findMany({
@@ -14,31 +14,38 @@ export async function GET(request, { params }) {
           },
         },
       },
-      orderBy: { createdAt: "desc" },
-    });
+      orderBy: { createdAt: 'desc' },
+    })
 
-    const listsWithTotalQuantity = lists.map((list) => {
-      const totalQuantity = list.items.reduce((sum, item) => sum + item.quantity, 0);
+    const listsWithTotalQuantity = lists.map(list => {
+      const totalQuantity = list.items.reduce(
+        (sum, item) => sum + item.quantity,
+        0
+      )
       return {
         ...list,
         totalQuantity,
-      };
-    });
+      }
+    })
 
-    return Response.json(listsWithTotalQuantity);
+    return Response.json(listsWithTotalQuantity)
   } catch (error) {
-    console.error("❌ Erreur GET wishlist/lists:", error);
-    return new Response(JSON.stringify({ error: "Erreur serveur" }), { status: 500 });
+    console.error('❌ Erreur GET wishlist/lists:', error)
+    return new Response(JSON.stringify({ error: 'Erreur serveur' }), {
+      status: 500,
+    })
   }
 }
 
 // POST - Créer une nouvelle liste de wishlist
 export async function POST(request, { params }) {
-  const { userId } = await params;
-  const { name } = await request.json();
+  const { userId } = await params
+  const { name } = await request.json()
 
   if (!name) {
-    return new Response(JSON.stringify({ error: "Nom de liste requis" }), { status: 400 });
+    return new Response(JSON.stringify({ error: 'Nom de liste requis' }), {
+      status: 400,
+    })
   }
 
   try {
@@ -47,22 +54,26 @@ export async function POST(request, { params }) {
         name,
         user: { connect: { id: userId } },
       },
-    });
+    })
 
-    return Response.json(newList);
+    return Response.json(newList)
   } catch (error) {
-    console.error("Erreur POST wishlist list:", error);
-    return new Response(JSON.stringify({ error: "Erreur serveur" }), { status: 500 });
+    console.error('Erreur POST wishlist list:', error)
+    return new Response(JSON.stringify({ error: 'Erreur serveur' }), {
+      status: 500,
+    })
   }
 }
 
 // PATCH - Renommer ou dupliquer une liste de souhaits
 export async function PATCH(request, { params }) {
-  const { userId } = await params;
-  const { listId, name, duplicate } = await request.json(); // 👈 name au lieu de newName
+  const { userId } = await params
+  const { listId, name, duplicate } = await request.json() // 👈 name au lieu de newName
 
   if (!listId || !name) {
-    return new Response(JSON.stringify({ error: "Données manquantes" }), { status: 400 });
+    return new Response(JSON.stringify({ error: 'Données manquantes' }), {
+      status: 400,
+    })
   }
 
   try {
@@ -70,10 +81,12 @@ export async function PATCH(request, { params }) {
       const original = await prisma.wishlistList.findUnique({
         where: { id: listId },
         include: { items: true },
-      });
+      })
 
       if (!original) {
-        return new Response(JSON.stringify({ error: "Liste introuvable" }), { status: 404 });
+        return new Response(JSON.stringify({ error: 'Liste introuvable' }), {
+          status: 404,
+        })
       }
 
       const duplicated = await prisma.wishlistList.create({
@@ -87,31 +100,34 @@ export async function PATCH(request, { params }) {
             })),
           },
         },
-      });
+      })
 
-      return Response.json({ id: duplicated.id, name: duplicated.name });
+      return Response.json({ id: duplicated.id, name: duplicated.name })
     } else {
       const renamed = await prisma.wishlistList.update({
         where: { id: listId },
         data: { name }, // 👈 ici aussi
-      });
+      })
 
-      return Response.json({ id: renamed.id, name: renamed.name });
+      return Response.json({ id: renamed.id, name: renamed.name })
     }
   } catch (error) {
-    console.error("Erreur PATCH wishlist list:", error);
-    return new Response(JSON.stringify({ error: "Erreur serveur" }), { status: 500 });
+    console.error('Erreur PATCH wishlist list:', error)
+    return new Response(JSON.stringify({ error: 'Erreur serveur' }), {
+      status: 500,
+    })
   }
 }
 
-
 // DELETE - Supprimer une liste de wishlist (et ses cartes associées)
 export async function DELETE(request, { params }) {
-  const { userId } = await params;
-  const { listId } = await request.json();
+  const { userId } = await params
+  const { listId } = await request.json()
 
   if (!listId) {
-    return new Response(JSON.stringify({ error: "ID de liste manquant" }), { status: 400 });
+    return new Response(JSON.stringify({ error: 'ID de liste manquant' }), {
+      status: 400,
+    })
   }
 
   try {
@@ -120,11 +136,13 @@ export async function DELETE(request, { params }) {
         id: listId,
         userId,
       },
-    });
+    })
 
-    return new Response(null, { status: 204 });
+    return new Response(null, { status: 204 })
   } catch (error) {
-    console.error("Erreur DELETE wishlist list:", error);
-    return new Response(JSON.stringify({ error: "Erreur serveur" }), { status: 500 });
+    console.error('Erreur DELETE wishlist list:', error)
+    return new Response(JSON.stringify({ error: 'Erreur serveur' }), {
+      status: 500,
+    })
   }
 }

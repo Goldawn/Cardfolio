@@ -1,20 +1,20 @@
-export const formatCard = (card) => {
-  const layoutType = card.layout || "normal";
+export const formatCard = card => {
+  const layoutType = card.layout || 'normal'
 
-  const checkColorless = (card) => {
-    return card.colors?.length === 0 && card.mana_cost ? ["C"] : card.colors;
-  };
+  const checkColorless = card => {
+    return card.colors?.length === 0 && card.mana_cost ? ['C'] : card.colors
+  }
 
-  const checkColorlessIdentity = (card) => {
-    return (Array.isArray(card.color_identity) &&
+  const checkColorlessIdentity = card => {
+    return Array.isArray(card.color_identity) &&
       card.color_identity.length === 0 &&
       card.mana_cost &&
-      card.mana_cost !== "")
-      ? ["C"]
-      : card.color_identity;
-  };
+      card.mana_cost !== ''
+      ? ['C']
+      : card.color_identity
+  }
 
-  const formatText = (text) => text;
+  const formatText = text => text
 
   // Base commune pour toutes les cartes
   const baseCard = {
@@ -22,12 +22,12 @@ export const formatCard = (card) => {
     layout: layoutType,
     setCode: card.set || null,
     setName: card.set_name || null,
-    lang: card.lang || "en",
+    lang: card.lang || 'en',
     quantity: 1,
-    addedAt: new Date().toISOString().split("T")[0],
+    addedAt: new Date().toISOString().split('T')[0],
     priceHistory: [
       {
-        date: new Date().toISOString().split("T")[0],
+        date: new Date().toISOString().split('T')[0],
         usd: card.prices?.usd || 0,
         eur: card.prices?.eur || 0,
       },
@@ -37,26 +37,26 @@ export const formatCard = (card) => {
     artist: card.artist || null,
     legalities: card.legalities || {},
     colorIdentity: checkColorlessIdentity(card),
-  };
+  }
 
-  const extractImage = (face) => ({
+  const extractImage = face => ({
     small: face?.image_uris?.small || null,
     normal: face?.image_uris?.normal || null,
     large: face?.image_uris?.large || null,
     artCrop: face?.image_uris?.art_crop || null,
-  });
+  })
 
   // Cas spécial des cartes réversibles
-  if (layoutType === "reversible_card") {
-    const faceLayout = card.card_faces[0]?.layout || "normal";
+  if (layoutType === 'reversible_card') {
+    const faceLayout = card.card_faces[0]?.layout || 'normal'
 
     // Fonction interne pour gérer la face comme un layout connu
-    const formatFaceAs = (layoutKind) => {
+    const formatFaceAs = layoutKind => {
       switch (layoutKind) {
-        case "adventure":
+        case 'adventure':
           return {
             ...baseCard,
-            name: card.name.split(" // ")[0],
+            name: card.name.split(' // ')[0],
             type: card.card_faces[0].type_line,
             manaCost: card.card_faces[0].mana_cost,
             oracleText: card.card_faces[0].oracle_text || null,
@@ -66,7 +66,7 @@ export const formatCard = (card) => {
             colors: checkColorless(card.card_faces[0]),
             image: extractImage(card.card_faces[0]),
             cardBack: {
-              name: card.card_faces[1]?.name || card.name.split(" // ")[1],
+              name: card.card_faces[1]?.name || card.name.split(' // ')[1],
               type: card.card_faces[1]?.type_line || null,
               manaCost: card.card_faces[1]?.mana_cost || null,
               oracleText: card.card_faces[1]?.oracle_text || null,
@@ -76,15 +76,15 @@ export const formatCard = (card) => {
               colors: checkColorless(card.card_faces[1]),
             },
             reversibleImage: extractImage(card.card_faces[1]),
-          };
+          }
 
-        case "split":
-        case "modal_dfc":
-        case "transform":
-        case "flip":
+        case 'split':
+        case 'modal_dfc':
+        case 'transform':
+        case 'flip':
           return {
             ...baseCard,
-            name: card.card_faces[0]?.name || card.name.split(" // ")[0],
+            name: card.card_faces[0]?.name || card.name.split(' // ')[0],
             type: card.card_faces[0]?.type_line || card.type_line,
             manaCost: card.card_faces[0]?.mana_cost || card.mana_cost,
             oracleText: card.card_faces[0]?.oracle_text || card.oracle_text,
@@ -95,7 +95,7 @@ export const formatCard = (card) => {
             colors: checkColorless(card.card_faces[0]),
             image: extractImage(card.card_faces[0]),
             cardBack: {
-              name: card.card_faces[1]?.name || card.name.split(" // ")[1],
+              name: card.card_faces[1]?.name || card.name.split(' // ')[1],
               type: card.card_faces[1]?.type_line || null,
               manaCost: card.card_faces[1]?.mana_cost || null,
               oracleText: card.card_faces[1]?.oracle_text || null,
@@ -107,7 +107,7 @@ export const formatCard = (card) => {
               image: extractImage(card.card_faces[1]),
             },
             reversibleImage: extractImage(card.card_faces[1]),
-          };
+          }
 
         default:
           return {
@@ -123,21 +123,21 @@ export const formatCard = (card) => {
             colors: checkColorless(card.card_faces[0]),
             image: extractImage(card.card_faces[0]),
             reversibleImage: extractImage(card.card_faces[1]),
-          };
+          }
       }
-    };
+    }
 
-    return formatFaceAs(faceLayout);
+    return formatFaceAs(faceLayout)
   }
 
   // Layouts spéciaux classiques
   switch (layoutType) {
-    case "transform":
-    case "modal_dfc":
-    case "flip":
+    case 'transform':
+    case 'modal_dfc':
+    case 'flip':
       return {
         ...baseCard,
-        name: card.card_faces[0]?.name || card.name.split(" // ")[0],
+        name: card.card_faces[0]?.name || card.name.split(' // ')[0],
         type: card.card_faces[0]?.type_line || card.type_line,
         manaCost: card.card_faces[0]?.mana_cost || card.mana_cost,
         oracleText: card.card_faces[0]?.oracle_text || card.oracle_text,
@@ -148,7 +148,7 @@ export const formatCard = (card) => {
         colors: checkColorless(card.card_faces[0]),
         image: extractImage(card.card_faces[0]),
         cardBack: {
-          name: card.card_faces[1]?.name || card.name.split(" // ")[1],
+          name: card.card_faces[1]?.name || card.name.split(' // ')[1],
           type: card.card_faces[1]?.type_line || null,
           manaCost: card.card_faces[1]?.mana_cost || null,
           oracleText: card.card_faces[1]?.oracle_text || null,
@@ -159,13 +159,13 @@ export const formatCard = (card) => {
           colors: checkColorless(card.card_faces[1]),
           image: extractImage(card.card_faces[1]),
         },
-      };
+      }
 
-    case "split":
-    case "adventure":
+    case 'split':
+    case 'adventure':
       return {
         ...baseCard,
-        name: card.name.split(" // ")[0],
+        name: card.name.split(' // ')[0],
         type: card.card_faces[0].type_line,
         manaCost: card.card_faces[0].mana_cost,
         oracleText: card.card_faces[0].oracle_text || null,
@@ -175,7 +175,7 @@ export const formatCard = (card) => {
         colors: checkColorless(card),
         image: extractImage(card),
         cardBack: {
-          name: card.card_faces[1]?.name || card.name.split(" // ")[1],
+          name: card.card_faces[1]?.name || card.name.split(' // ')[1],
           type: card.card_faces[1]?.type_line,
           manaCost: card.card_faces[1]?.mana_cost,
           oracleText: card.card_faces[1]?.oracle_text || null,
@@ -184,7 +184,7 @@ export const formatCard = (card) => {
           toughness: card.card_faces[1]?.toughness || null,
           colors: checkColorless(card.card_faces[1]),
         },
-      };
+      }
 
     default:
       return {
@@ -199,6 +199,6 @@ export const formatCard = (card) => {
         loyalty: card.loyalty || null,
         colors: checkColorless(card),
         image: extractImage(card),
-      };
+      }
   }
-};
+}

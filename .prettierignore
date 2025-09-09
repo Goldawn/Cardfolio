@@ -1,0 +1,13 @@
+node_modules
+.next
+out
+dist
+build
+coverage
+.nyc_output
+*.log
+.env*
+.DS_Store
+*.tsbuildinfo
+prisma/migrations
+public

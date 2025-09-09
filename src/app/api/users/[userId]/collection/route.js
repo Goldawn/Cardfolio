@@ -1,34 +1,34 @@
-import { prisma } from "@/lib/prisma";
+import { prisma } from '@/lib/prisma'
 
 export async function GET(request, { params }) {
-  const { userId } = await params;
+  const { userId } = await params
 
   try {
     const defaultCollection = await prisma.collection.findFirst({
-    where: { userId },
-    orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }],
-    include: { items: true }, // <- CollectionItem[]
-  });
+      where: { userId },
+      orderBy: [{ isDefault: 'desc' }, { createdAt: 'asc' }],
+      include: { items: true }, // <- CollectionItem[]
+    })
 
-    return Response.json(defaultCollection.items);
+    return Response.json(defaultCollection.items)
   } catch (error) {
-    console.error("Erreur API collection :", error);
-    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
+    console.error('Erreur API collection :', error)
+    return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
       status: 500,
-    });
+    })
   }
 }
 
 export async function POST(request, { params }) {
-  const { userId } = params;
-  const body = await request.json();
+  const { userId } = params
+  const body = await request.json()
 
-  const { scryfallId, quantity, priceHistory } = body;
+  const { scryfallId, quantity, priceHistory } = body
 
   if (!scryfallId || !quantity) {
-    return new Response(JSON.stringify({ error: "Données manquantes" }), {
+    return new Response(JSON.stringify({ error: 'Données manquantes' }), {
       status: 400,
-    });
+    })
   }
 
   try {
@@ -41,36 +41,39 @@ export async function POST(request, { params }) {
           connect: { id: userId },
         },
       },
-    });
+    })
 
     // 🆕 Création du log
     await prisma.collectionChangeLog.create({
       data: {
         userId,
         scryfallId,
-        changeType: "add",
+        changeType: 'add',
         quantity,
         totalAfter: quantity,
       },
-    });
+    })
 
-    return Response.json(newCard);
+    return Response.json(newCard)
   } catch (error) {
-    console.error("Erreur ajout collection :", error);
-    return new Response(JSON.stringify({ error: "Erreur serveur" }), {
+    console.error('Erreur ajout collection :', error)
+    return new Response(JSON.stringify({ error: 'Erreur serveur' }), {
       status: 500,
-    });
+    })
   }
 }
 
 export async function PATCH(request, { params }) {
-  const { userId } = params;
-  const { scryfallId, quantityDelta, newPriceEntry } = await request.json();
+  const { userId } = params
+  const { scryfallId, quantityDelta, newPriceEntry } = await request.json()
 
-  if (!scryfallId || typeof quantityDelta !== "number") {
-    return new Response(JSON.stringify({ error: "Données manquantes ou invalides" }), {
-      status: 400,
-    });
+  if (!scryfallId || typeof quantityDelta !== 'number') {
+    return new Response(
+      JSON.stringify({ error: 'Données manquantes ou invalides' }),
+      {
+        status: 400,
+      }
+    )
   }
 
   try {
@@ -79,33 +82,33 @@ export async function PATCH(request, { params }) {
         userId,
         scryfallId,
       },
-    });
+    })
 
     if (!existing) {
-      return new Response(JSON.stringify({ error: "Carte non trouvée" }), {
+      return new Response(JSON.stringify({ error: 'Carte non trouvée' }), {
         status: 404,
-      });
+      })
     }
 
-    const newQuantity = existing.quantity + quantityDelta;
+    const newQuantity = existing.quantity + quantityDelta
 
     // 👇 Si on supprime la carte (quantité <= 0)
     if (newQuantity < 1) {
       await prisma.collectionItem.delete({
         where: { id: existing.id },
-      });
+      })
 
       await prisma.collectionChangeLog.create({
         data: {
           userId,
           scryfallId,
-          changeType: "remove",
+          changeType: 'remove',
           quantity: quantityDelta,
           totalAfter: 0,
         },
-      });
+      })
 
-      return new Response(null, { status: 204 });
+      return new Response(null, { status: 204 })
     }
 
     // 👇 Sinon, on met à jour la carte normalement
@@ -117,55 +120,61 @@ export async function PATCH(request, { params }) {
           push: newPriceEntry ? [newPriceEntry] : [],
         },
       },
-    });
+    })
 
     // 👇 Ajout dans le log
     await prisma.collectionChangeLog.create({
       data: {
         userId,
         scryfallId,
-        changeType: quantityDelta > 0 ? "add" : "remove",
+        changeType: quantityDelta > 0 ? 'add' : 'remove',
         quantity: quantityDelta,
         totalAfter: newQuantity,
       },
-    });
+    })
 
-    return Response.json(updated);
+    return Response.json(updated)
   } catch (error) {
-    console.error("Erreur PATCH collection :", error);
-    return new Response(JSON.stringify({ error: "Erreur serveur" }), {
+    console.error('Erreur PATCH collection :', error)
+    return new Response(JSON.stringify({ error: 'Erreur serveur' }), {
       status: 500,
-    });
+    })
   }
 }
 
 export async function DELETE(request, { params }) {
-    const { userId } = params;
-    const { scryfallId } = await request.json();
-  
-    if (!scryfallId) {
-      return new Response(JSON.stringify({ error: "scryfallId manquant" }), { status: 400 });
+  const { userId } = params
+  const { scryfallId } = await request.json()
+
+  if (!scryfallId) {
+    return new Response(JSON.stringify({ error: 'scryfallId manquant' }), {
+      status: 400,
+    })
+  }
+
+  try {
+    const existing = await prisma.collectionItem.findFirst({
+      where: {
+        userId,
+        scryfallId,
+      },
+    })
+
+    if (!existing) {
+      return new Response(JSON.stringify({ error: 'Carte non trouvée' }), {
+        status: 404,
+      })
     }
-  
-    try {
-      const existing = await prisma.collectionItem.findFirst({
-        where: {
-          userId,
-          scryfallId,
-        },
-      });
-  
-      if (!existing) {
-        return new Response(JSON.stringify({ error: "Carte non trouvée" }), { status: 404 });
-      }
-  
-      await prisma.collectionItem.delete({
-        where: { id: existing.id },
-      });
-  
-      return new Response(null, { status: 204 });
-    } catch (error) {
-      console.error("Erreur DELETE collection :", error);
-      return new Response(JSON.stringify({ error: "Erreur serveur" }), { status: 500 });
-    }
+
+    await prisma.collectionItem.delete({
+      where: { id: existing.id },
+    })
+
+    return new Response(null, { status: 204 })
+  } catch (error) {
+    console.error('Erreur DELETE collection :', error)
+    return new Response(JSON.stringify({ error: 'Erreur serveur' }), {
+      status: 500,
+    })
+  }
 }

@@ -8,11 +8,15 @@
   place-items: center;
   padding: 20px;
   background:
-    radial-gradient(1200px 800px at 70% 20%, rgba(255,255,255,0.08), transparent 60%),
-    rgba(0,0,0,0.78);
+    radial-gradient(
+      1200px 800px at 70% 20%,
+      rgba(255, 255, 255, 0.08),
+      transparent 60%
+    ),
+    rgba(0, 0, 0, 0.78);
   backdrop-filter: blur(6px) saturate(115%);
   z-index: 1000;
-  animation: fadeIn .18s ease-out;
+  animation: fadeIn 0.18s ease-out;
 }
 
 /* ===== Boîte du modal ===== */
@@ -20,30 +24,46 @@
   position: relative;
   width: min(1200px, 92vw);
   max-height: 92vh;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03));
-  border: 1px solid rgba(255,255,255,0.12);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.05),
+    rgba(255, 255, 255, 0.03)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.45);
-  overflow: hidden;              /* pour arrondis + scroll internes */
-  animation: popIn .16s ease-out;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+  overflow: hidden; /* pour arrondis + scroll internes */
+  animation: popIn 0.16s ease-out;
 }
 
 /* ===== Bouton fermer ===== */
 .closeButton {
   position: absolute;
-  top: 10px; right: 10px;
-  width: 32px; height: 32px;
-  display: grid; place-items: center;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
   border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.18);
-  background: rgba(0,0,0,0.45);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.45);
   color: #e8eaed;
   cursor: pointer;
-  transition: transform .12s ease, background-color .12s ease, border-color .12s ease;
+  transition:
+    transform 0.12s ease,
+    background-color 0.12s ease,
+    border-color 0.12s ease;
 }
-.closeButton:hover { transform: translateY(-1px); background: rgba(0,0,0,0.6); border-color: rgba(255,255,255,0.28); }
-.closeButton:focus-visible { outline: 2px solid #7abaff; outline-offset: 2px; }
+.closeButton:hover {
+  transform: translateY(-1px);
+  background: rgba(0, 0, 0, 0.6);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+.closeButton:focus-visible {
+  outline: 2px solid #7abaff;
+  outline-offset: 2px;
+}
 
 /* ===== Layout interne ===== */
 .content {
@@ -58,27 +78,30 @@
    - les détails prennent l’espace restant
    - le panneau trading a une largeur minimale fixe */
 .imageContainer,
-.cardContainer {             /* le bloc visuel */
+.cardContainer {
+  /* le bloc visuel */
   flex: 0 0 min(36vw, 360px);
   width: min(36vw, 360px);
   aspect-ratio: 63 / 88;
   margin: 0 auto;
 }
-.details {                   /* colonne centrale */
+.details {
+  /* colonne centrale */
   flex: 1 1 420px;
-  min-width: 0;              /* évite les débordements */
-  max-height: calc(92vh - 24px*2 - 16px); /* scrolle si besoin */
+  min-width: 0; /* évite les débordements */
+  max-height: calc(92vh - 24px * 2 - 16px); /* scrolle si besoin */
   overflow: auto;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   padding: 14px 16px;
 }
-.tradingPanel {              /* colonne droite */
+.tradingPanel {
+  /* colonne droite */
   flex: 0 1 280px;
   min-width: 240px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   padding: 12px;
   display: flex;
@@ -88,10 +111,21 @@
 
 /* Responsive : passe en 1 colonne sous 980px */
 @media (max-width: 980px) {
-  .content { flex-direction: column; }
-  .imageContainer, .cardContainer { width: 100%; max-width: 420px; }
-  .details { max-height: none; }
-  .tradingPanel { width: 100%; min-width: 0; }
+  .content {
+    flex-direction: column;
+  }
+  .imageContainer,
+  .cardContainer {
+    width: 100%;
+    max-width: 420px;
+  }
+  .details {
+    max-height: none;
+  }
+  .tradingPanel {
+    width: 100%;
+    min-width: 0;
+  }
 }
 
 /* ===== Bloc quantité (sous l’image si présent) ===== */
@@ -101,8 +135,8 @@
   margin-top: 10px;
 }
 .quantityBox {
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 10px;
   text-align: center;
   padding: 10px;
@@ -113,27 +147,38 @@
   gap: 8px;
 }
 .qtyControls button {
-  width: 28px; height: 28px;
+  width: 28px;
+  height: 28px;
   border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.18);
-  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.35);
   color: #fff;
   cursor: pointer;
 }
-.qtyControls button:disabled { opacity: .55; cursor: not-allowed; }
+.qtyControls button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
 
 /* ===== Carte 3D (flip) ===== */
-.cardContainer { perspective: 1000px; position: relative; }
+.cardContainer {
+  perspective: 1000px;
+  position: relative;
+}
 .card {
   position: relative;
-  width: 100%; height: 100%;
+  width: 100%;
+  height: 100%;
   transform-style: preserve-3d;
-  transition: transform .6s ease;
+  transition: transform 0.6s ease;
 }
-.card.flipped { transform: rotateY(180deg); }
+.card.flipped {
+  transform: rotateY(180deg);
+}
 
 .cardFace {
-  position: absolute; inset: 0;
+  position: absolute;
+  inset: 0;
   border-radius: 6% / 4%;
   background-size: cover;
   background-position: center;
@@ -141,53 +186,105 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
-.cardFace:nth-child(2) { transform: rotateY(180deg); }
+.cardFace:nth-child(2) {
+  transform: rotateY(180deg);
+}
 
 .flipButton {
   position: absolute;
-  bottom: 10px; left: 50%;
+  bottom: 10px;
+  left: 50%;
   transform: translateX(-50%);
   padding: 6px 10px;
   border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.18);
-  background: rgba(0,0,0,0.55);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.55);
   color: #fff;
   font-size: 12px;
   cursor: pointer;
-  transition: transform .12s ease, background-color .12s ease, border-color .12s ease;
+  transition:
+    transform 0.12s ease,
+    background-color 0.12s ease,
+    border-color 0.12s ease;
 }
-.flipButton:hover { transform: translateX(-50%) translateY(-1px); background: rgba(0,0,0,0.7); border-color: rgba(255,255,255,0.28); }
+.flipButton:hover {
+  transform: translateX(-50%) translateY(-1px);
+  background: rgba(0, 0, 0, 0.7);
+  border-color: rgba(255, 255, 255, 0.28);
+}
 
 /* ===== Images (fallback) ===== */
-.imageContainer .image { border-radius: 6% / 4%; display: block; width: 100%; height: 100%; object-fit: cover; }
+.imageContainer .image {
+  border-radius: 6% / 4%;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
 /* ===== Détails ===== */
-.details img { width: 17px; vertical-align: text-bottom; } /* fix: text-bottoms -> text-bottom */
-.details h3, .details h4 {
+.details img {
+  width: 17px;
+  vertical-align: text-bottom;
+} /* fix: text-bottoms -> text-bottom */
+.details h3,
+.details h4 {
   margin: 8px 0 6px;
   font-size: 14px;
   font-weight: 700;
 }
-.details p, .details li, .details div { font-size: 13px; line-height: 1.45; }
-.details ul { margin: 6px 0 10px; padding-left: 18px; }
+.details p,
+.details li,
+.details div {
+  font-size: 13px;
+  line-height: 1.45;
+}
+.details ul {
+  margin: 6px 0 10px;
+  padding-left: 18px;
+}
 .details ul.legalities {
-  display: flex; flex-wrap: wrap; gap: 8px 12px;
-  list-style: none; padding: 0; margin: 8px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  list-style: none;
+  padding: 0;
+  margin: 8px 0;
 }
 .details ul.legalities li {
   padding: 3px 8px;
   border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.18);
-  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.06);
   font-size: 12px;
 }
 
 /* ===== Petits helpers visuels ===== */
-.cardTransition { animation: fadeIn .3s ease-in-out; }
-@keyframes fadeIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
-@keyframes popIn  { from { opacity: 0; transform: scale(.985); } to { opacity: 1; transform: scale(1); } }
+.cardTransition {
+  animation: fadeIn 0.3s ease-in-out;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
 
 /* Accessibilité focus */
 :where(.flipButton, .qtyControls button, .closeButton):focus-visible {

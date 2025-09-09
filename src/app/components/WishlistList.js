@@ -1,39 +1,39 @@
-"use client";
+'use client'
 
-import { useEffect, useRef, useState } from "react";
-import styles from "./WishlistList.module.css";
+import { useEffect, useRef, useState } from 'react'
+import styles from './WishlistList.module.css'
 
 export default function WishlistList({ list, onRename, onDelete }) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedName, setEditedName] = useState(list.name ?? "");
-  const inputRef = useRef(null);
+  const [isEditing, setIsEditing] = useState(false)
+  const [editedName, setEditedName] = useState(list.name ?? '')
+  const inputRef = useRef(null)
 
   useEffect(() => {
     if (isEditing) {
-      inputRef.current?.focus();
-      inputRef.current?.select();
+      inputRef.current?.focus()
+      inputRef.current?.select()
     }
-  }, [isEditing]);
+  }, [isEditing])
 
   const handleRename = () => {
-    const next = editedName.trim();
-    if (!next) return;
-    if (next !== list.name) onRename?.(next);
-    setIsEditing(false);
-  };
+    const next = editedName.trim()
+    if (!next) return
+    if (next !== list.name) onRename?.(next)
+    setIsEditing(false)
+  }
 
-  const onEditKeyDown = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleRename();
-    } else if (e.key === "Escape") {
-      setEditedName(list.name ?? "");
-      setIsEditing(false);
+  const onEditKeyDown = e => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      handleRename()
+    } else if (e.key === 'Escape') {
+      setEditedName(list.name ?? '')
+      setIsEditing(false)
     }
-  };
+  }
 
-  const uniqueCount = list.items?.length ?? 0;
-  const totalCount = list.totalQuantity ?? 0;
+  const uniqueCount = list.items?.length ?? 0
+  const totalCount = list.totalQuantity ?? 0
 
   return (
     <header className={styles.wishlistList}>
@@ -48,7 +48,10 @@ export default function WishlistList({ list, onRename, onDelete }) {
 
           <div className={styles.actions}>
             <button onClick={() => setIsEditing(true)}>Renommer</button>
-            <button onClick={() => onDelete?.(list.id)} className={styles.danger}>
+            <button
+              onClick={() => onDelete?.(list.id)}
+              className={styles.danger}
+            >
               Supprimer
             </button>
           </div>
@@ -59,7 +62,7 @@ export default function WishlistList({ list, onRename, onDelete }) {
             ref={inputRef}
             type="text"
             value={editedName}
-            onChange={(e) => setEditedName(e.target.value)}
+            onChange={e => setEditedName(e.target.value)}
             onKeyDown={onEditKeyDown}
             aria-label="Nouveau nom de la wishlist"
             placeholder="Nom de la liste"
@@ -67,8 +70,8 @@ export default function WishlistList({ list, onRename, onDelete }) {
           <button onClick={handleRename}>Valider</button>
           <button
             onClick={() => {
-              setIsEditing(false);
-              setEditedName(list.name ?? "");
+              setIsEditing(false)
+              setEditedName(list.name ?? '')
             }}
           >
             Annuler
@@ -76,5 +79,5 @@ export default function WishlistList({ list, onRename, onDelete }) {
         </div>
       )}
     </header>
-  );
+  )
 }

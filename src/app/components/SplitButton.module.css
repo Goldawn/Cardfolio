@@ -37,7 +37,7 @@ button.splitButtonRight {
   padding: 4px 0;
   z-index: 100;
   min-width: 160px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .splitButtonOption {
@@ -56,14 +56,39 @@ button.splitButtonRight {
   margin-right: 8px;
 }
 
-
 /* .splitButtonMenu { margin-top: 4px; background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 8px; min-width: 180px; box-shadow: 0 6px 20px rgba(0,0,0,.12); } */
-.splitButtonOption { display: flex; align-items: center; gap: 8px; padding: 6px 4px; cursor: pointer; }
-.splitButtonEmpty { padding: 6px 4px; color: #666; font-size: 13px; }
-.splitButtonSeparator { margin: 8px 0; height: 1px; background: #eee; }
-.createRow { display: flex; gap: 6px; }
-.createRow input { flex: 1; padding: 6px 8px; border: 1px solid #ddd; border-radius: 6px; }
-.createRow button { padding: 6px 10px; border: 1px solid #ddd; border-radius: 6px; 
+.splitButtonOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 4px;
+  cursor: pointer;
+}
+.splitButtonEmpty {
+  padding: 6px 4px;
+  color: #666;
+  font-size: 13px;
+}
+.splitButtonSeparator {
+  margin: 8px 0;
+  height: 1px;
+  background: #eee;
+}
+.createRow {
+  display: flex;
+  gap: 6px;
+}
+.createRow input {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+.createRow button {
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
   background: #f7f7f7;
   background: #383838;
-  cursor: pointer; }
+  cursor: pointer;
+}

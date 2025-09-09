@@ -1,25 +1,25 @@
-import GitHub from "next-auth/providers/github";
-import Google from "next-auth/providers/google";
-import type { NextAuthConfig } from "next-auth";
+import GitHub from 'next-auth/providers/github'
+import Google from 'next-auth/providers/google'
+import type { NextAuthConfig } from 'next-auth'
 
 export default {
   providers: [
     GitHub({
       clientId: process.env.AUTH_GITHUB_ID,
-      clientSecret: process.env.AUTH_GITHUB_SECRET
+      clientSecret: process.env.AUTH_GITHUB_SECRET,
     }),
     Google({
       clientId: process.env.AUTH_GOOGLE_ID,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET
-    })
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+    }),
   ],
 
   callbacks: {
     async session({ session, token }) {
       if (session.user && token.sub) {
-        session.user.id = token.sub;
+        session.user.id = token.sub
       }
-      return session;
-    }
-  }
-} satisfies NextAuthConfig;
+      return session
+    },
+  },
+} satisfies NextAuthConfig

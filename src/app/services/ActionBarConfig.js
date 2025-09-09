@@ -3,19 +3,19 @@ export {
   colorFilterElements,
   typeFilterElements,
   rarityFilterElements,
-} from "@/lib/mtgIcons";
+} from '@/lib/mtgIcons'
 
 // (Optionnel) Export par défaut pour compat legacy.
 import {
   colorFilterElements,
   typeFilterElements,
   rarityFilterElements,
-} from "@/lib/mtgIcons";
+} from '@/lib/mtgIcons'
 
 const ActionBarConfig = {
   colorFilterElements,
   typeFilterElements,
   rarityFilterElements,
-};
+}
 
-export default ActionBarConfig;
+export default ActionBarConfig

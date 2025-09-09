@@ -1,16 +1,16 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import styles from "./Card.module.css";
-import CardModal from "./CardModal";
-import SplitButton from "./SplitButton.tsx";
-import { on } from "events";
+import { useState } from 'react'
+import styles from './Card.module.css'
+import CardModal from './CardModal'
+import SplitButton from './SplitButton.tsx'
+import { on } from 'events'
 
 export default function Card({
   card,
   wishlistLists = [],
-  currency = "eur",
-  className = "",
+  currency = 'eur',
+  className = '',
   cardList,
   currentIndex,
 
@@ -38,45 +38,45 @@ export default function Card({
   updateQuantity,
   undoAddToCollection,
 }) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const getLastPrice = (card, currency) => {
-    if (!card.priceHistory || card.priceHistory.length === 0) return 0;
-    return card.priceHistory.slice(-1)[0][currency] || 0;
-  };
+    if (!card.priceHistory || card.priceHistory.length === 0) return 0
+    return card.priceHistory.slice(-1)[0][currency] || 0
+  }
 
-  const cardName = card.name?.split(" // ")[0] || "Nom inconnu";
-  const lastPrice = getLastPrice(card, currency);
-  const totalValue = (lastPrice * (card.quantity || 1)).toFixed(2);
+  const cardName = card.name?.split(' // ')[0] || 'Nom inconnu'
+  const lastPrice = getLastPrice(card, currency)
+  const totalValue = (lastPrice * (card.quantity || 1)).toFixed(2)
 
-  const handleOpenModal = (e) => {
+  const handleOpenModal = e => {
     // e.stopPropagation();                 // <-- évite de déclencher undoAdd
-    if (!modal || disabled) return;
-    setIsModalOpen(true);
-  };
+    if (!modal || disabled) return
+    setIsModalOpen(true)
+  }
 
-  const handleCloseModal = () => setIsModalOpen(false);
+  const handleCloseModal = () => setIsModalOpen(false)
 
   const handleRootClick = () => {
-    if (disabled) return;
+    if (disabled) return
     if (undoAddToCollection) {
-      undoAddToCollection(card);
+      undoAddToCollection(card)
     }
-  };
+  }
 
-  const stop = (e) => e.stopPropagation();
-  const isOwned = card.quantity > 0;
-  const cardClass = compareWithCollection && !isOwned ? styles.notOwned : "";
+  const stop = e => e.stopPropagation()
+  const isOwned = card.quantity > 0
+  const cardClass = compareWithCollection && !isOwned ? styles.notOwned : ''
 
   // Default list: si tu as un flag "isDefault" sur tes listes, privilégie-le ici
   const defaultListId =
-  wishlistLists.find((l) => l.isDefault)?.id ?? wishlistLists[0]?.id;
+    wishlistLists.find(l => l.isDefault)?.id ?? wishlistLists[0]?.id
 
   return (
     <div className={`${styles.card} ${className}`} onClick={handleRootClick}>
       <img
         className={`${cardClass}`}
-        src={card.image?.small || card.image?.normal || "/placeholder.png"}  // <-- fallback
+        src={card.image?.small || card.image?.normal || '/placeholder.png'} // <-- fallback
         alt={cardName}
         onClick={handleOpenModal}
       />
@@ -102,7 +102,7 @@ export default function Card({
           <SplitButton
             lists={wishlistLists || []}
             defaultListId={defaultListId}
-            onQuickAdd={(listId) => onAddToWishlist(listId, card)}
+            onQuickAdd={listId => onAddToWishlist(listId, card)}
             onCreateWishlist={onCreateWishlist}
             card={card}
           />
@@ -112,7 +112,10 @@ export default function Card({
           <button
             className={styles.wishlistButton}
             title="Ajouter au deck"
-            onClick={(e) => { e.stopPropagation(); onAddToDeck(card); }}
+            onClick={e => {
+              e.stopPropagation()
+              onAddToDeck(card)
+            }}
             disabled={disabled}
           >
             Ajouter au deck
@@ -131,11 +134,11 @@ export default function Card({
       {showPrice && (
         <>
           <p>
-            Prix unitaire : {Number(lastPrice).toFixed(2)}{" "}
-            {currency === "eur" ? "€" : "$"}
+            Prix unitaire : {Number(lastPrice).toFixed(2)}{' '}
+            {currency === 'eur' ? '€' : '$'}
           </p>
           <p>
-            Valeur totale : {totalValue} {currency === "eur" ? "€" : "$"}
+            Valeur totale : {totalValue} {currency === 'eur' ? '€' : '$'}
           </p>
         </>
       )}
@@ -183,5 +186,5 @@ export default function Card({
         />
       )}
     </div>
-  );
+  )
 }

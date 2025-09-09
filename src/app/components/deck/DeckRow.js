@@ -1,7 +1,7 @@
-"use client";
-import { Fragment } from "react";
-import Image from "next/image";
-import styles from "./DeckCardsTabs.module.css";
+'use client'
+import { Fragment } from 'react'
+import Image from 'next/image'
+import styles from './DeckCardsTabs.module.css'
 import {
   getMV,
   getArtSmall,
@@ -9,7 +9,7 @@ import {
   getShowcasePayload,
   rarityKeyOf,
   formatAndParseText,
-} from "@/lib/mtgCards";
+} from '@/lib/mtgCards'
 
 export default function DeckRow({
   card,
@@ -22,28 +22,26 @@ export default function DeckRow({
   setShowcased,
   getRowHoverHandlers,
   problems = [],
-  variant = "list",
+  variant = 'list',
 }) {
-
-  const hasThumb   = variant === "list";
-  const hasQty     = true;
-  const hasActions = true;
-  const hasRarity  = true;
+  const hasThumb = variant === 'list'
+  const hasQty = true
+  const hasActions = true
+  const hasRarity = true
 
   const nonRarityColCount =
-  (hasThumb ? 1 : 0)
-  + 1
-  + (hasQty ? 1 : 0)
-  + (hasActions ? 1 : 0);
+    (hasThumb ? 1 : 0) + 1 + (hasQty ? 1 : 0) + (hasActions ? 1 : 0)
 
-  const qty = Number(card?.decklistQuantity || 0);
-  if (!qty) return null;
+  const qty = Number(card?.decklistQuantity || 0)
+  if (!qty) return null
 
-  const isShowcased = String(deckState?.showcasedDeckCardId ?? "") === String(card?.deckCardId ?? "");
-  const rowProblem = showLegality && problems.length > 0;
+  const isShowcased =
+    String(deckState?.showcasedDeckCardId ?? '') ===
+    String(card?.deckCardId ?? '')
+  const rowProblem = showLegality && problems.length > 0
 
   // Rareté -> classes CSS
-  const rarity = rarityKeyOf(card);
+  const rarity = rarityKeyOf(card)
   const rarityClass =
     {
       common: styles.rarityCommon,
@@ -52,39 +50,52 @@ export default function DeckRow({
       mythic: styles.rarityMythic,
       special: styles.raritySpecial,
       other: styles.rarityOther,
-    }[rarity] || styles.rarityOther;
+    }[rarity] || styles.rarityOther
 
   // Hover preview (si dispo)
-  const hoverHandlers =
-    getRowHoverHandlers
-      ? getRowHoverHandlers({ url: getArtLarge(card), name: card.name || card.printedName })
-      : {};
+  const hoverHandlers = getRowHoverHandlers
+    ? getRowHoverHandlers({
+        url: getArtLarge(card),
+        name: card.name || card.printedName,
+      })
+    : {}
 
   // Actions quantité
-  const onDec = () => updateDeckCardQty(card.deckCardId, Math.max(0, qty - 1));
-  const onInc = () => updateDeckCardQty(card.deckCardId, qty + 1);
-  const onDelete = () => removeCardFromDeck(card.deckCardId);
-  const onToggleShowcase = () => setShowcased(card.deckCardId, getShowcasePayload(card));
+  const onDec = () => updateDeckCardQty(card.deckCardId, Math.max(0, qty - 1))
+  const onInc = () => updateDeckCardQty(card.deckCardId, qty + 1)
+  const onDelete = () => removeCardFromDeck(card.deckCardId)
+  const onToggleShowcase = () =>
+    setShowcased(card.deckCardId, getShowcasePayload(card))
 
   // Champs partagés
-  const name = card.name || card.printedName || "";
-  const typeLine = card.type || card.typeLine || "";
-  const manaCostNode = formatAndParseText(card.manaCost);
-  const mv = getMV(card); // numérique (pour tooltip CMC côté compact)
-  const artSmall = getArtSmall(card);
+  const name = card.name || card.printedName || ''
+  const typeLine = card.type || card.typeLine || ''
+  const manaCostNode = formatAndParseText(card.manaCost)
+  const mv = getMV(card) // numérique (pour tooltip CMC côté compact)
+  const artSmall = getArtSmall(card)
 
   // === Rendu selon variant ===
-  if (variant === "compact") {
+  if (variant === 'compact') {
     return (
       <Fragment>
-        <tr className={rowProblem ? styles.rowProblem : ""} {...hoverHandlers}>
+        <tr className={rowProblem ? styles.rowProblem : ''} {...hoverHandlers}>
           {/* Qté */}
           <td className={styles.qtyCell}>
             {editMode ? (
               <>
-                <button onClick={onDec} disabled={isPending || deckState?.isLocked || qty <= 1}>−</button>
+                <button
+                  onClick={onDec}
+                  disabled={isPending || deckState?.isLocked || qty <= 1}
+                >
+                  −
+                </button>
                 <span className={styles.qtyValue}>{qty}</span>
-                <button onClick={onInc} disabled={isPending || deckState?.isLocked}>+</button>
+                <button
+                  onClick={onInc}
+                  disabled={isPending || deckState?.isLocked}
+                >
+                  +
+                </button>
               </>
             ) : (
               <span className={styles.qtyValueStatic}>{qty}</span>
@@ -98,23 +109,34 @@ export default function DeckRow({
           </td>
 
           {/* CMC visuel */}
-          <td className={styles.cmcCell} title={mv != null ? `CMC ${mv}` : undefined}>
-            <span className={styles.cmcMana}>{manaCostNode || (mv ?? "—")}</span>
+          <td
+            className={styles.cmcCell}
+            title={mv != null ? `CMC ${mv}` : undefined}
+          >
+            <span className={styles.cmcMana}>
+              {manaCostNode || (mv ?? '—')}
+            </span>
           </td>
 
           {/* Actions */}
           <td className={styles.actionsCell}>
             <button
               onClick={onToggleShowcase}
-              title={isShowcased ? "Retirer de la mise en avant" : "Mettre en avant"}
+              title={
+                isShowcased ? 'Retirer de la mise en avant' : 'Mettre en avant'
+              }
               aria-pressed={isShowcased}
               className={`${styles.starBtn} ${isShowcased ? styles.starFull : styles.starEmpty}`}
             >
-              {isShowcased ? "★" : "☆"}
+              {isShowcased ? '★' : '☆'}
             </button>
 
             {editMode && (
-              <button onClick={onDelete} disabled={isPending || deckState?.isLocked} className={styles.danger}>
+              <button
+                onClick={onDelete}
+                disabled={isPending || deckState?.isLocked}
+                className={styles.danger}
+              >
                 Supprimer
               </button>
             )}
@@ -129,18 +151,20 @@ export default function DeckRow({
         {rowProblem && (
           <tr>
             {/* compact = 5 colonnes */}
-            <td colSpan={5} className={styles.problemLine}>{problems.join(" • ")}</td>
+            <td colSpan={5} className={styles.problemLine}>
+              {problems.join(' • ')}
+            </td>
           </tr>
         )}
       </Fragment>
-    );
+    )
   }
 
   // === variant === "list"
   return (
     <Fragment>
-      <tr className={rowProblem ? styles.rowProblem : ""} {...hoverHandlers}>
-         {hasThumb && (
+      <tr className={rowProblem ? styles.rowProblem : ''} {...hoverHandlers}>
+        {hasThumb && (
           <td className={styles.cellThumb}>
             {artSmall ? (
               <img src={artSmall} alt={name} className={styles.artThumbSmall} />
@@ -162,9 +186,19 @@ export default function DeckRow({
           <td className={styles.qtyCell}>
             {editMode ? (
               <>
-                <button onClick={onDec} disabled={isPending || deckState?.isLocked || qty <= 1}>−</button>
+                <button
+                  onClick={onDec}
+                  disabled={isPending || deckState?.isLocked || qty <= 1}
+                >
+                  −
+                </button>
                 <span className={styles.qtyValue}>{qty}</span>
-                <button onClick={onInc} disabled={isPending || deckState?.isLocked}>+</button>
+                <button
+                  onClick={onInc}
+                  disabled={isPending || deckState?.isLocked}
+                >
+                  +
+                </button>
               </>
             ) : (
               <span className={styles.qtyValueStatic}>{qty}</span>
@@ -176,11 +210,13 @@ export default function DeckRow({
           <td className={styles.actionsCell}>
             <button
               onClick={onToggleShowcase}
-              title={isShowcased ? "Retirer de la mise en avant" : "Mettre en avant"}
+              title={
+                isShowcased ? 'Retirer de la mise en avant' : 'Mettre en avant'
+              }
               aria-pressed={isShowcased}
               className={`${styles.starBtn} ${isShowcased ? styles.starFull : styles.starEmpty}`}
             >
-              {isShowcased ? "★" : "☆"}
+              {isShowcased ? '★' : '☆'}
             </button>
           </td>
         )}
@@ -188,24 +224,27 @@ export default function DeckRow({
         {/* Supprimer */}
         {editMode && (
           <td>
-            <button onClick={onDelete} disabled={isPending || deckState?.isLocked} className={styles.danger}>
+            <button
+              onClick={onDelete}
+              disabled={isPending || deckState?.isLocked}
+              className={styles.danger}
+            >
               Supprimer
             </button>
           </td>
         )}
 
-      {hasRarity && (
-        <td className={styles.rarityCell} aria-hidden="true">
-          <span className={`${styles.rarityBar} ${rarityClass}`} />
-        </td>
-      )}
-
+        {hasRarity && (
+          <td className={styles.rarityCell} aria-hidden="true">
+            <span className={`${styles.rarityBar} ${rarityClass}`} />
+          </td>
+        )}
       </tr>
 
       {rowProblem && (
         <tr>
           <td colSpan={nonRarityColCount} className={styles.problemLine}>
-            {problems.join(" • ")}
+            {problems.join(' • ')}
           </td>
           {hasRarity && (
             // on garde une cellule rareté vide pour respecter la grille de colonnes
@@ -214,5 +253,5 @@ export default function DeckRow({
         </tr>
       )}
     </Fragment>
-  );
+  )
 }

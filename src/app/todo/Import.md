@@ -44,7 +44,6 @@ Résumé : N cartes ajoutées, M mises à jour, K ignorées.
     - Bouton “Importer” + option “Créer une liste” (pour garder la trace de l’import).
     - Feedback final avec liens rapides : “Voir uniquement les nouvelles”, “Voir les conflits restants”.
 
-
 ## Look & Feel (style)
 
     - Aesthetic : clair + dark mode, surfaces en cartes (radius 16–20px), ombres douces, typos lisibles (Inter).
@@ -95,6 +94,7 @@ type Match = {
   candidates?: Candidate[];    // si < 0.9
 }
 ```
+
 ## Heuristiques de matching (résumé)
 
     - Clé canonique : normaliser nom (sans accents/punct), + set (code), + collectorNumber si présent, + langue.

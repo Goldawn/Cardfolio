@@ -8,6 +8,7 @@ Cette version **0.2.0** marque un **jalon majeur** : l’arrivée des **decklist
 ## ✨ Fonctionnalités principales
 
 ### 📦 Gestion complète de la collection
+
 - Importation des cartes directement via l’API **Scryfall**
 - Ajout de cartes avec suivi des **quantités possédées**
 - Historique automatique des **prix** pour chaque carte
@@ -18,6 +19,7 @@ Cette version **0.2.0** marque un **jalon majeur** : l’arrivée des **decklist
 ---
 
 ### 🗂 Gestion des decks (**NOUVEAU**)
+
 - Création, modification et suppression de **decklists**
 - Ajout / retrait de cartes d’un deck
 - Gestion des **quantités** pour chaque carte
@@ -27,7 +29,7 @@ Cette version **0.2.0** marque un **jalon majeur** : l’arrivée des **decklist
 - Vérification automatique de la **légalité des decks** :
   - Support des règles de singleton (Commander, Brawl, etc.)
   - Limitation à **4 exemplaires** pour les formats classiques
-  - Gestion des cartes à copies illimitées (ex. *Relentless Rats*, *Dragon’s Approach*…)
+  - Gestion des cartes à copies illimitées (ex. _Relentless Rats_, _Dragon’s Approach_…)
 - Notes personnelles sur chaque deck
 - Dupliquer facilement un deck
 - Verrouiller/déverrouiller un deck pour éviter les modifications accidentelles
@@ -35,6 +37,7 @@ Cette version **0.2.0** marque un **jalon majeur** : l’arrivée des **decklist
 ---
 
 ### 🧾 Gestion des wishlists (**NOUVEAU**)
+
 - Créez une ou plusieurs listes de souhaits
 - Ajoutez rapidement des cartes à une liste existante
 - Si aucune liste n’existe, **création automatique** d’une **wishlist par défaut**
@@ -45,6 +48,7 @@ Cette version **0.2.0** marque un **jalon majeur** : l’arrivée des **decklist
 ---
 
 ### 🔍 Filtres et tri avancés
+
 - Recherche rapide par **nom de carte**
 - Filtres multiples :
   - **Couleur** (WUBRG + Incolore et Multicolore)
@@ -60,15 +64,17 @@ Cette version **0.2.0** marque un **jalon majeur** : l’arrivée des **decklist
 ---
 
 ### 📊 Statistiques détaillées
+
 - Suivi du **nombre total de cartes**
 - Comptage des **extensions représentées**
 - **Valeur totale estimée** de la collection (EUR / USD)
 - Aperçu du **ratio possédé / total** par extension
-- *Prochainement* : statistiques détaillées par **deck**
+- _Prochainement_ : statistiques détaillées par **deck**
 
 ---
 
 ### 🧑‍💻 Authentification sécurisée
+
 - Connexion via **Google** ou **GitHub**
 - Chaque utilisateur dispose de **ses propres données isolées** :
   - Collection
@@ -78,12 +84,14 @@ Cette version **0.2.0** marque un **jalon majeur** : l’arrivée des **decklist
 ---
 
 ### 🌍 Gestion de la devise
+
 - Basculer entre **EUR** et **USD** à tout moment
 - Les prix sont récupérés automatiquement via **Scryfall**
 
 ---
 
 ### 🖼 Modale de carte enrichie
+
 - Zoom complet sur la carte
 - Affichage du **coût de mana**, du **texte oracle** et de toutes les infos essentielles
 - Gestion complète des **cartes recto-verso, transformables et flip**
@@ -125,18 +133,17 @@ npx prisma studio
 ### 3. Configurer les variables d’environnement
 
 DATABASE_URL="file:./dev.db"
-AUTH_GITHUB_ID="..."       # à récupérer sur GitHub Developer
+AUTH_GITHUB_ID="..." # à récupérer sur GitHub Developer
 AUTH_GITHUB_SECRET="..."
-AUTH_GOOGLE_ID="..."       # à récupérer sur Google Developer Console
+AUTH_GOOGLE_ID="..." # à récupérer sur Google Developer Console
 AUTH_GOOGLE_SECRET="..."
-NEXTAUTH_SECRET="..."      # généré avec : openssl rand -base64 32
+NEXTAUTH_SECRET="..." # généré avec : openssl rand -base64 32
 
 ### 4. Lancer l'application
 
 ```bash
 npm run dev
 ```
-
 
 > Le projet utilise **Next.js 15+** (avec `app/`), assurez-vous d'avoir Node.js 18+ installé.
 
@@ -168,12 +175,15 @@ Toute suggestion ou contribution est la bienvenue !
 #### 🔖 Changelog rapide
 
 ##### v0.2.0 — Decklists + Wishlists (actuel)
+
 - Ajout de la gestion complète des decks
 - Ajout du système de wishlist avec création dynamique
 - Vérification des légalités selon les formats
 - Gestion des couleurs des decks automatique
 - Amélioration de l’UX générale et persistance robuste des données
+
 ##### v0.1.1 — Prisma + Auth
+
 - Connexion à Prisma + base SQLite
 - Intégration de NextAuth
 - Importation des cartes depuis Scryfall

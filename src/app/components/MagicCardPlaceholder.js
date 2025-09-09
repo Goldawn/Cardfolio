@@ -1,9 +1,12 @@
 import React from 'react'
-import styles from "./MagicCardPlaceholder.module.css"
+import styles from './MagicCardPlaceholder.module.css'
 
 export default function MagicCardPlaceholder({ test, image }) {
   return (
-    <div className={`${styles.cardPlaceholder} ${ image ? styles.active : ""}`} onClick={test}>
+    <div
+      className={`${styles.cardPlaceholder} ${image ? styles.active : ''}`}
+      onClick={test}
+    >
       {image ? (
         <img className={styles.previewImage} src={image} alt="preview" />
       ) : (
@@ -13,9 +16,7 @@ export default function MagicCardPlaceholder({ test, image }) {
           <p>Ajouter une carte</p>
         </>
       )}
-      {!image &&
-        <div className={styles.cardBorder}></div>
-      }
+      {!image && <div className={styles.cardBorder}></div>}
     </div>
-  );
+  )
 }

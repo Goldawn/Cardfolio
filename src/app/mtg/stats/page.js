@@ -1,11 +1,5 @@
-import styles from "./page.module.css"
+import styles from './page.module.css'
 
-export default function Stats () {
-
-    return (
-        <>
-        "Stats"
-        </>
-    )
-
+export default function Stats() {
+  return <>"Stats"</>
 }

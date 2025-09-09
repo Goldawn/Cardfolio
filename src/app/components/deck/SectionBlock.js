@@ -1,6 +1,6 @@
-"use client";
-import Image from "next/image";
-import styles from "./DeckCardsTabs.module.css";
+'use client'
+import Image from 'next/image'
+import styles from './DeckCardsTabs.module.css'
 
 /**
  * En-tête + conteneur de section (type, couleur, CMC…)
@@ -30,5 +30,5 @@ export default function SectionBlock({ title, count, icon = null, children }) {
       </header>
       {children}
     </section>
-  );
+  )
 }

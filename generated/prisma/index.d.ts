@@ -1,9 +1,8 @@
-
 /**
  * Client
-**/
+ **/
 
-import * as runtime from './runtime/library.js';
+import * as runtime from './runtime/library.js'
 import $Types = runtime.Types // general types
 import $Public = runtime.Types.Public
 import $Utils = runtime.Types.Utils
@@ -12,10 +11,9 @@ import $Result = runtime.Types.Result
 
 export type PrismaPromise<T> = $Public.PrismaPromise<T>
 
-
 /**
  * Model Card
- * 
+ *
  */
 export type Card = $Result.DefaultSelection<Prisma.$CardPayload>
 
@@ -35,12 +33,16 @@ export type Card = $Result.DefaultSelection<Prisma.$CardPayload>
  */
 export class PrismaClient<
   ClientOptions extends Prisma.PrismaClientOptions = Prisma.PrismaClientOptions,
-  U = 'log' extends keyof ClientOptions ? ClientOptions['log'] extends Array<Prisma.LogLevel | Prisma.LogDefinition> ? Prisma.GetEvents<ClientOptions['log']> : never : never,
-  ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs
+  U = 'log' extends keyof ClientOptions
+    ? ClientOptions['log'] extends Array<Prisma.LogLevel | Prisma.LogDefinition>
+      ? Prisma.GetEvents<ClientOptions['log']>
+      : never
+    : never,
+  ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
 > {
   [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['other'] }
 
-    /**
+  /**
    * ##  Prisma Client ʲˢ
    *
    * Type-safe database client for TypeScript & Node.js
@@ -55,18 +57,25 @@ export class PrismaClient<
    * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client).
    */
 
-  constructor(optionsArg ?: Prisma.Subset<ClientOptions, Prisma.PrismaClientOptions>);
-  $on<V extends U>(eventType: V, callback: (event: V extends 'query' ? Prisma.QueryEvent : Prisma.LogEvent) => void): PrismaClient;
+  constructor(
+    optionsArg?: Prisma.Subset<ClientOptions, Prisma.PrismaClientOptions>
+  )
+  $on<V extends U>(
+    eventType: V,
+    callback: (
+      event: V extends 'query' ? Prisma.QueryEvent : Prisma.LogEvent
+    ) => void
+  ): PrismaClient
 
   /**
    * Connect with the database
    */
-  $connect(): $Utils.JsPromise<void>;
+  $connect(): $Utils.JsPromise<void>
 
   /**
    * Disconnect from the database
    */
-  $disconnect(): $Utils.JsPromise<void>;
+  $disconnect(): $Utils.JsPromise<void>
 
   /**
    * Add a middleware
@@ -75,7 +84,7 @@ export class PrismaClient<
    */
   $use(cb: Prisma.Middleware): void
 
-/**
+  /**
    * Executes a prepared raw query and returns the number of affected rows.
    * @example
    * ```
@@ -84,7 +93,10 @@ export class PrismaClient<
    *
    * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
    */
-  $executeRaw<T = unknown>(query: TemplateStringsArray | Prisma.Sql, ...values: any[]): Prisma.PrismaPromise<number>;
+  $executeRaw<T = unknown>(
+    query: TemplateStringsArray | Prisma.Sql,
+    ...values: any[]
+  ): Prisma.PrismaPromise<number>
 
   /**
    * Executes a raw query and returns the number of affected rows.
@@ -96,7 +108,10 @@ export class PrismaClient<
    *
    * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
    */
-  $executeRawUnsafe<T = unknown>(query: string, ...values: any[]): Prisma.PrismaPromise<number>;
+  $executeRawUnsafe<T = unknown>(
+    query: string,
+    ...values: any[]
+  ): Prisma.PrismaPromise<number>
 
   /**
    * Performs a prepared raw query and returns the `SELECT` data.
@@ -107,7 +122,10 @@ export class PrismaClient<
    *
    * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
    */
-  $queryRaw<T = unknown>(query: TemplateStringsArray | Prisma.Sql, ...values: any[]): Prisma.PrismaPromise<T>;
+  $queryRaw<T = unknown>(
+    query: TemplateStringsArray | Prisma.Sql,
+    ...values: any[]
+  ): Prisma.PrismaPromise<T>
 
   /**
    * Performs a raw query and returns the `SELECT` data.
@@ -119,8 +137,10 @@ export class PrismaClient<
    *
    * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
    */
-  $queryRawUnsafe<T = unknown>(query: string, ...values: any[]): Prisma.PrismaPromise<T>;
-
+  $queryRawUnsafe<T = unknown>(
+    query: string,
+    ...values: any[]
+  ): Prisma.PrismaPromise<T>
 
   /**
    * Allows the running of a sequence of read/write operations that are guaranteed to either succeed or fail as a whole.
@@ -132,27 +152,46 @@ export class PrismaClient<
    *   prisma.user.create({ data: { name: 'Alice' } }),
    * ])
    * ```
-   * 
+   *
    * Read more in our [docs](https://www.prisma.io/docs/concepts/components/prisma-client/transactions).
    */
-  $transaction<P extends Prisma.PrismaPromise<any>[]>(arg: [...P], options?: { isolationLevel?: Prisma.TransactionIsolationLevel }): $Utils.JsPromise<runtime.Types.Utils.UnwrapTuple<P>>
+  $transaction<P extends Prisma.PrismaPromise<any>[]>(
+    arg: [...P],
+    options?: { isolationLevel?: Prisma.TransactionIsolationLevel }
+  ): $Utils.JsPromise<runtime.Types.Utils.UnwrapTuple<P>>
 
-  $transaction<R>(fn: (prisma: Omit<PrismaClient, runtime.ITXClientDenyList>) => $Utils.JsPromise<R>, options?: { maxWait?: number, timeout?: number, isolationLevel?: Prisma.TransactionIsolationLevel }): $Utils.JsPromise<R>
+  $transaction<R>(
+    fn: (
+      prisma: Omit<PrismaClient, runtime.ITXClientDenyList>
+    ) => $Utils.JsPromise<R>,
+    options?: {
+      maxWait?: number
+      timeout?: number
+      isolationLevel?: Prisma.TransactionIsolationLevel
+    }
+  ): $Utils.JsPromise<R>
 
+  $extends: $Extensions.ExtendsHook<
+    'extends',
+    Prisma.TypeMapCb<ClientOptions>,
+    ExtArgs,
+    $Utils.Call<
+      Prisma.TypeMapCb<ClientOptions>,
+      {
+        extArgs: ExtArgs
+      }
+    >
+  >
 
-  $extends: $Extensions.ExtendsHook<"extends", Prisma.TypeMapCb<ClientOptions>, ExtArgs, $Utils.Call<Prisma.TypeMapCb<ClientOptions>, {
-    extArgs: ExtArgs
-  }>>
-
-      /**
+  /**
    * `prisma.card`: Exposes CRUD operations for the **Card** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more Cards
-    * const cards = await prisma.card.findMany()
-    * ```
-    */
-  get card(): Prisma.CardDelegate<ExtArgs, ClientOptions>;
+   * Example usage:
+   * ```ts
+   * // Fetch zero or more Cards
+   * const cards = await prisma.card.findMany()
+   * ```
+   */
+  get card(): Prisma.CardDelegate<ExtArgs, ClientOptions>
 }
 
 export namespace Prisma {
@@ -183,8 +222,6 @@ export namespace Prisma {
   export import raw = runtime.raw
   export import Sql = runtime.Sql
 
-
-
   /**
    * Decimal.js
    */
@@ -201,8 +238,8 @@ export namespace Prisma {
   export type MetricHistogramBucket = runtime.MetricHistogramBucket
 
   /**
-  * Extensions
-  */
+   * Extensions
+   */
   export import Extension = $Extensions.UserArgs
   export import getExtensionContext = runtime.Extensions.getExtensionContext
   export import Args = $Public.Args
@@ -224,7 +261,6 @@ export namespace Prisma {
    * Utility Types
    */
 
-
   export import JsonObject = runtime.JsonObject
   export import JsonArray = runtime.JsonArray
   export import JsonValue = runtime.JsonValue
@@ -239,36 +275,36 @@ export namespace Prisma {
    */
   namespace NullTypes {
     /**
-    * Type of `Prisma.DbNull`.
-    *
-    * You cannot use other instances of this class. Please use the `Prisma.DbNull` value.
-    *
-    * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
-    */
+     * Type of `Prisma.DbNull`.
+     *
+     * You cannot use other instances of this class. Please use the `Prisma.DbNull` value.
+     *
+     * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
+     */
     class DbNull {
       private DbNull: never
       private constructor()
     }
 
     /**
-    * Type of `Prisma.JsonNull`.
-    *
-    * You cannot use other instances of this class. Please use the `Prisma.JsonNull` value.
-    *
-    * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
-    */
+     * Type of `Prisma.JsonNull`.
+     *
+     * You cannot use other instances of this class. Please use the `Prisma.JsonNull` value.
+     *
+     * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
+     */
     class JsonNull {
       private JsonNull: never
       private constructor()
     }
 
     /**
-    * Type of `Prisma.AnyNull`.
-    *
-    * You cannot use other instances of this class. Please use the `Prisma.AnyNull` value.
-    *
-    * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
-    */
+     * Type of `Prisma.AnyNull`.
+     *
+     * You cannot use other instances of this class. Please use the `Prisma.AnyNull` value.
+     *
+     * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
+     */
     class AnyNull {
       private AnyNull: never
       private constructor()
@@ -309,22 +345,24 @@ export namespace Prisma {
   /**
    * Get the type of the value, that the Promise holds.
    */
-  export type PromiseType<T extends PromiseLike<any>> = T extends PromiseLike<infer U> ? U : T;
+  export type PromiseType<T extends PromiseLike<any>> =
+    T extends PromiseLike<infer U> ? U : T
 
   /**
    * Get the return type of a function which returns a Promise.
    */
-  export type PromiseReturnType<T extends (...args: any) => $Utils.JsPromise<any>> = PromiseType<ReturnType<T>>
+  export type PromiseReturnType<
+    T extends (...args: any) => $Utils.JsPromise<any>,
+  > = PromiseType<ReturnType<T>>
 
   /**
    * From T, pick a set of properties whose keys are in the union K
    */
   type Prisma__Pick<T, K extends keyof T> = {
-      [P in K]: T[P];
-  };
+    [P in K]: T[P]
+  }
 
-
-  export type Enumerable<T> = T | Array<T>;
+  export type Enumerable<T> = T | Array<T>
 
   export type RequiredKeys<T> = {
     [K in keyof T]-?: {} extends Prisma__Pick<T, K> ? never : K
@@ -341,8 +379,8 @@ export namespace Prisma {
    * @desc From `T` pick properties that exist in `U`. Simple version of Intersection
    */
   export type Subset<T, U> = {
-    [key in keyof T]: key extends keyof U ? T[key] : never;
-  };
+    [key in keyof T]: key extends keyof U ? T[key] : never
+  }
 
   /**
    * SelectSubset
@@ -351,12 +389,11 @@ export namespace Prisma {
    */
   export type SelectSubset<T, U> = {
     [key in keyof T]: key extends keyof U ? T[key] : never
-  } &
-    (T extends SelectAndInclude
-      ? 'Please either choose `select` or `include`.'
-      : T extends SelectAndOmit
-        ? 'Please either choose `select` or `omit`.'
-        : {})
+  } & (T extends SelectAndInclude
+    ? 'Please either choose `select` or `include`.'
+    : T extends SelectAndOmit
+      ? 'Please either choose `select` or `omit`.'
+      : {})
 
   /**
    * Subset + Intersection
@@ -364,37 +401,35 @@ export namespace Prisma {
    */
   export type SubsetIntersection<T, U, K> = {
     [key in keyof T]: key extends keyof U ? T[key] : never
-  } &
-    K
+  } & K
 
-  type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
+  type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never }
 
   /**
    * XOR is needed to have a real mutually exclusive union type
    * https://stackoverflow.com/questions/42123407/does-typescript-support-mutually-exclusive-types
    */
-  type XOR<T, U> =
-    T extends object ?
-    U extends object ?
-      (Without<T, U> & U) | (Without<U, T> & T)
-    : U : T
-
+  type XOR<T, U> = T extends object
+    ? U extends object
+      ? (Without<T, U> & U) | (Without<U, T> & T)
+      : U
+    : T
 
   /**
    * Is T a Record?
    */
-  type IsObject<T extends any> = T extends Array<any>
-  ? False
-  : T extends Date
-  ? False
-  : T extends Uint8Array
-  ? False
-  : T extends BigInt
-  ? False
-  : T extends object
-  ? True
-  : False
-
+  type IsObject<T extends any> =
+    T extends Array<any>
+      ? False
+      : T extends Date
+        ? False
+        : T extends Uint8Array
+          ? False
+          : T extends BigInt
+            ? False
+            : T extends object
+              ? True
+              : False
 
   /**
    * If it's T[], return T
@@ -415,11 +450,7 @@ export namespace Prisma {
 
   type EitherLoose<O extends object, K extends Key> = ComputeRaw<__Either<O, K>>
 
-  type _Either<
-    O extends object,
-    K extends Key,
-    strict extends Boolean
-  > = {
+  type _Either<O extends object, K extends Key, strict extends Boolean> = {
     1: EitherStrict<O, K>
     0: EitherLoose<O, K>
   }[strict]
@@ -427,7 +458,7 @@ export namespace Prisma {
   type Either<
     O extends object,
     K extends Key,
-    strict extends Boolean = 1
+    strict extends Boolean = 1,
   > = O extends unknown ? _Either<O, K, strict> : never
 
   export type Union = any
@@ -444,50 +475,69 @@ export namespace Prisma {
     : never
 
   export type Overwrite<O extends object, O1 extends object> = {
-      [K in keyof O]: K extends keyof O1 ? O1[K] : O[K];
-  } & {};
+    [K in keyof O]: K extends keyof O1 ? O1[K] : O[K]
+  } & {}
 
-  type _Merge<U extends object> = IntersectOf<Overwrite<U, {
-      [K in keyof U]-?: At<U, K>;
-  }>>;
+  type _Merge<U extends object> = IntersectOf<
+    Overwrite<
+      U,
+      {
+        [K in keyof U]-?: At<U, K>
+      }
+    >
+  >
 
-  type Key = string | number | symbol;
-  type AtBasic<O extends object, K extends Key> = K extends keyof O ? O[K] : never;
-  type AtStrict<O extends object, K extends Key> = O[K & keyof O];
-  type AtLoose<O extends object, K extends Key> = O extends unknown ? AtStrict<O, K> : never;
-  export type At<O extends object, K extends Key, strict extends Boolean = 1> = {
-      1: AtStrict<O, K>;
-      0: AtLoose<O, K>;
-  }[strict];
+  type Key = string | number | symbol
+  type AtBasic<O extends object, K extends Key> = K extends keyof O
+    ? O[K]
+    : never
+  type AtStrict<O extends object, K extends Key> = O[K & keyof O]
+  type AtLoose<O extends object, K extends Key> = O extends unknown
+    ? AtStrict<O, K>
+    : never
+  export type At<
+    O extends object,
+    K extends Key,
+    strict extends Boolean = 1,
+  > = {
+    1: AtStrict<O, K>
+    0: AtLoose<O, K>
+  }[strict]
 
-  export type ComputeRaw<A extends any> = A extends Function ? A : {
-    [K in keyof A]: A[K];
-  } & {};
+  export type ComputeRaw<A extends any> = A extends Function
+    ? A
+    : {
+        [K in keyof A]: A[K]
+      } & {}
 
   export type OptionalFlat<O> = {
-    [K in keyof O]?: O[K];
-  } & {};
+    [K in keyof O]?: O[K]
+  } & {}
 
   type _Record<K extends keyof any, T> = {
-    [P in K]: T;
-  };
+    [P in K]: T
+  }
 
   // cause typescript not to expand types and preserve names
-  type NoExpand<T> = T extends unknown ? T : never;
+  type NoExpand<T> = T extends unknown ? T : never
 
   // this type assumes the passed object is entirely optional
   type AtLeast<O extends object, K extends string> = NoExpand<
     O extends unknown
-    ? | (K extends keyof O ? { [P in K]: O[P] } & O : O)
-      | {[P in keyof O as P extends K ? P : never]-?: O[P]} & O
-    : never>;
+      ?
+          | (K extends keyof O ? { [P in K]: O[P] } & O : O)
+          | ({ [P in keyof O as P extends K ? P : never]-?: O[P] } & O)
+      : never
+  >
 
-  type _Strict<U, _U = U> = U extends unknown ? U & OptionalFlat<_Record<Exclude<Keys<_U>, keyof U>, never>> : never;
+  type _Strict<U, _U = U> = U extends unknown
+    ? U & OptionalFlat<_Record<Exclude<Keys<_U>, keyof U>, never>>
+    : never
 
-  export type Strict<U extends object> = ComputeRaw<_Strict<U>>;
+  export type Strict<U extends object> = ComputeRaw<_Strict<U>>
   /** End Helper Types for "Merge" **/
 
-  export type Merge<U extends object> = ComputeRaw<_Merge<Strict<U>>>;
+  export type Merge<U extends object> = ComputeRaw<_Merge<Strict<U>>>
 
   /**
   A [[Boolean]]
@@ -512,8 +562,8 @@ export namespace Prisma {
   export type Extends<A1 extends any, A2 extends any> = [A1] extends [never]
     ? 0 // anything `never` is false
     : A1 extends A2
-    ? 1
-    : 0
+      ? 1
+      : 0
 
   export type Has<U extends Union, U1 extends Union> = Not<
     Extends<Exclude<U1, U>, U1>
@@ -532,25 +582,23 @@ export namespace Prisma {
 
   export type Keys<U extends Union> = U extends unknown ? keyof U : never
 
-  type Cast<A, B> = A extends B ? A : B;
+  type Cast<A, B> = A extends B ? A : B
 
-  export const type: unique symbol;
-
-
+  export const type: unique symbol
 
   /**
    * Used by group by
    */
 
-  export type GetScalarType<T, O> = O extends object ? {
-    [P in keyof T]: P extends keyof O
-      ? O[P]
-      : never
-  } : never
+  export type GetScalarType<T, O> = O extends object
+    ? {
+        [P in keyof T]: P extends keyof O ? O[P] : never
+      }
+    : never
 
   type FieldPaths<
     T,
-    U = Omit<T, '_avg' | '_sum' | '_count' | '_min' | '_max'>
+    U = Omit<T, '_avg' | '_sum' | '_count' | '_min' | '_max'>,
   > = IsObject<T> extends True ? U : T
 
   type GetHavingFields<T> = {
@@ -562,11 +610,13 @@ export namespace Prisma {
         // based on the brilliant idea of Pierre-Antoine Mills
         // https://github.com/microsoft/TypeScript/issues/30188#issuecomment-478938437
         T[K] extends infer TK
-        ? GetHavingFields<UnEnumerate<TK> extends object ? Merge<UnEnumerate<TK>> : never>
+        ? GetHavingFields<
+            UnEnumerate<TK> extends object ? Merge<UnEnumerate<TK>> : never
+          >
         : never
       : {} extends FieldPaths<T[K]>
-      ? never
-      : K
+        ? never
+        : K
   }[keyof T]
 
   /**
@@ -579,40 +629,54 @@ export namespace Prisma {
   /**
    * Like `Pick`, but additionally can also accept an array of keys
    */
-  type PickEnumerable<T, K extends Enumerable<keyof T> | keyof T> = Prisma__Pick<T, MaybeTupleToUnion<K>>
+  type PickEnumerable<
+    T,
+    K extends Enumerable<keyof T> | keyof T,
+  > = Prisma__Pick<T, MaybeTupleToUnion<K>>
 
   /**
    * Exclude all keys with underscores
    */
-  type ExcludeUnderscoreKeys<T extends string> = T extends `_${string}` ? never : T
-
+  type ExcludeUnderscoreKeys<T extends string> = T extends `_${string}`
+    ? never
+    : T
 
   export type FieldRef<Model, FieldType> = runtime.FieldRef<Model, FieldType>
 
-  type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRef<Model, FieldType>
-
+  type FieldRefInputType<Model, FieldType> = Model extends never
+    ? never
+    : FieldRef<Model, FieldType>
 
   export const ModelName: {
     Card: 'Card'
-  };
+  }
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
-
 
   export type Datasources = {
     db?: Datasource
   }
 
-  interface TypeMapCb<ClientOptions = {}> extends $Utils.Fn<{extArgs: $Extensions.InternalArgs }, $Utils.Record<string, any>> {
-    returns: Prisma.TypeMap<this['params']['extArgs'], ClientOptions extends { omit: infer OmitOptions } ? OmitOptions : {}>
+  interface TypeMapCb<ClientOptions = {}>
+    extends $Utils.Fn<
+      { extArgs: $Extensions.InternalArgs },
+      $Utils.Record<string, any>
+    > {
+    returns: Prisma.TypeMap<
+      this['params']['extArgs'],
+      ClientOptions extends { omit: infer OmitOptions } ? OmitOptions : {}
+    >
   }
 
-  export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export type TypeMap<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+    GlobalOmitOptions = {},
+  > = {
     globalOmitOptions: {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "card"
+      modelProps: 'card'
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -696,25 +760,29 @@ export namespace Prisma {
       payload: any
       operations: {
         $executeRaw: {
-          args: [query: TemplateStringsArray | Prisma.Sql, ...values: any[]],
+          args: [query: TemplateStringsArray | Prisma.Sql, ...values: any[]]
           result: any
         }
         $executeRawUnsafe: {
-          args: [query: string, ...values: any[]],
+          args: [query: string, ...values: any[]]
           result: any
         }
         $queryRaw: {
-          args: [query: TemplateStringsArray | Prisma.Sql, ...values: any[]],
+          args: [query: TemplateStringsArray | Prisma.Sql, ...values: any[]]
           result: any
         }
         $queryRawUnsafe: {
-          args: [query: string, ...values: any[]],
+          args: [query: string, ...values: any[]]
           result: any
         }
       }
     }
   }
-  export const defineExtension: $Extensions.ExtendsHook<"define", Prisma.TypeMapCb, $Extensions.DefaultArgs>
+  export const defineExtension: $Extensions.ExtendsHook<
+    'define',
+    Prisma.TypeMapCb,
+    $Extensions.DefaultArgs
+  >
   export type DefaultPrismaClient = PrismaClient
   export type ErrorFormat = 'pretty' | 'colorless' | 'minimal'
   export interface PrismaClientOptions {
@@ -735,7 +803,7 @@ export namespace Prisma {
      * ```
      * // Defaults to stdout
      * log: ['query', 'info', 'warn', 'error']
-     * 
+     *
      * // Emit as events
      * log: [
      *   { emit: 'stdout', level: 'query' },
@@ -759,7 +827,7 @@ export namespace Prisma {
     }
     /**
      * Global configuration for omitting model fields by default.
-     * 
+     *
      * @example
      * ```
      * const prisma = new PrismaClient({
@@ -784,10 +852,20 @@ export namespace Prisma {
     emit: 'stdout' | 'event'
   }
 
-  export type GetLogType<T extends LogLevel | LogDefinition> = T extends LogDefinition ? T['emit'] extends 'event' ? T['level'] : never : never
-  export type GetEvents<T extends any> = T extends Array<LogLevel | LogDefinition> ?
-    GetLogType<T[0]> | GetLogType<T[1]> | GetLogType<T[2]> | GetLogType<T[3]>
-    : never
+  export type GetLogType<T extends LogLevel | LogDefinition> =
+    T extends LogDefinition
+      ? T['emit'] extends 'event'
+        ? T['level']
+        : never
+      : never
+  export type GetEvents<T extends any> =
+    T extends Array<LogLevel | LogDefinition>
+      ?
+          | GetLogType<T[0]>
+          | GetLogType<T[1]>
+          | GetLogType<T[2]>
+          | GetLogType<T[3]>
+      : never
 
   export type QueryEvent = {
     timestamp: Date
@@ -803,7 +881,6 @@ export namespace Prisma {
     target: string
   }
   /* End Types for Logging */
-
 
   export type PrismaAction =
     | 'findUnique'
@@ -844,16 +921,21 @@ export namespace Prisma {
    */
   export type Middleware<T = any> = (
     params: MiddlewareParams,
-    next: (params: MiddlewareParams) => $Utils.JsPromise<T>,
+    next: (params: MiddlewareParams) => $Utils.JsPromise<T>
   ) => $Utils.JsPromise<T>
 
   // tested in getLogLevel.test.ts
-  export function getLogLevel(log: Array<LogLevel | LogDefinition>): LogLevel | undefined;
+  export function getLogLevel(
+    log: Array<LogLevel | LogDefinition>
+  ): LogLevel | undefined
 
   /**
    * `PrismaClient` proxy available in interactive transactions.
    */
-  export type TransactionClient = Omit<Prisma.DefaultPrismaClient, runtime.ITXClientDenyList>
+  export type TransactionClient = Omit<
+    Prisma.DefaultPrismaClient,
+    runtime.ITXClientDenyList
+  >
 
   export type Datasource = {
     url?: string
@@ -862,8 +944,6 @@ export namespace Prisma {
   /**
    * Count Types
    */
-
-
 
   /**
    * Models
@@ -978,7 +1058,6 @@ export namespace Prisma {
     _all: number
   }
 
-
   export type CardAvgAggregateInputType = {
     quantity?: true
   }
@@ -1076,81 +1155,84 @@ export namespace Prisma {
     _all?: true
   }
 
-  export type CardAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type CardAggregateArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
     /**
      * Filter which Card to aggregate.
      */
     where?: CardWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
+     *
      * Determine the order of Cards to fetch.
      */
     orderBy?: CardOrderByWithRelationInput | CardOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
+     *
      * Sets the start position
      */
     cursor?: CardWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
+     *
      * Take `±n` Cards from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
+     *
      * Skip the first `n` Cards.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
+     *
      * Count returned Cards
-    **/
+     **/
     _count?: true | CardCountAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
+     *
      * Select which fields to average
-    **/
+     **/
     _avg?: CardAvgAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
+     *
      * Select which fields to sum
-    **/
+     **/
     _sum?: CardSumAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
+     *
      * Select which fields to find the minimum value
-    **/
+     **/
     _min?: CardMinAggregateInputType
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
+     *
      * Select which fields to find the maximum value
-    **/
+     **/
     _max?: CardMaxAggregateInputType
   }
 
   export type GetCardAggregateType<T extends CardAggregateArgs> = {
-        [P in keyof T & keyof AggregateCard]: P extends '_count' | 'count'
+    [P in keyof T & keyof AggregateCard]: P extends '_count' | 'count'
       ? T[P] extends true
         ? number
         : GetScalarType<T[P], AggregateCard[P]>
       : GetScalarType<T[P], AggregateCard[P]>
   }
 
-
-
-
-  export type CardGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type CardGroupByArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
     where?: CardWhereInput
-    orderBy?: CardOrderByWithAggregationInput | CardOrderByWithAggregationInput[]
+    orderBy?:
+      | CardOrderByWithAggregationInput
+      | CardOrderByWithAggregationInput[]
     by: CardScalarFieldEnum[] | CardScalarFieldEnum
     having?: CardScalarWhereWithAggregatesInput
     take?: number
@@ -1199,107 +1281,120 @@ export namespace Prisma {
 
   type GetCardGroupByPayload<T extends CardGroupByArgs> = Prisma.PrismaPromise<
     Array<
-      PickEnumerable<CardGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof CardGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], CardGroupByOutputType[P]>
+      PickEnumerable<CardGroupByOutputType, T['by']> & {
+        [P in keyof T & keyof CardGroupByOutputType]: P extends '_count'
+          ? T[P] extends boolean
+            ? number
             : GetScalarType<T[P], CardGroupByOutputType[P]>
-        }
-      >
+          : GetScalarType<T[P], CardGroupByOutputType[P]>
+      }
     >
+  >
 
+  export type CardSelect<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = $Extensions.GetSelect<
+    {
+      id?: boolean
+      name?: boolean
+      setCode?: boolean
+      lang?: boolean
+      quantity?: boolean
+      addedAt?: boolean
+      imageFront?: boolean
+      manaCost?: boolean
+      typeLine?: boolean
+      rarity?: boolean
+      oracleText?: boolean
+      flavorText?: boolean
+      power?: boolean
+      toughness?: boolean
+      artist?: boolean
+      collectorNumber?: boolean
+      colors?: boolean
+      backName?: boolean
+      backManaCost?: boolean
+      backImage?: boolean
+      backTypeLine?: boolean
+      backRarity?: boolean
+      backOracleText?: boolean
+      backFlavorText?: boolean
+      backPower?: boolean
+      backToughness?: boolean
+      priceHistory?: boolean
+    },
+    ExtArgs['result']['card']
+  >
 
-  export type CardSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    name?: boolean
-    setCode?: boolean
-    lang?: boolean
-    quantity?: boolean
-    addedAt?: boolean
-    imageFront?: boolean
-    manaCost?: boolean
-    typeLine?: boolean
-    rarity?: boolean
-    oracleText?: boolean
-    flavorText?: boolean
-    power?: boolean
-    toughness?: boolean
-    artist?: boolean
-    collectorNumber?: boolean
-    colors?: boolean
-    backName?: boolean
-    backManaCost?: boolean
-    backImage?: boolean
-    backTypeLine?: boolean
-    backRarity?: boolean
-    backOracleText?: boolean
-    backFlavorText?: boolean
-    backPower?: boolean
-    backToughness?: boolean
-    priceHistory?: boolean
-  }, ExtArgs["result"]["card"]>
+  export type CardSelectCreateManyAndReturn<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = $Extensions.GetSelect<
+    {
+      id?: boolean
+      name?: boolean
+      setCode?: boolean
+      lang?: boolean
+      quantity?: boolean
+      addedAt?: boolean
+      imageFront?: boolean
+      manaCost?: boolean
+      typeLine?: boolean
+      rarity?: boolean
+      oracleText?: boolean
+      flavorText?: boolean
+      power?: boolean
+      toughness?: boolean
+      artist?: boolean
+      collectorNumber?: boolean
+      colors?: boolean
+      backName?: boolean
+      backManaCost?: boolean
+      backImage?: boolean
+      backTypeLine?: boolean
+      backRarity?: boolean
+      backOracleText?: boolean
+      backFlavorText?: boolean
+      backPower?: boolean
+      backToughness?: boolean
+      priceHistory?: boolean
+    },
+    ExtArgs['result']['card']
+  >
 
-  export type CardSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    name?: boolean
-    setCode?: boolean
-    lang?: boolean
-    quantity?: boolean
-    addedAt?: boolean
-    imageFront?: boolean
-    manaCost?: boolean
-    typeLine?: boolean
-    rarity?: boolean
-    oracleText?: boolean
-    flavorText?: boolean
-    power?: boolean
-    toughness?: boolean
-    artist?: boolean
-    collectorNumber?: boolean
-    colors?: boolean
-    backName?: boolean
-    backManaCost?: boolean
-    backImage?: boolean
-    backTypeLine?: boolean
-    backRarity?: boolean
-    backOracleText?: boolean
-    backFlavorText?: boolean
-    backPower?: boolean
-    backToughness?: boolean
-    priceHistory?: boolean
-  }, ExtArgs["result"]["card"]>
-
-  export type CardSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    name?: boolean
-    setCode?: boolean
-    lang?: boolean
-    quantity?: boolean
-    addedAt?: boolean
-    imageFront?: boolean
-    manaCost?: boolean
-    typeLine?: boolean
-    rarity?: boolean
-    oracleText?: boolean
-    flavorText?: boolean
-    power?: boolean
-    toughness?: boolean
-    artist?: boolean
-    collectorNumber?: boolean
-    colors?: boolean
-    backName?: boolean
-    backManaCost?: boolean
-    backImage?: boolean
-    backTypeLine?: boolean
-    backRarity?: boolean
-    backOracleText?: boolean
-    backFlavorText?: boolean
-    backPower?: boolean
-    backToughness?: boolean
-    priceHistory?: boolean
-  }, ExtArgs["result"]["card"]>
+  export type CardSelectUpdateManyAndReturn<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = $Extensions.GetSelect<
+    {
+      id?: boolean
+      name?: boolean
+      setCode?: boolean
+      lang?: boolean
+      quantity?: boolean
+      addedAt?: boolean
+      imageFront?: boolean
+      manaCost?: boolean
+      typeLine?: boolean
+      rarity?: boolean
+      oracleText?: boolean
+      flavorText?: boolean
+      power?: boolean
+      toughness?: boolean
+      artist?: boolean
+      collectorNumber?: boolean
+      colors?: boolean
+      backName?: boolean
+      backManaCost?: boolean
+      backImage?: boolean
+      backTypeLine?: boolean
+      backRarity?: boolean
+      backOracleText?: boolean
+      backFlavorText?: boolean
+      backPower?: boolean
+      backToughness?: boolean
+      priceHistory?: boolean
+    },
+    ExtArgs['result']['card']
+  >
 
   export type CardSelectScalar = {
     id?: boolean
@@ -1331,52 +1426,96 @@ export namespace Prisma {
     priceHistory?: boolean
   }
 
-  export type CardOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "setCode" | "lang" | "quantity" | "addedAt" | "imageFront" | "manaCost" | "typeLine" | "rarity" | "oracleText" | "flavorText" | "power" | "toughness" | "artist" | "collectorNumber" | "colors" | "backName" | "backManaCost" | "backImage" | "backTypeLine" | "backRarity" | "backOracleText" | "backFlavorText" | "backPower" | "backToughness" | "priceHistory", ExtArgs["result"]["card"]>
+  export type CardOmit<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = $Extensions.GetOmit<
+    | 'id'
+    | 'name'
+    | 'setCode'
+    | 'lang'
+    | 'quantity'
+    | 'addedAt'
+    | 'imageFront'
+    | 'manaCost'
+    | 'typeLine'
+    | 'rarity'
+    | 'oracleText'
+    | 'flavorText'
+    | 'power'
+    | 'toughness'
+    | 'artist'
+    | 'collectorNumber'
+    | 'colors'
+    | 'backName'
+    | 'backManaCost'
+    | 'backImage'
+    | 'backTypeLine'
+    | 'backRarity'
+    | 'backOracleText'
+    | 'backFlavorText'
+    | 'backPower'
+    | 'backToughness'
+    | 'priceHistory',
+    ExtArgs['result']['card']
+  >
 
-  export type $CardPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "Card"
+  export type $CardPayload<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
+    name: 'Card'
     objects: {}
-    scalars: $Extensions.GetPayloadResult<{
-      id: string
-      name: string
-      setCode: string
-      lang: string
-      quantity: number
-      addedAt: Date
-      imageFront: string
-      manaCost: string | null
-      typeLine: string | null
-      rarity: string | null
-      oracleText: string | null
-      flavorText: string | null
-      power: string | null
-      toughness: string | null
-      artist: string | null
-      collectorNumber: string | null
-      colors: string | null
-      backName: string | null
-      backManaCost: string | null
-      backImage: string | null
-      backTypeLine: string | null
-      backRarity: string | null
-      backOracleText: string | null
-      backFlavorText: string | null
-      backPower: string | null
-      backToughness: string | null
-      priceHistory: Prisma.JsonValue
-    }, ExtArgs["result"]["card"]>
+    scalars: $Extensions.GetPayloadResult<
+      {
+        id: string
+        name: string
+        setCode: string
+        lang: string
+        quantity: number
+        addedAt: Date
+        imageFront: string
+        manaCost: string | null
+        typeLine: string | null
+        rarity: string | null
+        oracleText: string | null
+        flavorText: string | null
+        power: string | null
+        toughness: string | null
+        artist: string | null
+        collectorNumber: string | null
+        colors: string | null
+        backName: string | null
+        backManaCost: string | null
+        backImage: string | null
+        backTypeLine: string | null
+        backRarity: string | null
+        backOracleText: string | null
+        backFlavorText: string | null
+        backPower: string | null
+        backToughness: string | null
+        priceHistory: Prisma.JsonValue
+      },
+      ExtArgs['result']['card']
+    >
     composites: {}
   }
 
-  type CardGetPayload<S extends boolean | null | undefined | CardDefaultArgs> = $Result.GetResult<Prisma.$CardPayload, S>
+  type CardGetPayload<S extends boolean | null | undefined | CardDefaultArgs> =
+    $Result.GetResult<Prisma.$CardPayload, S>
 
-  type CardCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<CardFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: CardCountAggregateInputType | true
+  type CardCountArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = Omit<CardFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+    select?: CardCountAggregateInputType | true
+  }
+
+  export interface CardDelegate<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+    GlobalOmitOptions = {},
+  > {
+    [K: symbol]: {
+      types: Prisma.TypeMap<ExtArgs>['model']['Card']
+      meta: { name: 'Card' }
     }
-
-  export interface CardDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Card'], meta: { name: 'Card' } }
     /**
      * Find zero or one Card that matches the filter.
      * @param {CardFindUniqueArgs} args - Arguments to find a Card
@@ -1388,7 +1527,19 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends CardFindUniqueArgs>(args: SelectSubset<T, CardFindUniqueArgs<ExtArgs>>): Prisma__CardClient<$Result.GetResult<Prisma.$CardPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findUnique<T extends CardFindUniqueArgs>(
+      args: SelectSubset<T, CardFindUniqueArgs<ExtArgs>>
+    ): Prisma__CardClient<
+      $Result.GetResult<
+        Prisma.$CardPayload<ExtArgs>,
+        T,
+        'findUnique',
+        GlobalOmitOptions
+      > | null,
+      null,
+      ExtArgs,
+      GlobalOmitOptions
+    >
 
     /**
      * Find one Card that matches the filter or throw an error with `error.code='P2025'`
@@ -1402,7 +1553,19 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends CardFindUniqueOrThrowArgs>(args: SelectSubset<T, CardFindUniqueOrThrowArgs<ExtArgs>>): Prisma__CardClient<$Result.GetResult<Prisma.$CardPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findUniqueOrThrow<T extends CardFindUniqueOrThrowArgs>(
+      args: SelectSubset<T, CardFindUniqueOrThrowArgs<ExtArgs>>
+    ): Prisma__CardClient<
+      $Result.GetResult<
+        Prisma.$CardPayload<ExtArgs>,
+        T,
+        'findUniqueOrThrow',
+        GlobalOmitOptions
+      >,
+      never,
+      ExtArgs,
+      GlobalOmitOptions
+    >
 
     /**
      * Find the first Card that matches the filter.
@@ -1417,7 +1580,19 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends CardFindFirstArgs>(args?: SelectSubset<T, CardFindFirstArgs<ExtArgs>>): Prisma__CardClient<$Result.GetResult<Prisma.$CardPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findFirst<T extends CardFindFirstArgs>(
+      args?: SelectSubset<T, CardFindFirstArgs<ExtArgs>>
+    ): Prisma__CardClient<
+      $Result.GetResult<
+        Prisma.$CardPayload<ExtArgs>,
+        T,
+        'findFirst',
+        GlobalOmitOptions
+      > | null,
+      null,
+      ExtArgs,
+      GlobalOmitOptions
+    >
 
     /**
      * Find the first Card that matches the filter or
@@ -1433,7 +1608,19 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends CardFindFirstOrThrowArgs>(args?: SelectSubset<T, CardFindFirstOrThrowArgs<ExtArgs>>): Prisma__CardClient<$Result.GetResult<Prisma.$CardPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findFirstOrThrow<T extends CardFindFirstOrThrowArgs>(
+      args?: SelectSubset<T, CardFindFirstOrThrowArgs<ExtArgs>>
+    ): Prisma__CardClient<
+      $Result.GetResult<
+        Prisma.$CardPayload<ExtArgs>,
+        T,
+        'findFirstOrThrow',
+        GlobalOmitOptions
+      >,
+      never,
+      ExtArgs,
+      GlobalOmitOptions
+    >
 
     /**
      * Find zero or more Cards that matches the filter.
@@ -1443,15 +1630,24 @@ export namespace Prisma {
      * @example
      * // Get all Cards
      * const cards = await prisma.card.findMany()
-     * 
+     *
      * // Get first 10 Cards
      * const cards = await prisma.card.findMany({ take: 10 })
-     * 
+     *
      * // Only select the `id`
      * const cardWithIdOnly = await prisma.card.findMany({ select: { id: true } })
-     * 
+     *
      */
-    findMany<T extends CardFindManyArgs>(args?: SelectSubset<T, CardFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CardPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+    findMany<T extends CardFindManyArgs>(
+      args?: SelectSubset<T, CardFindManyArgs<ExtArgs>>
+    ): Prisma.PrismaPromise<
+      $Result.GetResult<
+        Prisma.$CardPayload<ExtArgs>,
+        T,
+        'findMany',
+        GlobalOmitOptions
+      >
+    >
 
     /**
      * Create a Card.
@@ -1463,9 +1659,21 @@ export namespace Prisma {
      *     // ... data to create a Card
      *   }
      * })
-     * 
+     *
      */
-    create<T extends CardCreateArgs>(args: SelectSubset<T, CardCreateArgs<ExtArgs>>): Prisma__CardClient<$Result.GetResult<Prisma.$CardPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    create<T extends CardCreateArgs>(
+      args: SelectSubset<T, CardCreateArgs<ExtArgs>>
+    ): Prisma__CardClient<
+      $Result.GetResult<
+        Prisma.$CardPayload<ExtArgs>,
+        T,
+        'create',
+        GlobalOmitOptions
+      >,
+      never,
+      ExtArgs,
+      GlobalOmitOptions
+    >
 
     /**
      * Create many Cards.
@@ -1477,9 +1685,11 @@ export namespace Prisma {
      *     // ... provide data here
      *   ]
      * })
-     *     
+     *
      */
-    createMany<T extends CardCreateManyArgs>(args?: SelectSubset<T, CardCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    createMany<T extends CardCreateManyArgs>(
+      args?: SelectSubset<T, CardCreateManyArgs<ExtArgs>>
+    ): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Create many Cards and returns the data saved in the database.
@@ -1491,7 +1701,7 @@ export namespace Prisma {
      *     // ... provide data here
      *   ]
      * })
-     * 
+     *
      * // Create many Cards and only return the `id`
      * const cardWithIdOnly = await prisma.card.createManyAndReturn({
      *   select: { id: true },
@@ -1501,9 +1711,18 @@ export namespace Prisma {
      * })
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * 
+     *
      */
-    createManyAndReturn<T extends CardCreateManyAndReturnArgs>(args?: SelectSubset<T, CardCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CardPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+    createManyAndReturn<T extends CardCreateManyAndReturnArgs>(
+      args?: SelectSubset<T, CardCreateManyAndReturnArgs<ExtArgs>>
+    ): Prisma.PrismaPromise<
+      $Result.GetResult<
+        Prisma.$CardPayload<ExtArgs>,
+        T,
+        'createManyAndReturn',
+        GlobalOmitOptions
+      >
+    >
 
     /**
      * Delete a Card.
@@ -1515,9 +1734,21 @@ export namespace Prisma {
      *     // ... filter to delete one Card
      *   }
      * })
-     * 
+     *
      */
-    delete<T extends CardDeleteArgs>(args: SelectSubset<T, CardDeleteArgs<ExtArgs>>): Prisma__CardClient<$Result.GetResult<Prisma.$CardPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    delete<T extends CardDeleteArgs>(
+      args: SelectSubset<T, CardDeleteArgs<ExtArgs>>
+    ): Prisma__CardClient<
+      $Result.GetResult<
+        Prisma.$CardPayload<ExtArgs>,
+        T,
+        'delete',
+        GlobalOmitOptions
+      >,
+      never,
+      ExtArgs,
+      GlobalOmitOptions
+    >
 
     /**
      * Update one Card.
@@ -1532,9 +1763,21 @@ export namespace Prisma {
      *     // ... provide data here
      *   }
      * })
-     * 
+     *
      */
-    update<T extends CardUpdateArgs>(args: SelectSubset<T, CardUpdateArgs<ExtArgs>>): Prisma__CardClient<$Result.GetResult<Prisma.$CardPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    update<T extends CardUpdateArgs>(
+      args: SelectSubset<T, CardUpdateArgs<ExtArgs>>
+    ): Prisma__CardClient<
+      $Result.GetResult<
+        Prisma.$CardPayload<ExtArgs>,
+        T,
+        'update',
+        GlobalOmitOptions
+      >,
+      never,
+      ExtArgs,
+      GlobalOmitOptions
+    >
 
     /**
      * Delete zero or more Cards.
@@ -1546,9 +1789,11 @@ export namespace Prisma {
      *     // ... provide filter here
      *   }
      * })
-     * 
+     *
      */
-    deleteMany<T extends CardDeleteManyArgs>(args?: SelectSubset<T, CardDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    deleteMany<T extends CardDeleteManyArgs>(
+      args?: SelectSubset<T, CardDeleteManyArgs<ExtArgs>>
+    ): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Update zero or more Cards.
@@ -1565,9 +1810,11 @@ export namespace Prisma {
      *     // ... provide data here
      *   }
      * })
-     * 
+     *
      */
-    updateMany<T extends CardUpdateManyArgs>(args: SelectSubset<T, CardUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+    updateMany<T extends CardUpdateManyArgs>(
+      args: SelectSubset<T, CardUpdateManyArgs<ExtArgs>>
+    ): Prisma.PrismaPromise<BatchPayload>
 
     /**
      * Update zero or more Cards and returns the data updated in the database.
@@ -1582,7 +1829,7 @@ export namespace Prisma {
      *     // ... provide data here
      *   ]
      * })
-     * 
+     *
      * // Update zero or more Cards and only return the `id`
      * const cardWithIdOnly = await prisma.card.updateManyAndReturn({
      *   select: { id: true },
@@ -1595,9 +1842,18 @@ export namespace Prisma {
      * })
      * Note, that providing `undefined` is treated as the value not being there.
      * Read more here: https://pris.ly/d/null-undefined
-     * 
+     *
      */
-    updateManyAndReturn<T extends CardUpdateManyAndReturnArgs>(args: SelectSubset<T, CardUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CardPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+    updateManyAndReturn<T extends CardUpdateManyAndReturnArgs>(
+      args: SelectSubset<T, CardUpdateManyAndReturnArgs<ExtArgs>>
+    ): Prisma.PrismaPromise<
+      $Result.GetResult<
+        Prisma.$CardPayload<ExtArgs>,
+        T,
+        'updateManyAndReturn',
+        GlobalOmitOptions
+      >
+    >
 
     /**
      * Create or update one Card.
@@ -1616,8 +1872,19 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends CardUpsertArgs>(args: SelectSubset<T, CardUpsertArgs<ExtArgs>>): Prisma__CardClient<$Result.GetResult<Prisma.$CardPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
+    upsert<T extends CardUpsertArgs>(
+      args: SelectSubset<T, CardUpsertArgs<ExtArgs>>
+    ): Prisma__CardClient<
+      $Result.GetResult<
+        Prisma.$CardPayload<ExtArgs>,
+        T,
+        'upsert',
+        GlobalOmitOptions
+      >,
+      never,
+      ExtArgs,
+      GlobalOmitOptions
+    >
 
     /**
      * Count the number of Cards.
@@ -1631,9 +1898,9 @@ export namespace Prisma {
      *     // ... the filter for the Cards we want to count
      *   }
      * })
-    **/
+     **/
     count<T extends CardCountArgs>(
-      args?: Subset<T, CardCountArgs>,
+      args?: Subset<T, CardCountArgs>
     ): Prisma.PrismaPromise<
       T extends $Utils.Record<'select', any>
         ? T['select'] extends true
@@ -1665,8 +1932,10 @@ export namespace Prisma {
      *   },
      *   take: 10,
      * })
-    **/
-    aggregate<T extends CardAggregateArgs>(args: Subset<T, CardAggregateArgs>): Prisma.PrismaPromise<GetCardAggregateType<T>>
+     **/
+    aggregate<T extends CardAggregateArgs>(
+      args: Subset<T, CardAggregateArgs>
+    ): Prisma.PrismaPromise<GetCardAggregateType<T>>
 
     /**
      * Group by Card.
@@ -1684,8 +1953,8 @@ export namespace Prisma {
      *     _all: true
      *   },
      * })
-     * 
-    **/
+     *
+     **/
     groupBy<
       T extends CardGroupByArgs,
       HasSelectOrTake extends Or<
@@ -1695,59 +1964,65 @@ export namespace Prisma {
       OrderByArg extends True extends HasSelectOrTake
         ? { orderBy: CardGroupByArgs['orderBy'] }
         : { orderBy?: CardGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      OrderFields extends ExcludeUnderscoreKeys<
+        Keys<MaybeTupleToUnion<T['orderBy']>>
+      >,
       ByFields extends MaybeTupleToUnion<T['by']>,
       ByValid extends Has<ByFields, OrderFields>,
       HavingFields extends GetHavingFields<T['having']>,
       HavingValid extends Has<ByFields, HavingFields>,
       ByEmpty extends T['by'] extends never[] ? True : False,
       InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
+        ? `Error: "by" must not be empty.`
+        : HavingValid extends False
+          ? {
+              [P in HavingFields]: P extends ByFields
                 ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, CardGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetCardGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the Card model
-   */
-  readonly fields: CardFieldRefs;
+                : P extends string
+                  ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+                  : [
+                      Error,
+                      'Field ',
+                      P,
+                      ` in "having" needs to be provided in "by"`,
+                    ]
+            }[HavingFields]
+          : 'take' extends Keys<T>
+            ? 'orderBy' extends Keys<T>
+              ? ByValid extends True
+                ? {}
+                : {
+                    [P in OrderFields]: P extends ByFields
+                      ? never
+                      : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+                  }[OrderFields]
+              : 'Error: If you provide "take", you also need to provide "orderBy"'
+            : 'skip' extends Keys<T>
+              ? 'orderBy' extends Keys<T>
+                ? ByValid extends True
+                  ? {}
+                  : {
+                      [P in OrderFields]: P extends ByFields
+                        ? never
+                        : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+                    }[OrderFields]
+                : 'Error: If you provide "skip", you also need to provide "orderBy"'
+              : ByValid extends True
+                ? {}
+                : {
+                    [P in OrderFields]: P extends ByFields
+                      ? never
+                      : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+                  }[OrderFields],
+    >(
+      args: SubsetIntersection<T, CardGroupByArgs, OrderByArg> & InputErrors
+    ): {} extends InputErrors
+      ? GetCardGroupByPayload<T>
+      : Prisma.PrismaPromise<InputErrors>
+    /**
+     * Fields of the Card model
+     */
+    readonly fields: CardFieldRefs
   }
 
   /**
@@ -1756,21 +2031,40 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export interface Prisma__CardClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
+  export interface Prisma__CardClient<
+    T,
+    Null = never,
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+    GlobalOmitOptions = {},
+  > extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: 'PrismaPromise'
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of which ever callback is executed.
      */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    then<TResult1 = T, TResult2 = never>(
+      onfulfilled?:
+        | ((value: T) => TResult1 | PromiseLike<TResult1>)
+        | undefined
+        | null,
+      onrejected?:
+        | ((reason: any) => TResult2 | PromiseLike<TResult2>)
+        | undefined
+        | null
+    ): $Utils.JsPromise<TResult1 | TResult2>
     /**
      * Attaches a callback for only the rejection of the Promise.
      * @param onrejected The callback to execute when the Promise is rejected.
      * @returns A Promise for the completion of the callback.
      */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    catch<TResult = never>(
+      onrejected?:
+        | ((reason: any) => TResult | PromiseLike<TResult>)
+        | undefined
+        | null
+    ): $Utils.JsPromise<T | TResult>
     /**
      * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
      * resolved value cannot be modified from the callback.
@@ -1780,48 +2074,46 @@ export namespace Prisma {
     finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
   }
 
-
-
-
   /**
    * Fields of the Card model
-   */ 
+   */
   interface CardFieldRefs {
-    readonly id: FieldRef<"Card", 'String'>
-    readonly name: FieldRef<"Card", 'String'>
-    readonly setCode: FieldRef<"Card", 'String'>
-    readonly lang: FieldRef<"Card", 'String'>
-    readonly quantity: FieldRef<"Card", 'Int'>
-    readonly addedAt: FieldRef<"Card", 'DateTime'>
-    readonly imageFront: FieldRef<"Card", 'String'>
-    readonly manaCost: FieldRef<"Card", 'String'>
-    readonly typeLine: FieldRef<"Card", 'String'>
-    readonly rarity: FieldRef<"Card", 'String'>
-    readonly oracleText: FieldRef<"Card", 'String'>
-    readonly flavorText: FieldRef<"Card", 'String'>
-    readonly power: FieldRef<"Card", 'String'>
-    readonly toughness: FieldRef<"Card", 'String'>
-    readonly artist: FieldRef<"Card", 'String'>
-    readonly collectorNumber: FieldRef<"Card", 'String'>
-    readonly colors: FieldRef<"Card", 'String'>
-    readonly backName: FieldRef<"Card", 'String'>
-    readonly backManaCost: FieldRef<"Card", 'String'>
-    readonly backImage: FieldRef<"Card", 'String'>
-    readonly backTypeLine: FieldRef<"Card", 'String'>
-    readonly backRarity: FieldRef<"Card", 'String'>
-    readonly backOracleText: FieldRef<"Card", 'String'>
-    readonly backFlavorText: FieldRef<"Card", 'String'>
-    readonly backPower: FieldRef<"Card", 'String'>
-    readonly backToughness: FieldRef<"Card", 'String'>
-    readonly priceHistory: FieldRef<"Card", 'Json'>
+    readonly id: FieldRef<'Card', 'String'>
+    readonly name: FieldRef<'Card', 'String'>
+    readonly setCode: FieldRef<'Card', 'String'>
+    readonly lang: FieldRef<'Card', 'String'>
+    readonly quantity: FieldRef<'Card', 'Int'>
+    readonly addedAt: FieldRef<'Card', 'DateTime'>
+    readonly imageFront: FieldRef<'Card', 'String'>
+    readonly manaCost: FieldRef<'Card', 'String'>
+    readonly typeLine: FieldRef<'Card', 'String'>
+    readonly rarity: FieldRef<'Card', 'String'>
+    readonly oracleText: FieldRef<'Card', 'String'>
+    readonly flavorText: FieldRef<'Card', 'String'>
+    readonly power: FieldRef<'Card', 'String'>
+    readonly toughness: FieldRef<'Card', 'String'>
+    readonly artist: FieldRef<'Card', 'String'>
+    readonly collectorNumber: FieldRef<'Card', 'String'>
+    readonly colors: FieldRef<'Card', 'String'>
+    readonly backName: FieldRef<'Card', 'String'>
+    readonly backManaCost: FieldRef<'Card', 'String'>
+    readonly backImage: FieldRef<'Card', 'String'>
+    readonly backTypeLine: FieldRef<'Card', 'String'>
+    readonly backRarity: FieldRef<'Card', 'String'>
+    readonly backOracleText: FieldRef<'Card', 'String'>
+    readonly backFlavorText: FieldRef<'Card', 'String'>
+    readonly backPower: FieldRef<'Card', 'String'>
+    readonly backToughness: FieldRef<'Card', 'String'>
+    readonly priceHistory: FieldRef<'Card', 'Json'>
   }
-    
 
   // Custom InputTypes
   /**
    * Card findUnique
    */
-  export type CardFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type CardFindUniqueArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
     /**
      * Select specific fields to fetch from the Card
      */
@@ -1839,7 +2131,9 @@ export namespace Prisma {
   /**
    * Card findUniqueOrThrow
    */
-  export type CardFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type CardFindUniqueOrThrowArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
     /**
      * Select specific fields to fetch from the Card
      */
@@ -1857,7 +2151,9 @@ export namespace Prisma {
   /**
    * Card findFirst
    */
-  export type CardFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type CardFindFirstArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
     /**
      * Select specific fields to fetch from the Card
      */
@@ -1872,31 +2168,31 @@ export namespace Prisma {
     where?: CardWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
+     *
      * Determine the order of Cards to fetch.
      */
     orderBy?: CardOrderByWithRelationInput | CardOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
+     *
      * Sets the position for searching for Cards.
      */
     cursor?: CardWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
+     *
      * Take `±n` Cards from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
+     *
      * Skip the first `n` Cards.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
+     *
      * Filter by unique combinations of Cards.
      */
     distinct?: CardScalarFieldEnum | CardScalarFieldEnum[]
@@ -1905,7 +2201,9 @@ export namespace Prisma {
   /**
    * Card findFirstOrThrow
    */
-  export type CardFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type CardFindFirstOrThrowArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
     /**
      * Select specific fields to fetch from the Card
      */
@@ -1920,31 +2218,31 @@ export namespace Prisma {
     where?: CardWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
+     *
      * Determine the order of Cards to fetch.
      */
     orderBy?: CardOrderByWithRelationInput | CardOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
+     *
      * Sets the position for searching for Cards.
      */
     cursor?: CardWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
+     *
      * Take `±n` Cards from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
+     *
      * Skip the first `n` Cards.
      */
     skip?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
+     *
      * Filter by unique combinations of Cards.
      */
     distinct?: CardScalarFieldEnum | CardScalarFieldEnum[]
@@ -1953,7 +2251,9 @@ export namespace Prisma {
   /**
    * Card findMany
    */
-  export type CardFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type CardFindManyArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
     /**
      * Select specific fields to fetch from the Card
      */
@@ -1968,25 +2268,25 @@ export namespace Prisma {
     where?: CardWhereInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
+     *
      * Determine the order of Cards to fetch.
      */
     orderBy?: CardOrderByWithRelationInput | CardOrderByWithRelationInput[]
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
+     *
      * Sets the position for listing Cards.
      */
     cursor?: CardWhereUniqueInput
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
+     *
      * Take `±n` Cards from the position of the cursor.
      */
     take?: number
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
+     *
      * Skip the first `n` Cards.
      */
     skip?: number
@@ -1996,7 +2296,9 @@ export namespace Prisma {
   /**
    * Card create
    */
-  export type CardCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type CardCreateArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
     /**
      * Select specific fields to fetch from the Card
      */
@@ -2014,7 +2316,9 @@ export namespace Prisma {
   /**
    * Card createMany
    */
-  export type CardCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type CardCreateManyArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
     /**
      * The data used to create many Cards.
      */
@@ -2024,7 +2328,9 @@ export namespace Prisma {
   /**
    * Card createManyAndReturn
    */
-  export type CardCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type CardCreateManyAndReturnArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
     /**
      * Select specific fields to fetch from the Card
      */
@@ -2042,7 +2348,9 @@ export namespace Prisma {
   /**
    * Card update
    */
-  export type CardUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type CardUpdateArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
     /**
      * Select specific fields to fetch from the Card
      */
@@ -2064,7 +2372,9 @@ export namespace Prisma {
   /**
    * Card updateMany
    */
-  export type CardUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type CardUpdateManyArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
     /**
      * The data used to update Cards.
      */
@@ -2082,7 +2392,9 @@ export namespace Prisma {
   /**
    * Card updateManyAndReturn
    */
-  export type CardUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type CardUpdateManyAndReturnArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
     /**
      * Select specific fields to fetch from the Card
      */
@@ -2108,7 +2420,9 @@ export namespace Prisma {
   /**
    * Card upsert
    */
-  export type CardUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type CardUpsertArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
     /**
      * Select specific fields to fetch from the Card
      */
@@ -2134,7 +2448,9 @@ export namespace Prisma {
   /**
    * Card delete
    */
-  export type CardDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type CardDeleteArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
     /**
      * Select specific fields to fetch from the Card
      */
@@ -2152,7 +2468,9 @@ export namespace Prisma {
   /**
    * Card deleteMany
    */
-  export type CardDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type CardDeleteManyArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
     /**
      * Filter which Cards to delete
      */
@@ -2166,7 +2484,9 @@ export namespace Prisma {
   /**
    * Card without action
    */
-  export type CardDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type CardDefaultArgs<
+    ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs,
+  > = {
     /**
      * Select specific fields to fetch from the Card
      */
@@ -2177,172 +2497,174 @@ export namespace Prisma {
     omit?: CardOmit<ExtArgs> | null
   }
 
-
   /**
    * Enums
    */
 
   export const TransactionIsolationLevel: {
     Serializable: 'Serializable'
-  };
+  }
 
-  export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
-
+  export type TransactionIsolationLevel =
+    (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
   export const CardScalarFieldEnum: {
-    id: 'id',
-    name: 'name',
-    setCode: 'setCode',
-    lang: 'lang',
-    quantity: 'quantity',
-    addedAt: 'addedAt',
-    imageFront: 'imageFront',
-    manaCost: 'manaCost',
-    typeLine: 'typeLine',
-    rarity: 'rarity',
-    oracleText: 'oracleText',
-    flavorText: 'flavorText',
-    power: 'power',
-    toughness: 'toughness',
-    artist: 'artist',
-    collectorNumber: 'collectorNumber',
-    colors: 'colors',
-    backName: 'backName',
-    backManaCost: 'backManaCost',
-    backImage: 'backImage',
-    backTypeLine: 'backTypeLine',
-    backRarity: 'backRarity',
-    backOracleText: 'backOracleText',
-    backFlavorText: 'backFlavorText',
-    backPower: 'backPower',
-    backToughness: 'backToughness',
+    id: 'id'
+    name: 'name'
+    setCode: 'setCode'
+    lang: 'lang'
+    quantity: 'quantity'
+    addedAt: 'addedAt'
+    imageFront: 'imageFront'
+    manaCost: 'manaCost'
+    typeLine: 'typeLine'
+    rarity: 'rarity'
+    oracleText: 'oracleText'
+    flavorText: 'flavorText'
+    power: 'power'
+    toughness: 'toughness'
+    artist: 'artist'
+    collectorNumber: 'collectorNumber'
+    colors: 'colors'
+    backName: 'backName'
+    backManaCost: 'backManaCost'
+    backImage: 'backImage'
+    backTypeLine: 'backTypeLine'
+    backRarity: 'backRarity'
+    backOracleText: 'backOracleText'
+    backFlavorText: 'backFlavorText'
+    backPower: 'backPower'
+    backToughness: 'backToughness'
     priceHistory: 'priceHistory'
-  };
+  }
 
-  export type CardScalarFieldEnum = (typeof CardScalarFieldEnum)[keyof typeof CardScalarFieldEnum]
-
+  export type CardScalarFieldEnum =
+    (typeof CardScalarFieldEnum)[keyof typeof CardScalarFieldEnum]
 
   export const SortOrder: {
-    asc: 'asc',
+    asc: 'asc'
     desc: 'desc'
-  };
+  }
 
   export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
-
   export const JsonNullValueInput: {
     JsonNull: typeof JsonNull
-  };
+  }
 
-  export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
-
+  export type JsonNullValueInput =
+    (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
   export const JsonNullValueFilter: {
-    DbNull: typeof DbNull,
-    JsonNull: typeof JsonNull,
+    DbNull: typeof DbNull
+    JsonNull: typeof JsonNull
     AnyNull: typeof AnyNull
-  };
+  }
 
-  export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
-
+  export type JsonNullValueFilter =
+    (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
   export const QueryMode: {
-    default: 'default',
+    default: 'default'
     insensitive: 'insensitive'
-  };
+  }
 
   export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
 
-
   export const NullsOrder: {
-    first: 'first',
+    first: 'first'
     last: 'last'
-  };
+  }
 
   export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 
-
   /**
-   * Field references 
+   * Field references
    */
-
 
   /**
    * Reference to a field of type 'String'
    */
-  export type StringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'String'>
-    
-
+  export type StringFieldRefInput<$PrismaModel> = FieldRefInputType<
+    $PrismaModel,
+    'String'
+  >
 
   /**
    * Reference to a field of type 'Int'
    */
-  export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
-    
-
+  export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<
+    $PrismaModel,
+    'Int'
+  >
 
   /**
    * Reference to a field of type 'DateTime'
    */
-  export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
-    
-
+  export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<
+    $PrismaModel,
+    'DateTime'
+  >
 
   /**
    * Reference to a field of type 'Json'
    */
-  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
-    
-
+  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<
+    $PrismaModel,
+    'Json'
+  >
 
   /**
    * Reference to a field of type 'QueryMode'
    */
-  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
-    
-
+  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<
+    $PrismaModel,
+    'QueryMode'
+  >
 
   /**
    * Reference to a field of type 'Float'
    */
-  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
-    
+  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<
+    $PrismaModel,
+    'Float'
+  >
+
   /**
    * Deep Input Types
    */
-
 
   export type CardWhereInput = {
     AND?: CardWhereInput | CardWhereInput[]
     OR?: CardWhereInput[]
     NOT?: CardWhereInput | CardWhereInput[]
-    id?: StringFilter<"Card"> | string
-    name?: StringFilter<"Card"> | string
-    setCode?: StringFilter<"Card"> | string
-    lang?: StringFilter<"Card"> | string
-    quantity?: IntFilter<"Card"> | number
-    addedAt?: DateTimeFilter<"Card"> | Date | string
-    imageFront?: StringFilter<"Card"> | string
-    manaCost?: StringNullableFilter<"Card"> | string | null
-    typeLine?: StringNullableFilter<"Card"> | string | null
-    rarity?: StringNullableFilter<"Card"> | string | null
-    oracleText?: StringNullableFilter<"Card"> | string | null
-    flavorText?: StringNullableFilter<"Card"> | string | null
-    power?: StringNullableFilter<"Card"> | string | null
-    toughness?: StringNullableFilter<"Card"> | string | null
-    artist?: StringNullableFilter<"Card"> | string | null
-    collectorNumber?: StringNullableFilter<"Card"> | string | null
-    colors?: StringNullableFilter<"Card"> | string | null
-    backName?: StringNullableFilter<"Card"> | string | null
-    backManaCost?: StringNullableFilter<"Card"> | string | null
-    backImage?: StringNullableFilter<"Card"> | string | null
-    backTypeLine?: StringNullableFilter<"Card"> | string | null
-    backRarity?: StringNullableFilter<"Card"> | string | null
-    backOracleText?: StringNullableFilter<"Card"> | string | null
-    backFlavorText?: StringNullableFilter<"Card"> | string | null
-    backPower?: StringNullableFilter<"Card"> | string | null
-    backToughness?: StringNullableFilter<"Card"> | string | null
-    priceHistory?: JsonFilter<"Card">
+    id?: StringFilter<'Card'> | string
+    name?: StringFilter<'Card'> | string
+    setCode?: StringFilter<'Card'> | string
+    lang?: StringFilter<'Card'> | string
+    quantity?: IntFilter<'Card'> | number
+    addedAt?: DateTimeFilter<'Card'> | Date | string
+    imageFront?: StringFilter<'Card'> | string
+    manaCost?: StringNullableFilter<'Card'> | string | null
+    typeLine?: StringNullableFilter<'Card'> | string | null
+    rarity?: StringNullableFilter<'Card'> | string | null
+    oracleText?: StringNullableFilter<'Card'> | string | null
+    flavorText?: StringNullableFilter<'Card'> | string | null
+    power?: StringNullableFilter<'Card'> | string | null
+    toughness?: StringNullableFilter<'Card'> | string | null
+    artist?: StringNullableFilter<'Card'> | string | null
+    collectorNumber?: StringNullableFilter<'Card'> | string | null
+    colors?: StringNullableFilter<'Card'> | string | null
+    backName?: StringNullableFilter<'Card'> | string | null
+    backManaCost?: StringNullableFilter<'Card'> | string | null
+    backImage?: StringNullableFilter<'Card'> | string | null
+    backTypeLine?: StringNullableFilter<'Card'> | string | null
+    backRarity?: StringNullableFilter<'Card'> | string | null
+    backOracleText?: StringNullableFilter<'Card'> | string | null
+    backFlavorText?: StringNullableFilter<'Card'> | string | null
+    backPower?: StringNullableFilter<'Card'> | string | null
+    backToughness?: StringNullableFilter<'Card'> | string | null
+    priceHistory?: JsonFilter<'Card'>
   }
 
   export type CardOrderByWithRelationInput = {
@@ -2375,38 +2697,41 @@ export namespace Prisma {
     priceHistory?: SortOrder
   }
 
-  export type CardWhereUniqueInput = Prisma.AtLeast<{
-    id?: string
-    AND?: CardWhereInput | CardWhereInput[]
-    OR?: CardWhereInput[]
-    NOT?: CardWhereInput | CardWhereInput[]
-    name?: StringFilter<"Card"> | string
-    setCode?: StringFilter<"Card"> | string
-    lang?: StringFilter<"Card"> | string
-    quantity?: IntFilter<"Card"> | number
-    addedAt?: DateTimeFilter<"Card"> | Date | string
-    imageFront?: StringFilter<"Card"> | string
-    manaCost?: StringNullableFilter<"Card"> | string | null
-    typeLine?: StringNullableFilter<"Card"> | string | null
-    rarity?: StringNullableFilter<"Card"> | string | null
-    oracleText?: StringNullableFilter<"Card"> | string | null
-    flavorText?: StringNullableFilter<"Card"> | string | null
-    power?: StringNullableFilter<"Card"> | string | null
-    toughness?: StringNullableFilter<"Card"> | string | null
-    artist?: StringNullableFilter<"Card"> | string | null
-    collectorNumber?: StringNullableFilter<"Card"> | string | null
-    colors?: StringNullableFilter<"Card"> | string | null
-    backName?: StringNullableFilter<"Card"> | string | null
-    backManaCost?: StringNullableFilter<"Card"> | string | null
-    backImage?: StringNullableFilter<"Card"> | string | null
-    backTypeLine?: StringNullableFilter<"Card"> | string | null
-    backRarity?: StringNullableFilter<"Card"> | string | null
-    backOracleText?: StringNullableFilter<"Card"> | string | null
-    backFlavorText?: StringNullableFilter<"Card"> | string | null
-    backPower?: StringNullableFilter<"Card"> | string | null
-    backToughness?: StringNullableFilter<"Card"> | string | null
-    priceHistory?: JsonFilter<"Card">
-  }, "id">
+  export type CardWhereUniqueInput = Prisma.AtLeast<
+    {
+      id?: string
+      AND?: CardWhereInput | CardWhereInput[]
+      OR?: CardWhereInput[]
+      NOT?: CardWhereInput | CardWhereInput[]
+      name?: StringFilter<'Card'> | string
+      setCode?: StringFilter<'Card'> | string
+      lang?: StringFilter<'Card'> | string
+      quantity?: IntFilter<'Card'> | number
+      addedAt?: DateTimeFilter<'Card'> | Date | string
+      imageFront?: StringFilter<'Card'> | string
+      manaCost?: StringNullableFilter<'Card'> | string | null
+      typeLine?: StringNullableFilter<'Card'> | string | null
+      rarity?: StringNullableFilter<'Card'> | string | null
+      oracleText?: StringNullableFilter<'Card'> | string | null
+      flavorText?: StringNullableFilter<'Card'> | string | null
+      power?: StringNullableFilter<'Card'> | string | null
+      toughness?: StringNullableFilter<'Card'> | string | null
+      artist?: StringNullableFilter<'Card'> | string | null
+      collectorNumber?: StringNullableFilter<'Card'> | string | null
+      colors?: StringNullableFilter<'Card'> | string | null
+      backName?: StringNullableFilter<'Card'> | string | null
+      backManaCost?: StringNullableFilter<'Card'> | string | null
+      backImage?: StringNullableFilter<'Card'> | string | null
+      backTypeLine?: StringNullableFilter<'Card'> | string | null
+      backRarity?: StringNullableFilter<'Card'> | string | null
+      backOracleText?: StringNullableFilter<'Card'> | string | null
+      backFlavorText?: StringNullableFilter<'Card'> | string | null
+      backPower?: StringNullableFilter<'Card'> | string | null
+      backToughness?: StringNullableFilter<'Card'> | string | null
+      priceHistory?: JsonFilter<'Card'>
+    },
+    'id'
+  >
 
   export type CardOrderByWithAggregationInput = {
     id?: SortOrder
@@ -2444,36 +2769,40 @@ export namespace Prisma {
   }
 
   export type CardScalarWhereWithAggregatesInput = {
-    AND?: CardScalarWhereWithAggregatesInput | CardScalarWhereWithAggregatesInput[]
+    AND?:
+      | CardScalarWhereWithAggregatesInput
+      | CardScalarWhereWithAggregatesInput[]
     OR?: CardScalarWhereWithAggregatesInput[]
-    NOT?: CardScalarWhereWithAggregatesInput | CardScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"Card"> | string
-    name?: StringWithAggregatesFilter<"Card"> | string
-    setCode?: StringWithAggregatesFilter<"Card"> | string
-    lang?: StringWithAggregatesFilter<"Card"> | string
-    quantity?: IntWithAggregatesFilter<"Card"> | number
-    addedAt?: DateTimeWithAggregatesFilter<"Card"> | Date | string
-    imageFront?: StringWithAggregatesFilter<"Card"> | string
-    manaCost?: StringNullableWithAggregatesFilter<"Card"> | string | null
-    typeLine?: StringNullableWithAggregatesFilter<"Card"> | string | null
-    rarity?: StringNullableWithAggregatesFilter<"Card"> | string | null
-    oracleText?: StringNullableWithAggregatesFilter<"Card"> | string | null
-    flavorText?: StringNullableWithAggregatesFilter<"Card"> | string | null
-    power?: StringNullableWithAggregatesFilter<"Card"> | string | null
-    toughness?: StringNullableWithAggregatesFilter<"Card"> | string | null
-    artist?: StringNullableWithAggregatesFilter<"Card"> | string | null
-    collectorNumber?: StringNullableWithAggregatesFilter<"Card"> | string | null
-    colors?: StringNullableWithAggregatesFilter<"Card"> | string | null
-    backName?: StringNullableWithAggregatesFilter<"Card"> | string | null
-    backManaCost?: StringNullableWithAggregatesFilter<"Card"> | string | null
-    backImage?: StringNullableWithAggregatesFilter<"Card"> | string | null
-    backTypeLine?: StringNullableWithAggregatesFilter<"Card"> | string | null
-    backRarity?: StringNullableWithAggregatesFilter<"Card"> | string | null
-    backOracleText?: StringNullableWithAggregatesFilter<"Card"> | string | null
-    backFlavorText?: StringNullableWithAggregatesFilter<"Card"> | string | null
-    backPower?: StringNullableWithAggregatesFilter<"Card"> | string | null
-    backToughness?: StringNullableWithAggregatesFilter<"Card"> | string | null
-    priceHistory?: JsonWithAggregatesFilter<"Card">
+    NOT?:
+      | CardScalarWhereWithAggregatesInput
+      | CardScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<'Card'> | string
+    name?: StringWithAggregatesFilter<'Card'> | string
+    setCode?: StringWithAggregatesFilter<'Card'> | string
+    lang?: StringWithAggregatesFilter<'Card'> | string
+    quantity?: IntWithAggregatesFilter<'Card'> | number
+    addedAt?: DateTimeWithAggregatesFilter<'Card'> | Date | string
+    imageFront?: StringWithAggregatesFilter<'Card'> | string
+    manaCost?: StringNullableWithAggregatesFilter<'Card'> | string | null
+    typeLine?: StringNullableWithAggregatesFilter<'Card'> | string | null
+    rarity?: StringNullableWithAggregatesFilter<'Card'> | string | null
+    oracleText?: StringNullableWithAggregatesFilter<'Card'> | string | null
+    flavorText?: StringNullableWithAggregatesFilter<'Card'> | string | null
+    power?: StringNullableWithAggregatesFilter<'Card'> | string | null
+    toughness?: StringNullableWithAggregatesFilter<'Card'> | string | null
+    artist?: StringNullableWithAggregatesFilter<'Card'> | string | null
+    collectorNumber?: StringNullableWithAggregatesFilter<'Card'> | string | null
+    colors?: StringNullableWithAggregatesFilter<'Card'> | string | null
+    backName?: StringNullableWithAggregatesFilter<'Card'> | string | null
+    backManaCost?: StringNullableWithAggregatesFilter<'Card'> | string | null
+    backImage?: StringNullableWithAggregatesFilter<'Card'> | string | null
+    backTypeLine?: StringNullableWithAggregatesFilter<'Card'> | string | null
+    backRarity?: StringNullableWithAggregatesFilter<'Card'> | string | null
+    backOracleText?: StringNullableWithAggregatesFilter<'Card'> | string | null
+    backFlavorText?: StringNullableWithAggregatesFilter<'Card'> | string | null
+    backPower?: StringNullableWithAggregatesFilter<'Card'> | string | null
+    backToughness?: StringNullableWithAggregatesFilter<'Card'> | string | null
+    priceHistory?: JsonWithAggregatesFilter<'Card'>
   }
 
   export type CardCreateInput = {
@@ -2735,15 +3064,21 @@ export namespace Prisma {
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
-  export type JsonFilter<$PrismaModel = never> = 
+  export type JsonFilter<$PrismaModel = never> =
     | PatchUndefined<
-        Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
+        Either<
+          Required<JsonFilterBase<$PrismaModel>>,
+          Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>
+        >,
         Required<JsonFilterBase<$PrismaModel>>
       >
     | OptionalFlat<Omit<Required<JsonFilterBase<$PrismaModel>>, 'path'>>
 
   export type JsonFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    equals?:
+      | InputJsonValue
+      | JsonFieldRefInput<$PrismaModel>
+      | JsonNullValueFilter
     path?: string
     mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
@@ -2918,15 +3253,26 @@ export namespace Prisma {
     _min?: NestedStringNullableFilter<$PrismaModel>
     _max?: NestedStringNullableFilter<$PrismaModel>
   }
-  export type JsonWithAggregatesFilter<$PrismaModel = never> = 
+  export type JsonWithAggregatesFilter<$PrismaModel = never> =
     | PatchUndefined<
-        Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Either<
+          Required<JsonWithAggregatesFilterBase<$PrismaModel>>,
+          Exclude<
+            keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>,
+            'path'
+          >
+        >,
         Required<JsonWithAggregatesFilterBase<$PrismaModel>>
       >
-    | OptionalFlat<Omit<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+    | OptionalFlat<
+        Omit<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>
+      >
 
   export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    equals?:
+      | InputJsonValue
+      | JsonFieldRefInput<$PrismaModel>
+      | JsonNullValueFilter
     path?: string
     mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
@@ -3095,15 +3441,21 @@ export namespace Prisma {
     gte?: number | IntFieldRefInput<$PrismaModel>
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
-  export type NestedJsonFilter<$PrismaModel = never> = 
+  export type NestedJsonFilter<$PrismaModel = never> =
     | PatchUndefined<
-        Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
+        Either<
+          Required<NestedJsonFilterBase<$PrismaModel>>,
+          Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>
+        >,
         Required<NestedJsonFilterBase<$PrismaModel>>
       >
     | OptionalFlat<Omit<Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>
 
   export type NestedJsonFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    equals?:
+      | InputJsonValue
+      | JsonFieldRefInput<$PrismaModel>
+      | JsonNullValueFilter
     path?: string
     mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
@@ -3113,8 +3465,6 @@ export namespace Prisma {
     array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
-
-
 
   /**
    * Batch Payload for updateMany & deleteMany & createMany

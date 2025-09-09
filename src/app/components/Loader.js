@@ -1,4 +1,4 @@
-import styles from "./Loader.module.css";
+import styles from './Loader.module.css'
 
 export default function Loader() {
   return (
@@ -6,5 +6,5 @@ export default function Loader() {
       <div className={styles.spinner}></div>
       <p>Chargement des cartes...</p>
     </div>
-  );
+  )
 }

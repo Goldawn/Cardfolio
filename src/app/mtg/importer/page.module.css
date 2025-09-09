@@ -38,7 +38,7 @@
 
 .inputContainer ul li i {
   float: right;
-  font-size: 0.8rem;;
+  font-size: 0.8rem;
 }
 
 .expansion {
@@ -62,7 +62,11 @@
 }
 
 .inputContainer ul li:hover {
-  background: linear-gradient(90deg, rgb(224, 209, 230) 0%, rgba(255, 255, 255, 0.1) 99%);
+  background: linear-gradient(
+    90deg,
+    rgb(224, 209, 230) 0%,
+    rgba(255, 255, 255, 0.1) 99%
+  );
   color: black;
 }
 
@@ -79,7 +83,9 @@
   margin: 0 35px;
 }
 
-.setHeaderInputContainer input, .setHeaderInputContainer select, .setHeaderInputContainer button {
+.setHeaderInputContainer input,
+.setHeaderInputContainer select,
+.setHeaderInputContainer button {
   height: 50px;
   padding: 10px 20px;
 }
@@ -192,19 +198,15 @@
   animation: fadeInSlide 0.4s ease-out;
 }
 
-
-
-#scrollbar::-webkit-scrollbar
-{
-	/* width: 12px; */
-	background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 0 10px 10px 0;
+#scrollbar::-webkit-scrollbar {
+  /* width: 12px; */
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 0 10px 10px 0;
 }
 
-#scrollbar::-webkit-scrollbar-thumb
-{
-	border-radius: 10px;
-	background-color: #cacaca;
+#scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background-color: #cacaca;
 }
 
 @keyframes fadeInSlide {

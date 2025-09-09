@@ -1,7 +1,7 @@
 // Normalized MTG card helpers — single source of truth
 // ----------------------------------------------------
-import React from "react";
-import manaSymbols from "../app/assets/mock/mana.json";
+import React from 'react'
+import manaSymbols from '../app/assets/mock/mana.json'
 
 /** ------- Mana helpers ------- **/
 
@@ -14,25 +14,25 @@ import manaSymbols from "../app/assets/mock/mana.json";
  * @returns {number}
  */
 export function parseManaCostNumeric(manaCost) {
-  if (!manaCost) return 0;
-  const tokens = String(manaCost).match(/\{[^}]+\}/g) || [];
-  let sum = 0;
+  if (!manaCost) return 0
+  const tokens = String(manaCost).match(/\{[^}]+\}/g) || []
+  let sum = 0
   for (const tok of tokens) {
-    const sym = tok.slice(1, -1).toUpperCase().trim();
+    const sym = tok.slice(1, -1).toUpperCase().trim()
     if (/^\d+$/.test(sym)) {
-      sum += Number(sym);
-    } else if (sym.includes("/")) {
+      sum += Number(sym)
+    } else if (sym.includes('/')) {
       // ex: {W/U}, {2/W}, {W/P}...
-      const parts = sym.split("/");
-      const numeric = parts.find((p) => /^\d+$/.test(p));
-      sum += numeric ? Number(numeric) : 1;
-    } else if (sym === "X" || sym === "Y" || sym === "Z") {
-      sum += 0;
+      const parts = sym.split('/')
+      const numeric = parts.find(p => /^\d+$/.test(p))
+      sum += numeric ? Number(numeric) : 1
+    } else if (sym === 'X' || sym === 'Y' || sym === 'Z') {
+      sum += 0
     } else {
-      sum += 1;
+      sum += 1
     }
   }
-  return sum;
+  return sum
 }
 
 /**
@@ -41,16 +41,18 @@ export function parseManaCostNumeric(manaCost) {
  * @returns {React.ReactNode}
  */
 export function renderManaCost(manaCost) {
-  if (!manaCost) return null;
+  if (!manaCost) return null
   return String(manaCost)
-    .split("\n")
+    .split('\n')
     .map((line, lineIndex) => (
       <span key={lineIndex}>
         {line
           .split(/(\{[^}]+\})/g)
           .filter(Boolean)
           .map((symbol, symbolIndex) => {
-            const found = (manaSymbols?.data || []).find((e) => e.symbol === symbol);
+            const found = (manaSymbols?.data || []).find(
+              e => e.symbol === symbol
+            )
             return found ? (
               <img
                 key={`${lineIndex}-${symbolIndex}`}
@@ -59,29 +61,38 @@ export function renderManaCost(manaCost) {
               />
             ) : (
               symbol
-            );
+            )
           })}
         <br />
       </span>
-    ));
+    ))
 }
 
-export const formatAndParseText = (text) => {
-if (!text) return null;
-return text.split("\n").map((line, lineIndex) => (
+export const formatAndParseText = text => {
+  if (!text) return null
+  return text.split('\n').map((line, lineIndex) => (
     <span key={lineIndex}>
-    {line.split(/(\{[^}]+\})/g).filter(Boolean).map((symbol, symbolIndex) => {
-        const foundSymbol = manaSymbols.data.find(entry => entry.symbol === symbol);
-        return foundSymbol ? (
-        <img key={`${lineIndex}-${symbolIndex}`} src={foundSymbol.svg_uri} alt={symbol} />
-        ) : (
-        symbol
-        );
-    })}
-    <br />
+      {line
+        .split(/(\{[^}]+\})/g)
+        .filter(Boolean)
+        .map((symbol, symbolIndex) => {
+          const foundSymbol = manaSymbols.data.find(
+            entry => entry.symbol === symbol
+          )
+          return foundSymbol ? (
+            <img
+              key={`${lineIndex}-${symbolIndex}`}
+              src={foundSymbol.svg_uri}
+              alt={symbol}
+            />
+          ) : (
+            symbol
+          )
+        })}
+      <br />
     </span>
-));
-};
+  ))
+}
 
 /**
  * MV/CMC d’une carte (prend les champs numériques si présents, sinon parse la string de mana).
@@ -90,36 +101,36 @@ return text.split("\n").map((line, lineIndex) => (
  */
 export function getMV(card) {
   const cand = [card?.manaValue, card?.cmc, card?.convertedManaCost].find(
-    (v) => v !== undefined && v !== null && Number.isFinite(Number(v))
-  );
-  if (cand !== undefined) return Math.max(0, Math.floor(Number(cand)));
-  return Math.max(0, Math.floor(parseManaCostNumeric(card?.manaCost)));
+    v => v !== undefined && v !== null && Number.isFinite(Number(v))
+  )
+  if (cand !== undefined) return Math.max(0, Math.floor(Number(cand)))
+  return Math.max(0, Math.floor(parseManaCostNumeric(card?.manaCost)))
 }
 
 /** Buckets CMC utilisés partout */
-export const BUCKETS = ["1-", "2", "3", "4", "5", "6", "7+"];
+export const BUCKETS = ['1-', '2', '3', '4', '5', '6', '7+']
 /**
  * Label de bucket pour un MV.
  * @param {number} mv
  * @returns {"1-"|"2"|"3"|"4"|"5"|"6"|"7+"}
  */
 export function bucketLabel(mv) {
-  return mv <= 1 ? "1-" : mv >= 7 ? "7+" : String(mv);
+  return mv <= 1 ? '1-' : mv >= 7 ? '7+' : String(mv)
 }
 
 /** ------- Type helpers ------- **/
 
 export const TYPE_ORDER = [
-  "creature",
-  "instant",
-  "sorcery",
-  "enchantment",
-  "artifact",
-  "planeswalker",
-  "battle",
-  "land",
-  "other",
-];
+  'creature',
+  'instant',
+  'sorcery',
+  'enchantment',
+  'artifact',
+  'planeswalker',
+  'battle',
+  'land',
+  'other',
+]
 
 /**
  * Type principal (catégories cohérentes avec l’UI).
@@ -127,24 +138,24 @@ export const TYPE_ORDER = [
  * @returns {string}
  */
 export function primaryTypeOf(card) {
-  const t = (card?.type || card?.typeLine || "").toLowerCase();
-  if (t.includes("land")) return "land";
-  if (t.includes("creature")) return "creature";
-  if (t.includes("instant")) return "instant";
-  if (t.includes("sorcery")) return "sorcery";
-  if (t.includes("enchantment")) return "enchantment";
-  if (t.includes("artifact")) return "artifact";
-  if (t.includes("planeswalker")) return "planeswalker";
-  if (t.includes("battle")) return "battle";
-  return "other";
+  const t = (card?.type || card?.typeLine || '').toLowerCase()
+  if (t.includes('land')) return 'land'
+  if (t.includes('creature')) return 'creature'
+  if (t.includes('instant')) return 'instant'
+  if (t.includes('sorcery')) return 'sorcery'
+  if (t.includes('enchantment')) return 'enchantment'
+  if (t.includes('artifact')) return 'artifact'
+  if (t.includes('planeswalker')) return 'planeswalker'
+  if (t.includes('battle')) return 'battle'
+  return 'other'
 }
 
 /** @param {any} card */
-export const isLand = (card) => primaryTypeOf(card) === "land";
+export const isLand = card => primaryTypeOf(card) === 'land'
 
 /** ------- Color helpers ------- **/
 
-export const COLOR_ORDER = ["W", "U", "B", "R", "G", "M", "C"];
+export const COLOR_ORDER = ['W', 'U', 'B', 'R', 'G', 'M', 'C']
 
 /**
  * Extrait W/U/B/R/G d’une string de mana (hybrides compris).
@@ -152,17 +163,17 @@ export const COLOR_ORDER = ["W", "U", "B", "R", "G", "M", "C"];
  * @returns {Array<"W"|"U"|"B"|"R"|"G">}
  */
 export function colorsFromManaCost(manaCost) {
-  if (!manaCost) return [];
-  const tokens = String(manaCost).match(/\{[^}]+\}/g) || [];
-  const set = new Set();
+  if (!manaCost) return []
+  const tokens = String(manaCost).match(/\{[^}]+\}/g) || []
+  const set = new Set()
   for (const tok of tokens) {
-    const sym = tok.slice(1, -1).toUpperCase();
-    if (["W", "U", "B", "R", "G"].includes(sym)) set.add(sym);
-    sym.split("/").forEach((s) => {
-      if (["W", "U", "B", "R", "G"].includes(s)) set.add(s);
-    });
+    const sym = tok.slice(1, -1).toUpperCase()
+    if (['W', 'U', 'B', 'R', 'G'].includes(sym)) set.add(sym)
+    sym.split('/').forEach(s => {
+      if (['W', 'U', 'B', 'R', 'G'].includes(s)) set.add(s)
+    })
   }
-  return Array.from(set);
+  return Array.from(set)
 }
 
 /**
@@ -172,20 +183,22 @@ export function colorsFromManaCost(manaCost) {
  * @returns {"W"|"U"|"B"|"R"|"G"|"M"|"C"}
  */
 export function colorBucketOf(card) {
-  let cols = [];
-  if (Array.isArray(card?.colors) && card.colors.length) cols = card.colors;
-  else if (Array.isArray(card?.colorIdentity) && card.colorIdentity.length) cols = card.colorIdentity;
-  else if (Array.isArray(card?.color_identity) && card.color_identity.length) cols = card.color_identity;
-  else cols = colorsFromManaCost(card?.manaCost);
+  let cols = []
+  if (Array.isArray(card?.colors) && card.colors.length) cols = card.colors
+  else if (Array.isArray(card?.colorIdentity) && card.colorIdentity.length)
+    cols = card.colorIdentity
+  else if (Array.isArray(card?.color_identity) && card.color_identity.length)
+    cols = card.color_identity
+  else cols = colorsFromManaCost(card?.manaCost)
 
   const norm = cols
     .map(String)
-    .map((c) => c.toUpperCase())
-    .filter((c) => ["W", "U", "B", "R", "G"].includes(c));
+    .map(c => c.toUpperCase())
+    .filter(c => ['W', 'U', 'B', 'R', 'G'].includes(c))
 
-  if (norm.length === 0) return "C";
-  if (norm.length >= 2) return "M";
-  return norm[0];
+  if (norm.length === 0) return 'C'
+  if (norm.length >= 2) return 'M'
+  return norm[0]
 }
 
 /** ------- Rarity helpers ------- **/
@@ -195,18 +208,17 @@ export function colorBucketOf(card) {
  * @returns {"common"|"uncommon"|"rare"|"mythic"|"special"|"other"}
  */
 export function rarityKeyOf(card) {
-  const r =
-    (card?.rarity || card?.printedRarity || card?.rarityKey || "")
-      .toString()
-      .toLowerCase()
-      .trim();
+  const r = (card?.rarity || card?.printedRarity || card?.rarityKey || '')
+    .toString()
+    .toLowerCase()
+    .trim()
 
-  if (r === "common") return "common";
-  if (r === "uncommon") return "uncommon";
-  if (r === "rare") return "rare";
-  if (r === "mythic" || r === "mythic rare") return "mythic";
-  if (r === "special" || r === "bonus" || r === "timeshifted") return "special";
-  return "other";
+  if (r === 'common') return 'common'
+  if (r === 'uncommon') return 'uncommon'
+  if (r === 'rare') return 'rare'
+  if (r === 'mythic' || r === 'mythic rare') return 'mythic'
+  if (r === 'special' || r === 'bonus' || r === 'timeshifted') return 'special'
+  return 'other'
 }
 
 /** ------- Images / Showcase helpers ------- **/
@@ -222,7 +234,7 @@ export function getArtSmall(card) {
     card?.cardBack?.image?.artCrop ||
     card?.image?.normal ||
     null
-  );
+  )
 }
 
 /**
@@ -237,7 +249,7 @@ export function getArtLarge(card) {
     card?.image?.artCrop ||
     card?.cardBack?.image?.artCrop ||
     null
-  );
+  )
 }
 
 /**
@@ -251,13 +263,15 @@ export function getShowcasePayload(card) {
     card?.cardBack?.image?.artCrop ||
     card?.image?.normal ||
     null
-  );
+  )
 }
 
 /** ------- Tiny utils ------- **/
 
-/** @param {any} card */ export const getName = (card) => String(card?.name || card?.printedName || "");
-/** @param {any} card */ export const getQty  = (card) => Number(card?.decklistQuantity || 0);
+/** @param {any} card */ export const getName = card =>
+  String(card?.name || card?.printedName || '')
+/** @param {any} card */ export const getQty = card =>
+  Number(card?.decklistQuantity || 0)
 
 /** ------- Default export (optionnel) ------- **/
 export default {
@@ -284,4 +298,4 @@ export default {
   // tiny utils
   getName,
   getQty,
-};
+}

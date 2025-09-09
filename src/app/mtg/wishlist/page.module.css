@@ -30,8 +30,8 @@
   height: 34px;
   padding: 6px 10px;
   border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.16);
-  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
   color: #fff;
   min-width: 220px;
 }
@@ -40,8 +40,8 @@
   height: 34px;
   padding: 0 12px;
   border-radius: 8px;
-  border: 1px solid rgba(122,186,255,.4);
-  background: rgba(122,186,255,.15);
+  border: 1px solid rgba(122, 186, 255, 0.4);
+  background: rgba(122, 186, 255, 0.15);
   color: #dff0ff;
   font-size: 13px;
 }

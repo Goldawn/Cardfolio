@@ -1,9 +1,9 @@
-"use client";
+'use client'
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import styles from "./WishlistSearchSection.module.css";
-import Card from "./Card";
-import { formatCard } from "../services/FormatCard";
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import styles from './WishlistSearchSection.module.css'
+import Card from './Card'
+import { formatCard } from '../services/FormatCard'
 
 export default function WishlistSearchSection({
   userId,
@@ -13,266 +13,273 @@ export default function WishlistSearchSection({
   onHoverCard,
   onCardAdded,
 }) {
-  const [searchInput, setSearchInput] = useState("");
-  const [suggestions, setSuggestions] = useState([]);
-  const [highlightIndex, setHighlightIndex] = useState(-1);
-  const [searchResults, setSearchResults] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [searchInput, setSearchInput] = useState('')
+  const [suggestions, setSuggestions] = useState([])
+  const [highlightIndex, setHighlightIndex] = useState(-1)
+  const [searchResults, setSearchResults] = useState([])
+  const [loading, setLoading] = useState(false)
 
   // Empêche l’autocomplete de se rouvrir juste après un clic sur une suggestion (cas "Opt")
-  const [freezeAutocomplete, setFreezeAutocomplete] = useState(false);
+  const [freezeAutocomplete, setFreezeAutocomplete] = useState(false)
 
   // UI: position du popover
-  const [placement, setPlacement] = useState("right"); // "right" | "left" | "bottom"
-  const [drawerStyle, setDrawerStyle] = useState({});
-  const drawerRef = useRef(null);
+  const [placement, setPlacement] = useState('right') // "right" | "left" | "bottom"
+  const [drawerStyle, setDrawerStyle] = useState({})
+  const drawerRef = useRef(null)
 
-  const abortRef = useRef(null);
-  const hoverAbortRef = useRef(null);
+  const abortRef = useRef(null)
+  const hoverAbortRef = useRef(null)
 
-  const debouncedQuery = useDebounce(searchInput, 220);
+  const debouncedQuery = useDebounce(searchInput, 220)
 
   /* ---------- positionnement du popover ---------- */
   const reposition = () => {
-    if (!drawerRef.current) return;
-    const parent = drawerRef.current.parentElement; // le conteneur de la tuile placeholder
-    if (!parent) return;
+    if (!drawerRef.current) return
+    const parent = drawerRef.current.parentElement // le conteneur de la tuile placeholder
+    if (!parent) return
 
-    const rect = parent.getBoundingClientRect();
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const m = 12;
-    const desiredW = Math.min(720, Math.max(360, vw - 2 * m));
+    const rect = parent.getBoundingClientRect()
+    const vw = window.innerWidth
+    const vh = window.innerHeight
+    const m = 12
+    const desiredW = Math.min(720, Math.max(360, vw - 2 * m))
 
     // défaut: à droite
-    let nextPlacement = "right";
-    let left = rect.right + m;
-    let top = Math.min(Math.max(rect.top, m), vh - m - 120);
-    let width = desiredW;
+    let nextPlacement = 'right'
+    let left = rect.right + m
+    let top = Math.min(Math.max(rect.top, m), vh - m - 120)
+    let width = desiredW
 
     // pas de place à droite -> essayer gauche
     if (left + desiredW > vw - m) {
-      const leftOption = rect.left - m - desiredW;
+      const leftOption = rect.left - m - desiredW
       if (leftOption >= m) {
-        nextPlacement = "left";
-        left = leftOption;
+        nextPlacement = 'left'
+        left = leftOption
       } else {
         // ni droite ni gauche -> dessous
-        nextPlacement = "bottom";
-        left = Math.min(Math.max(rect.left, m), vw - desiredW - m);
-        top = rect.bottom + m;
+        nextPlacement = 'bottom'
+        left = Math.min(Math.max(rect.left, m), vw - desiredW - m)
+        top = rect.bottom + m
       }
     }
 
-    setPlacement(nextPlacement);
+    setPlacement(nextPlacement)
     setDrawerStyle({
       left: `${left}px`,
       top: `${top}px`,
       width: `${width}px`,
       maxHeight: `min(80vh, ${vh - 2 * m}px)`,
-    });
-  };
+    })
+  }
 
   useLayoutEffect(() => {
-    reposition();
-  }, []);
+    reposition()
+  }, [])
 
   useEffect(() => {
-    const onScroll = () => reposition();
-    const onResize = () => reposition();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onResize);
+    const onScroll = () => reposition()
+    const onResize = () => reposition()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onResize)
     return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onResize);
-    };
-  }, []);
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onResize)
+    }
+  }, [])
 
   /* ---------- fermeture: esc + clic-extérieur ---------- */
   useEffect(() => {
-    const onKey = (e) => {
-      if (e.key === "Escape") StopAddingToWishlist?.();
-    };
-    const onClick = (e) => {
-      if (!drawerRef.current) return;
+    const onKey = e => {
+      if (e.key === 'Escape') StopAddingToWishlist?.()
+    }
+    const onClick = e => {
+      if (!drawerRef.current) return
       if (!drawerRef.current.contains(e.target)) {
-        StopAddingToWishlist?.();
+        StopAddingToWishlist?.()
       }
-    };
-    document.addEventListener("keydown", onKey);
-    document.addEventListener("mousedown", onClick);
+    }
+    document.addEventListener('keydown', onKey)
+    document.addEventListener('mousedown', onClick)
     return () => {
-      document.removeEventListener("keydown", onKey);
-      document.removeEventListener("mousedown", onClick);
-    };
-  }, [StopAddingToWishlist]);
+      document.removeEventListener('keydown', onKey)
+      document.removeEventListener('mousedown', onClick)
+    }
+  }, [StopAddingToWishlist])
 
   /* ---------- autocomplete (avec gel si besoin) ---------- */
   useEffect(() => {
-    const q = debouncedQuery.trim();
-    setHighlightIndex(-1);
+    const q = debouncedQuery.trim()
+    setHighlightIndex(-1)
 
     if (freezeAutocomplete) {
-      setSuggestions([]);
-      return;
+      setSuggestions([])
+      return
     }
 
     if (q.length < 3) {
-      setSuggestions([]);
-      return;
+      setSuggestions([])
+      return
     }
 
-    (async () => {
+    ;(async () => {
       try {
-        if (abortRef.current) abortRef.current.abort();
-        abortRef.current = new AbortController();
+        if (abortRef.current) abortRef.current.abort()
+        abortRef.current = new AbortController()
 
         const res = await fetch(
           `https://api.scryfall.com/cards/autocomplete?q=${encodeURIComponent(q)}`,
           { signal: abortRef.current.signal }
-        );
-        const data = await res.json();
-        setSuggestions(Array.isArray(data?.data) ? data.data.slice(0, 15) : []);
+        )
+        const data = await res.json()
+        setSuggestions(Array.isArray(data?.data) ? data.data.slice(0, 15) : [])
       } catch (error) {
-        if (error?.name !== "AbortError") {
-          console.error("Erreur chargement suggestions:", error);
+        if (error?.name !== 'AbortError') {
+          console.error('Erreur chargement suggestions:', error)
         }
       }
-    })();
-  }, [debouncedQuery, freezeAutocomplete]);
+    })()
+  }, [debouncedQuery, freezeAutocomplete])
 
   /* ---------- résultats généraux ---------- */
-  const handleSearch = async (query) => {
-    const q = (query ?? searchInput).trim();
-    if (!q) return;
+  const handleSearch = async query => {
+    const q = (query ?? searchInput).trim()
+    if (!q) return
 
-    setLoading(true);
-    setSuggestions([]); // ferme la liste
-    setHighlightIndex(-1);
+    setLoading(true)
+    setSuggestions([]) // ferme la liste
+    setHighlightIndex(-1)
 
     try {
       const res = await fetch(
         `https://api.scryfall.com/cards/search?q=${encodeURIComponent(q)}&unique=prints`
-      );
-      const data = await res.json();
-      const formattedResults = Array.isArray(data?.data) ? data.data.map(formatCard) : [];
-      setSearchResults(formattedResults);
+      )
+      const data = await res.json()
+      const formattedResults = Array.isArray(data?.data)
+        ? data.data.map(formatCard)
+        : []
+      setSearchResults(formattedResults)
     } catch (error) {
-      console.error("Erreur chargement résultats:", error);
+      console.error('Erreur chargement résultats:', error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   /* ---------- prints EXACTS après clic sur une suggestion ---------- */
-  const handleSearchExactPrints = async (exactName) => {
+  const handleSearchExactPrints = async exactName => {
     // 1) on gèle l’autocomplete pour éviter qu’il se rouvre (cas "Opt")
-    setFreezeAutocomplete(true);
-    setSuggestions([]);
-    setSearchResults([]);
-    setHighlightIndex(-1);
-    setSearchInput(exactName);
+    setFreezeAutocomplete(true)
+    setSuggestions([])
+    setSearchResults([])
+    setHighlightIndex(-1)
+    setSearchInput(exactName)
 
-    setLoading(true);
+    setLoading(true)
     try {
       // Récupère la carte exacte puis son prints_search_uri
       const namedRes = await fetch(
         `https://api.scryfall.com/cards/named?exact=${encodeURIComponent(exactName)}`
-      );
-      const named = await namedRes.json();
-      const printsUrl = named?.prints_search_uri;
+      )
+      const named = await namedRes.json()
+      const printsUrl = named?.prints_search_uri
       if (printsUrl) {
-        const printsRes = await fetch(`${printsUrl}&order=released&unique=prints`);
-        const printsData = await printsRes.json();
+        const printsRes = await fetch(
+          `${printsUrl}&order=released&unique=prints`
+        )
+        const printsData = await printsRes.json()
         const formatted = Array.isArray(printsData?.data)
           ? printsData.data.map(formatCard)
-          : [];
-        setSearchResults(formatted);
+          : []
+        setSearchResults(formatted)
       } else {
         // fallback – très rare
-        await handleSearch(`!"${exactName}"`);
+        await handleSearch(`!"${exactName}"`)
       }
     } catch (error) {
-      console.error("Erreur chargement prints exacts:", error);
+      console.error('Erreur chargement prints exacts:', error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   /* ---------- ajout wishlist ---------- */
-  const handleAddToSpecificWishlist = async (card) => {
-    if (!userId || !wishlistId) return;
+  const handleAddToSpecificWishlist = async card => {
+    if (!userId || !wishlistId) return
 
     try {
       const addRes = await fetch(
         `/api/users/${userId}/wishlist/lists/${wishlistId}/items`,
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ scryfallId: card.id, quantity: 1 }),
         }
-      );
+      )
 
-      if (!addRes.ok) throw new Error("Erreur lors de l'ajout à la wishlist");
-      onCardAdded?.();
+      if (!addRes.ok) throw new Error("Erreur lors de l'ajout à la wishlist")
+      onCardAdded?.()
     } catch (error) {
-      console.error("❌ Erreur ajout carte à wishlist :", error);
+      console.error('❌ Erreur ajout carte à wishlist :', error)
     }
-  };
+  }
 
   /* ---------- clavier sur l’input ---------- */
-  const onInputKeyDown = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
+  const onInputKeyDown = e => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
       if (suggestions.length > 0 && highlightIndex >= 0) {
-        const choice = suggestions[highlightIndex];
-        handleSearchExactPrints(choice);
+        const choice = suggestions[highlightIndex]
+        handleSearchExactPrints(choice)
       } else {
-        setFreezeAutocomplete(false);
-        handleSearch(searchInput);
+        setFreezeAutocomplete(false)
+        handleSearch(searchInput)
       }
-    } else if (e.key === "Escape") {
-      setSuggestions([]);
-    } else if (e.key === "ArrowDown") {
-      e.preventDefault();
+    } else if (e.key === 'Escape') {
+      setSuggestions([])
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault()
       if (suggestions.length) {
-        setHighlightIndex((i) => Math.min(i + 1, suggestions.length - 1));
+        setHighlightIndex(i => Math.min(i + 1, suggestions.length - 1))
       }
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
       if (suggestions.length) {
-        setHighlightIndex((i) => Math.max(i - 1, 0));
+        setHighlightIndex(i => Math.max(i - 1, 0))
       }
     }
-  };
+  }
 
   /* ---------- hover preview sur suggestions ---------- */
-  const onSuggestionHover = async (name) => {
+  const onSuggestionHover = async name => {
     try {
-      if (hoverAbortRef.current) hoverAbortRef.current.abort();
-      hoverAbortRef.current = new AbortController();
+      if (hoverAbortRef.current) hoverAbortRef.current.abort()
+      hoverAbortRef.current = new AbortController()
 
       const res = await fetch(
         `https://api.scryfall.com/cards/named?fuzzy=${encodeURIComponent(name)}`,
         { signal: hoverAbortRef.current.signal }
-      );
-      const card = await res.json();
-      const formatted = formatCard(card);
-      const image = formatted?.image?.small || formatted?.image_uris?.small;
-      if (image) onHoverCard?.(image);
+      )
+      const card = await res.json()
+      const formatted = formatCard(card)
+      const image = formatted?.image?.small || formatted?.image_uris?.small
+      if (image) onHoverCard?.(image)
     } catch (e) {
-      if (e?.name !== "AbortError") console.error("Erreur chargement image hover", e);
+      if (e?.name !== 'AbortError')
+        console.error('Erreur chargement image hover', e)
     }
-  };
+  }
 
   return (
     <section
       className={[
         styles.drawer,
-        placement === "left" ? styles.placeLeft :
-        placement === "bottom" ? styles.placeBottom :
-        styles.placeRight
-      ].join(" ")}
+        placement === 'left'
+          ? styles.placeLeft
+          : placement === 'bottom'
+            ? styles.placeBottom
+            : styles.placeRight,
+      ].join(' ')}
       ref={drawerRef}
       role="dialog"
       aria-modal="true"
@@ -280,14 +287,16 @@ export default function WishlistSearchSection({
     >
       <div className={styles.topBar}>
         <div className={styles.inputWrap}>
-          <span className={styles.searchIcon} aria-hidden>🔎</span>
+          <span className={styles.searchIcon} aria-hidden>
+            🔎
+          </span>
           <input
             type="text"
             placeholder="Rechercher une carte (≥ 3 lettres)"
             value={searchInput}
-            onChange={(e) => {
-              setFreezeAutocomplete(false); // l’utilisateur retape → on réactive l’autocomplete
-              setSearchInput(e.target.value);
+            onChange={e => {
+              setFreezeAutocomplete(false) // l’utilisateur retape → on réactive l’autocomplete
+              setSearchInput(e.target.value)
             }}
             onKeyDown={onInputKeyDown}
             aria-autocomplete="list"
@@ -299,11 +308,11 @@ export default function WishlistSearchSection({
               className={styles.clearBtn}
               title="Effacer"
               onClick={() => {
-                setSearchInput("");
-                setSuggestions([]);
-                setSearchResults([]);
-                setFreezeAutocomplete(false);
-                onHoverCard?.(null);
+                setSearchInput('')
+                setSuggestions([])
+                setSearchResults([])
+                setFreezeAutocomplete(false)
+                onHoverCard?.(null)
               }}
             >
               ×
@@ -311,7 +320,13 @@ export default function WishlistSearchSection({
           )}
         </div>
 
-        <button className={styles.searchBtn} onClick={() => { setFreezeAutocomplete(false); handleSearch(searchInput); }}>
+        <button
+          className={styles.searchBtn}
+          onClick={() => {
+            setFreezeAutocomplete(false)
+            handleSearch(searchInput)
+          }}
+        >
           Rechercher
         </button>
 
@@ -327,7 +342,11 @@ export default function WishlistSearchSection({
 
       {/* Suggestions */}
       {suggestions.length > 0 && (
-        <ul className={styles.suggestionList} role="listbox" aria-label="Suggestions">
+        <ul
+          className={styles.suggestionList}
+          role="listbox"
+          aria-label="Suggestions"
+        >
           {suggestions.map((s, index) => (
             <li
               key={`${s}-${index}`}
@@ -335,7 +354,7 @@ export default function WishlistSearchSection({
               className={index === highlightIndex ? styles.active : undefined}
               onMouseEnter={() => onSuggestionHover(s)}
               onMouseLeave={() => onHoverCard?.(null)}
-              onClick={() => handleSearchExactPrints(s)} 
+              onClick={() => handleSearchExactPrints(s)}
             >
               {s}
             </li>
@@ -345,7 +364,9 @@ export default function WishlistSearchSection({
 
       {/* Résultats */}
       <div className={styles.contentArea}>
-        {loading && <div className={styles.loading}>Chargement des cartes…</div>}
+        {loading && (
+          <div className={styles.loading}>Chargement des cartes…</div>
+        )}
 
         {!loading && searchResults.length > 0 && (
           <>
@@ -359,8 +380,8 @@ export default function WishlistSearchSection({
                   key={card.id ?? index}
                   className={styles.cardResultsItem}
                   onMouseEnter={() => {
-                    const img = card?.image?.small || card?.image_uris?.small;
-                    if (img) onHoverCard?.(img);
+                    const img = card?.image?.small || card?.image_uris?.small
+                    if (img) onHoverCard?.(img)
                   }}
                   onMouseLeave={() => onHoverCard?.(null)}
                 >
@@ -384,20 +405,21 @@ export default function WishlistSearchSection({
 
         {!loading && searchResults.length === 0 && !suggestions.length && (
           <div className={styles.empty}>
-            Tape au moins 3 lettres pour voir les suggestions, ou lance une recherche.
+            Tape au moins 3 lettres pour voir les suggestions, ou lance une
+            recherche.
           </div>
         )}
       </div>
     </section>
-  );
+  )
 }
 
 /* --------- utils --------- */
 function useDebounce(value, delay = 250) {
-  const [v, setV] = useState(value);
+  const [v, setV] = useState(value)
   useEffect(() => {
-    const t = setTimeout(() => setV(value), delay);
-    return () => clearTimeout(t);
-  }, [value, delay]);
-  return v;
+    const t = setTimeout(() => setV(value), delay)
+    return () => clearTimeout(t)
+  }, [value, delay])
+  return v
 }

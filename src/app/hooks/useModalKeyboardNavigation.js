@@ -1,22 +1,27 @@
-import { useEffect } from 'react';
+import { useEffect } from 'react'
 
-export default function useModalKeyboardNavigation({ onClose, onNext, onPrev, isOpen }) {
+export default function useModalKeyboardNavigation({
+  onClose,
+  onNext,
+  onPrev,
+  isOpen,
+}) {
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) return
 
-    const handleKeyDown = (e) => {
+    const handleKeyDown = e => {
       if (e.key === 'Escape') {
-        onClose();
+        onClose()
       } else if (e.key === 'ArrowLeft') {
-        onPrev();
+        onPrev()
       } else if (e.key === 'ArrowRight') {
-        onNext();
+        onNext()
       }
-    };
+    }
 
-    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown)
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [onClose, onNext, onPrev, isOpen]);
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [onClose, onNext, onPrev, isOpen])
 }
