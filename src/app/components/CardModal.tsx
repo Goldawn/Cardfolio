@@ -16,13 +16,22 @@ import {
 import styles from './CardModal.module.css'
 import useModalKeyboardNavigation from '../hooks/useModalKeyboardNavigation'
 import { useCurrencyContext } from '@/context/'
+import type { GameCard } from '@/types'
+import type { JSX } from 'react'
+
+interface CardModalProps {
+  card: GameCard
+  onClose: () => void
+  cardList?: GameCard[]
+  currentIndex?: number
+}
 
 export default function CardModal({
   card,
   onClose,
   cardList = [],
   currentIndex = 0,
-}) {
+}: CardModalProps): JSX.Element {
   console.log(card)
   const [flipped, setFlipped] = useState(false)
   const [currentCardIndex, setCurrentCardIndex] = useState(currentIndex)
@@ -30,14 +39,14 @@ export default function CardModal({
 
   const { currency, toggleCurrency } = useCurrencyContext()
 
-  const handleNextCard = () => {
+  const handleNextCard = (): void => {
     if (currentCardIndex < cardList.length - 1) {
       setCurrentCardIndex(currentCardIndex + 1)
       setFlipped(false)
     }
   }
 
-  const handlePreviousCard = () => {
+  const handlePreviousCard = (): void => {
     if (currentCardIndex > 0) {
       setCurrentCardIndex(currentCardIndex - 1)
       setFlipped(false)
@@ -59,14 +68,14 @@ export default function CardModal({
   }, [])
 
   const isFrontAndBack = ['flip', 'transform', 'modal_dfc'].includes(
-    currentCard.layout
+    (currentCard as any).layout
   )
   const isDualFaceLayout = ['split', 'adventure', 'reversible_card'].includes(
-    currentCard.layout
+    (currentCard as any).layout
   )
 
   const displayedCard = useMemo(() => {
-    if (isFrontAndBack && flipped) return currentCard.cardBack
+    if (isFrontAndBack && flipped) return (currentCard as any).cardBack
     return currentCard
   }, [currentCard, flipped])
 
@@ -76,22 +85,22 @@ export default function CardModal({
     return currentCard.priceHistory
       .map(entry => ({
         date: entry.date,
-        eur: parseFloat(entry.eur),
-        usd: parseFloat(entry.usd),
+        eur: parseFloat(entry.eur.toString()),
+        usd: parseFloat(entry.usd.toString()),
       }))
-      .sort((a, b) => new Date(a.date) - new Date(b.date))
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
   }, [currentCard])
 
   const getCurrentImage = () => {
-    if (currentCard.layout === 'reversible_card') {
+    if ((currentCard as any).layout === 'reversible_card') {
       return flipped
-        ? currentCard.reversibleImage?.large || currentCard.image?.large
+        ? (currentCard as any).reversibleImage?.large || currentCard.image?.large
         : currentCard.image?.large
     }
     return currentCard.image?.large
   }
 
-  const renderCardFace = cardData => (
+  const renderCardFace = (cardData: any) => (
     <>
       <h2>{cardData.name}</h2>
       {cardData.manaCost && (
@@ -166,7 +175,7 @@ export default function CardModal({
 
         <div className={styles.content}>
           <div className={styles.cardQuantityPanel}>
-            {isFrontAndBack || currentCard.layout === 'reversible_card' ? (
+            {isFrontAndBack || (currentCard as any).layout === 'reversible_card' ? (
               <div
                 key={currentCard.id}
                 className={`${styles.cardContainer} ${styles.cardTransition}`}
@@ -177,7 +186,7 @@ export default function CardModal({
                   <div
                     className={styles.cardFace}
                     style={{
-                      backgroundImage: `url(${currentCard.image.large})`,
+                      backgroundImage: `url(${currentCard.image?.large})`,
                     }}
                   >
                     <button
@@ -190,7 +199,7 @@ export default function CardModal({
                   <div
                     className={styles.cardFace}
                     style={{
-                      backgroundImage: `url(${currentCard.reversibleImage?.large || currentCard.cardBack?.image?.large})`,
+                      backgroundImage: `url(${(currentCard as any).reversibleImage?.large || (currentCard as any).cardBack?.image?.large})`,
                     }}
                   >
                     <button
@@ -237,10 +246,10 @@ export default function CardModal({
               {currentCard.collectorNumber}
             </p>
 
-            {isDualFaceLayout && currentCard.cardBack && (
+            {isDualFaceLayout && (currentCard as any).cardBack && (
               <>
                 <p>---------------------------------------------------------</p>
-                {renderCardFace(currentCard.cardBack)}
+                {renderCardFace((currentCard as any).cardBack)}
               </>
             )}
 
@@ -264,7 +273,7 @@ export default function CardModal({
             {currentCard.priceHistory &&
               currentCard.priceHistory.map(price => (
                 <p key={price.date}>
-                  <strong>{price.date} :</strong> {price[currency]}{' '}
+                  <strong>{price.date} :</strong> {(price as any)[currency]}{' '}
                   {currency === 'eur' ? '€' : '$'}
                 </p>
               ))}

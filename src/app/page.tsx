@@ -1,12 +1,13 @@
 'use client'
 
 import { useSession, signOut } from 'next-auth/react'
-import NavBar from './components/NavBar.js'
+import NavBar from './components/NavBar'
 import styles from './page.module.css'
 import Link from 'next/link'
 import Image from 'next/image'
+import type { JSX } from 'react'
 
-export default function Home() {
+export default function Home(): JSX.Element {
   const { data: session } = useSession()
 
   return (

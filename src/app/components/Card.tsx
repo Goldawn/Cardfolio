@@ -3,8 +3,43 @@
 import { useState } from 'react'
 import styles from './Card.module.css'
 import CardModal from './CardModal'
-import SplitButton from './SplitButton.tsx'
-import { on } from 'events'
+import SplitButton from './SplitButton'
+import type { GameCard, Currency } from '@/types'
+import type { WishlistList } from '@/types/collections'
+import type { JSX } from 'react'
+
+interface CardProps {
+  card: GameCard
+  wishlistLists?: WishlistList[]
+  currency?: Currency
+  className?: string
+  cardList?: GameCard[]
+  currentIndex?: number
+
+  // Features (flags)
+  showName?: boolean
+  showSet?: boolean
+  showQuantity?: boolean
+  showWishlistQuantity?: boolean
+  showDecklistQuantity?: boolean
+  showPrice?: boolean
+  showAddToCollectionButton?: boolean
+  showAddToWishlistButton?: boolean
+  showAddToDeckButton?: boolean
+  showDeleteButton?: boolean
+  compareWithCollection?: boolean
+  modal?: boolean
+  disabled?: boolean
+
+  // Actions (callbacks)
+  onAddToCollection?: (card: GameCard) => void
+  onCreateWishlist?: (name: string) => Promise<string | null>
+  onAddToWishlist?: (listId: string, card: GameCard) => Promise<void>
+  onAddToDeck?: (card: GameCard) => void
+  onRemove?: (cardId: string) => void
+  updateQuantity?: (cardId: string, delta: number) => void
+  undoAddToCollection?: (card: GameCard) => void
+}
 
 export default function Card({
   card,
@@ -37,10 +72,10 @@ export default function Card({
   onRemove,
   updateQuantity,
   undoAddToCollection,
-}) {
+}: CardProps): JSX.Element {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  const getLastPrice = (card, currency) => {
+  const getLastPrice = (card: GameCard, currency: Currency): number => {
     if (!card.priceHistory || card.priceHistory.length === 0) return 0
     return card.priceHistory.slice(-1)[0][currency] || 0
   }
@@ -49,23 +84,23 @@ export default function Card({
   const lastPrice = getLastPrice(card, currency)
   const totalValue = (lastPrice * (card.quantity || 1)).toFixed(2)
 
-  const handleOpenModal = e => {
+  const handleOpenModal = (e: React.MouseEvent) => {
     // e.stopPropagation();                 // <-- évite de déclencher undoAdd
     if (!modal || disabled) return
     setIsModalOpen(true)
   }
 
-  const handleCloseModal = () => setIsModalOpen(false)
+  const handleCloseModal = (): void => setIsModalOpen(false)
 
-  const handleRootClick = () => {
+  const handleRootClick = (): void => {
     if (disabled) return
     if (undoAddToCollection) {
       undoAddToCollection(card)
     }
   }
 
-  const stop = e => e.stopPropagation()
-  const isOwned = card.quantity > 0
+  const stop = (e: React.MouseEvent) => e.stopPropagation()
+  const isOwned = (card.quantity || 0) > 0
   const cardClass = compareWithCollection && !isOwned ? styles.notOwned : ''
 
   // Default list: si tu as un flag "isDefault" sur tes listes, privilégie-le ici
@@ -112,7 +147,7 @@ export default function Card({
           <button
             className={styles.wishlistButton}
             title="Ajouter au deck"
-            onClick={e => {
+            onClick={(e: React.MouseEvent) => {
               e.stopPropagation()
               onAddToDeck(card)
             }}
@@ -123,12 +158,12 @@ export default function Card({
         )}
       </div>
 
-      {showQuantity && <p>Dans la collection : {card.quantity}</p>}
+      {showQuantity && <p>Dans la collection : {card.quantity || 0}</p>}
       {showWishlistQuantity && (
-        <p>Dans la wishlist : {card.wishlistQuantity}</p>
+        <p>Dans la wishlist : {(card as any).wishlistQuantity || 0}</p>
       )}
       {showDecklistQuantity && (
-        <p>Dans la decklist : {card.decklistQuantity}</p>
+        <p>Dans la decklist : {(card as any).decklistQuantity || 0}</p>
       )}
 
       {showPrice && (
@@ -150,7 +185,7 @@ export default function Card({
             <button
               className={styles.remove}
               onClick={() => updateQuantity(card.id, -1)}
-              disabled={disabled || card.quantity <= 1}
+              disabled={disabled || (card.quantity || 0) <= 1}
             >
               -1
             </button>

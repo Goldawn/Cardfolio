@@ -3,10 +3,12 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import styles from './Navigation.module.css'
+import type { JSX } from 'react'
 
-export default function Navigation() {
+
+export default function Navigation(): JSX.Element {
   const pathname = usePathname()
-  const isActive = href => (pathname === href ? styles.active : '')
+  const isActive = (href: string): string => (pathname === href ? styles.active : '')
 
   return (
     <nav>

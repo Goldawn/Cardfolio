@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import styles from './CardMenu.module.css'
+import type { JSX } from 'react'
 
-export default function CardMenu() {
+export default function CardMenu(): JSX.Element {
   return (
     <div className={styles.cardManager}>
       <ul>

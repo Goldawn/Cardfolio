@@ -5,8 +5,10 @@ import lorcanaLogo from '../assets/images/icons/Big-Logo-Lorcana.png'
 import riftboundLogo from '../assets/images/icons/riftbound_logo.png'
 import Image from 'next/image'
 import styles from '../page.module.css'
+import type { JSX } from 'react'
 
-export default function NavBar() {
+
+export default function NavBar(): JSX.Element {
   return (
     <nav>
       <ul id={styles.mainUl}>

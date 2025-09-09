@@ -2,12 +2,27 @@ import styles from './CollectionActionBar.module.css'
 import Image from 'next/image'
 
 import HautBas from '../assets/images/icons/haut-bas.png'
+import type { JSX } from 'react'
+
 
 import {
   colorFilterElements,
   typeFilterElements,
   rarityFilterElements,
 } from '@/lib/mtgIcons'
+
+interface CollectionActionBarProps {
+  selectedColors: string[]
+  toggleColorFilter: (color: string) => void
+  selectedTypes: string[]
+  toggleTypeFilter: (type: string) => void
+  selectedRarities: string[]
+  toggleRarityFilter: (rarity: string) => void
+  sortOption: string
+  setSortOption: (option: string) => void
+  sortOrderAsc: boolean
+  toggleSortOrder: () => void
+}
 
 export default function CollectionActionBar({
   selectedColors,
@@ -20,15 +35,15 @@ export default function CollectionActionBar({
   setSortOption,
   sortOrderAsc,
   toggleSortOrder,
-}) {
+}: CollectionActionBarProps): JSX.Element {
   return (
     <div className={styles.collectionActionBar}>
       <div className={styles.filterBar}>
         {colorFilterElements.map(color => (
           <div
             key={color.letter}
-            className={`${styles.colorIcon} ${selectedColors.includes(color.letter) ? styles.active : ''}`}
-            onClick={() => toggleColorFilter(color.letter)}
+            className={`${styles.colorIcon} ${selectedColors.includes(color.letter || '') ? styles.active : ''}`}
+            onClick={() => toggleColorFilter(color.letter || '')}
           >
             <Image
               title={color.name}
@@ -46,7 +61,7 @@ export default function CollectionActionBar({
           <div
             key={type.name}
             className={`${styles.typeIcon} ${selectedTypes.includes(type.name) ? styles.active : ''}`}
-            onClick={() => toggleTypeFilter(type.name)}
+            onClick={() => toggleTypeFilter(type.name || '')}
           >
             <Image title={type.name} src={type.icon} alt={type.name} />
           </div>

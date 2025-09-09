@@ -4,12 +4,14 @@ import { useEffect, useState } from 'react'
 import Card from './Card'
 import styles from './FetchCardInput.module.css'
 import { formatCard } from '../services/FormatCard'
+import type { JSX } from 'react'
+import type { GameCard } from '@/types'
 
-export default function FetchCardInput() {
+export default function FetchCardInput(): JSX.Element {
   const [searchInput, setSearchInput] = useState('')
-  const [suggestions, setSuggestions] = useState([])
-  const [searchResults, setSearchResults] = useState([])
-  const [hoveredCardImageByList, setHoveredCardImageByList] = useState({})
+  const [suggestions, setSuggestions] = useState<string[]>([])
+  const [searchResults, setSearchResults] = useState<GameCard[]>([])
+  const [hoveredCardImageByList, setHoveredCardImageByList] = useState<Record<string, string>>({})
 
   const [loading, setLoading] = useState(false)
 
@@ -31,7 +33,7 @@ export default function FetchCardInput() {
   }, [searchInput])
 
   // Rechercher des cartes complètes (résultats)
-  const handleSearch = async query => {
+  const handleSearch = async (query: string): Promise<void> => {
     setLoading(true)
     try {
       const res = await fetch(
@@ -47,7 +49,7 @@ export default function FetchCardInput() {
     }
   }
 
-  const handleHoverCard = (listId, imageUrl) => {
+  const handleHoverCard = (listId: string, imageUrl: string): void => {
     setHoveredCardImageByList(prev => ({
       ...prev,
       [listId]: imageUrl,
@@ -78,13 +80,13 @@ export default function FetchCardInput() {
                   const card = await res.json()
                   const formatted = formatCard(card)
                   const image =
-                    formatted.image?.small || formatted.image_uris?.small
-                  if (image) handleHoverCard(image)
+                    formatted.image?.small || (formatted as any).image_uris?.small
+                  if (image) handleHoverCard(s, image)
                 } catch (e) {
                   console.error('Erreur chargement image hover', e)
                 }
               }}
-              onMouseLeave={() => handleHoverCard(null)}
+              onMouseLeave={() => handleHoverCard(s, '')}
               onClick={() => {
                 setSearchInput(s)
                 setSuggestions([])
@@ -109,7 +111,7 @@ export default function FetchCardInput() {
                 currentIndex={index}
                 cardList={searchResults}
                 modal={true}
-                name={true}
+                showName={true}
               />
               {/* <button onClick={() => handleAddToSpecificWishlist(card)}>Ajouter à la wishlist</button> */}
             </div>

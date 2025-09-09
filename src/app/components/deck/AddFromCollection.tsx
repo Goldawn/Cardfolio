@@ -3,24 +3,43 @@
 import { useEffect, useMemo, useState, useTransition } from 'react'
 import { formatCard } from '@/app/services/FormatCard'
 import styles from './AddFromCollection.module.css'
+import type { GameCard } from '@/types'
+import type { JSX } from 'react'
+
+interface CollectionItem {
+  scryfallId: string
+  quantity: number
+}
+
+interface DeckCard {
+  scryfallId: string
+  quantity: number
+}
+
+interface AddFromCollectionProps {
+  deckId: string
+  collectionItems: CollectionItem[]
+  currentDeckCards: DeckCard[]
+  onAdd: (scryfallId: string, qty: number) => Promise<void>
+}
 
 export default function AddFromCollection({
   deckId,
-  collectionItems, // [{ scryfallId, quantity }]
-  currentDeckCards, // [{ scryfallId, quantity }] pour caper si besoin
-  onAdd, // (scryfallId, qty) => Promise
-}) {
+  collectionItems,
+  currentDeckCards,
+  onAdd,
+}: AddFromCollectionProps): JSX.Element {
   console.log(collectionItems)
   const [isPending, startTransition] = useTransition()
-  const [enriched, setEnriched] = useState([]) // [{...formatted, ownedQuantity}]
+  const [enriched, setEnriched] = useState<(GameCard & { ownedQuantity: number })[]>([])
   const [query, setQuery] = useState('')
   const [respectOwned, setRespectOwned] = useState(true)
-  const [qtyById, setQtyById] = useState({}) // { scryfallId: number }
+  const [qtyById, setQtyById] = useState<Record<string, number>>({})
 
   // map des quantités déjà dans le deck (pour cap si respectOwned)
   const inDeckMap = useMemo(() => {
-    const m = new Map()
-    ;(currentDeckCards || []).forEach(dc => {
+    const m = new Map<string, number>()
+    ;(currentDeckCards || []).forEach((dc: DeckCard) => {
       m.set(dc.scryfallId, (m.get(dc.scryfallId) || 0) + (dc.quantity || 0))
     })
     return m
@@ -41,10 +60,10 @@ export default function AddFromCollection({
         for (let i = 0; i < collectionItems.length; i += chunkSize) {
           chunks.push(collectionItems.slice(i, i + chunkSize))
         }
-        const all = []
+        const all: (GameCard & { ownedQuantity: number })[] = []
         for (const chunk of chunks) {
           const body = {
-            identifiers: chunk.map(it => ({ id: it.scryfallId })),
+            identifiers: chunk.map((it: CollectionItem) => ({ id: it.scryfallId })),
           }
           const res = await fetch('https://api.scryfall.com/cards/collection', {
             method: 'POST',
@@ -53,11 +72,11 @@ export default function AddFromCollection({
             cache: 'no-store',
           })
           const data = await res.json()
-          const formatted = (data?.data || []).map(raw => formatCard(raw))
+          const formatted = (data?.data || []).map((raw: any) => formatCard(raw))
           // rattache ownedQuantity
-          formatted.forEach(f => {
+          formatted.forEach((f: GameCard) => {
             const owned =
-              collectionItems.find(ci => ci.scryfallId === f.id)?.quantity || 0
+              collectionItems.find((ci: CollectionItem) => ci.scryfallId === f.id)?.quantity || 0
             all.push({ ...f, ownedQuantity: owned })
           })
         }
@@ -83,15 +102,15 @@ export default function AddFromCollection({
     )
   }, [enriched, query])
 
-  const handleQtyChange = (scryfallId, value) => {
+  const handleQtyChange = (scryfallId: string, value: number): void => {
     const v = Math.max(1, Math.min(99, Number(value) || 1))
     setQtyById(prev => ({ ...prev, [scryfallId]: v }))
   }
 
-  const addOne = scryfallId => {
+  const addOne = (scryfallId: string): void => {
     const wanted = qtyById[scryfallId] ?? 1
     const owned =
-      collectionItems.find(ci => ci.scryfallId === scryfallId)?.quantity || 0
+      collectionItems.find((ci: CollectionItem) => ci.scryfallId === scryfallId)?.quantity || 0
     const inDeck = inDeckMap.get(scryfallId) || 0
     let qty = wanted
 
@@ -184,7 +203,7 @@ export default function AddFromCollection({
                       min={1}
                       max={99}
                       value={qtyById[c.id] ?? 1}
-                      onChange={e => handleQtyChange(c.id, e.target.value)}
+                      onChange={e => handleQtyChange(c.id, Number(e.target.value))}
                       style={{ width: 64 }}
                     />
                     <button
