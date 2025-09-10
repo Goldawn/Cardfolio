@@ -84,7 +84,7 @@ export async function fetchSetCardsExample() {
       return
     }
     
-    const cards = adapter.transformCards(response.data)
+    const cards = adapter.transformCards(response.data as any)
     
     console.log(`${cards.length} cartes récupérées du set DMU`)
     

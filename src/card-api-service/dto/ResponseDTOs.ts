@@ -1,5 +1,5 @@
 import type { MTGCard } from '@/types/games/magic'
-import type { GameSet, PriceData } from './AppDTOs'
+import type { GameSet, PriceData } from '../dto/AppDTOs'
 
 /**
  * DTOs pour les réponses des services

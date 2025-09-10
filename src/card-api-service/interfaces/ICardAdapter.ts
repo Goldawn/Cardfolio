@@ -1,6 +1,5 @@
 import type { MTGCard } from '@/types/games/magic'
-import type { GameSet } from '../dto/AppDTOs'
-import type { PriceData } from '../dto/AppDTOs'
+import type { GameSet, PriceData } from '../dto'
 
 /**
  * Interface pour les adapters de transformation

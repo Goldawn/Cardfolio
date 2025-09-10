@@ -1,4 +1,5 @@
 import type { CardRarity, Currency } from '@/types/base'
+import type { MTGCard } from '@/types/games/magic'
 
 /**
  * DTOs pour les données de l'application (format unifié)

@@ -1,4 +1,4 @@
-import type { SetServiceResponseDTO } from '../dto/ResponseDTOs'
+import type { SetServiceResponseDTO } from '../dto'
 
 /**
  * Interface pour les providers de sets

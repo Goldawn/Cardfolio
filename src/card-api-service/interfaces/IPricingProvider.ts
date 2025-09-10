@@ -1,4 +1,4 @@
-import type { PriceServiceResponseDTO } from '../dto/ResponseDTOs'
+import type { PriceServiceResponseDTO } from '../dto'
 
 /**
  * Interface pour les providers de prix
