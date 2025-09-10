@@ -6,7 +6,8 @@ import WishlistSearchSection from '../../components/WishlistSearchSection'
 import MagicCardPlaceholder from '../../components/MagicCardPlaceholder'
 import WishlistList from '../../components/WishlistList'
 import Card from '../../components/Card'
-import { formatCard } from '../../services/FormatCard'
+import { formatCard } from '@/app/services/FormatCard'
+import { CardServiceFactory } from '@/card-api-service'
 import styles from './page.module.css'
 import type { GameCard } from '@/types'
 import type { JSX } from 'react'
@@ -19,6 +20,7 @@ interface WishlistList {
 
 export default function WishlistPage(): JSX.Element {
   const { data: session, status } = useSession()
+  const cardService = CardServiceFactory.create()
   const [lists, setLists] = useState<WishlistList[]>([])
   const [cardsByList, setCardsByList] = useState<Record<string, GameCard[]>>({})
   const [loading, setLoading] = useState<boolean>(true)
@@ -63,11 +65,7 @@ export default function WishlistPage(): JSX.Element {
 
             const enriched = await Promise.all(
               items.map(async (item: any) => {
-                const r = await fetch(
-                  `https://api.scryfall.com/cards/${item.scryfallId}`
-                )
-                const raw = await r.json()
-                const formatted = formatCard(raw)
+                const formatted = await cardService.fetchCard({ cardId: item.scryfallId })
                 return {
                   ...formatted,
                   wishlistQuantity: item.quantity,
@@ -250,7 +248,7 @@ export default function WishlistPage(): JSX.Element {
                     image={hoveredCardImageByList[list.id]}
                   />
 
-                  {activeListId === list.id && (
+                  {activeListId === list.id && userId && (
                     <WishlistSearchSection
                       userId={userId}
                       wishlistLists={lists}

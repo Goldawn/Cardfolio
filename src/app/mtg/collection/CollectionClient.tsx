@@ -8,7 +8,8 @@ import {
   fetchSetCards,
   fetchMoreCards,
 } from '../../services/Scryfall'
-import { formatCard } from '../../services/FormatCard'
+import { formatCard } from '@/app/services/FormatCard'
+import { CardServiceFactory } from '@/card-api-service'
 import useCardFilters from '../../hooks/useCardFilters'
 import Card from '../../components/Card'
 import CollectionActionBar from '../../components/CollectionActionBar'
@@ -17,7 +18,8 @@ import { fetchCardPrice } from '../../services/pricing'
 import SetBar from '../../components/SetBar' // ✅ intégré
 import styles from './page.module.css'
 import type { GameCard, Currency } from '@/types'
-import type { ScryfallSet, ScryfallCard } from '../../services/Scryfall'
+import type { GameSet } from '../../services/Scryfall'
+import type { MTGCard } from '@/types/games/magic'
 import type { JSX } from 'react'
 
 interface CollectionItem {
@@ -40,6 +42,7 @@ interface CollectionClientProps {
 
 export default function CollectionClient({ initialItems, actions }: CollectionClientProps): JSX.Element {
   const { currency } = useCurrencyContext()
+  const cardService = CardServiceFactory.create()
 
   // collection brute (scryfallId, qty, priceHistory, dbId)
   const [collection, setCollection] = useState<CollectionItem[]>(
@@ -55,9 +58,9 @@ export default function CollectionClient({ initialItems, actions }: CollectionCl
   const [enrichedCollection, setEnrichedCollection] = useState<GameCard[]>([])
 
   // sets & navigation par extension
-  const [sets, setSets] = useState<ScryfallSet[]>([])
+  const [sets, setSets] = useState<GameSet[]>([])
   const [selectedSet, setSelectedSet] = useState<string | undefined>()
-  const [selectedSetCards, setSelectedSetCards] = useState<ScryfallCard[]>([])
+  const [selectedSetCards, setSelectedSetCards] = useState<MTGCard[]>([])
   const [nextPage, setNextPage] = useState<string | undefined>()
   const [loading, setLoading] = useState<boolean>(false)
   const [hideNotOwned, setHideNotOwned] = useState<boolean>(false)
@@ -78,12 +81,7 @@ export default function CollectionClient({ initialItems, actions }: CollectionCl
       try {
         const cards = await Promise.all(
           collection.map(async it => {
-            const res = await fetch(
-              `https://api.scryfall.com/cards/${it.scryfallId}`,
-              { cache: 'no-store' }
-            )
-            const raw = await res.json()
-            const formatted = formatCard(raw)
+            const formatted = await cardService.fetchCard({ cardId: it.scryfallId })
             return {
               ...formatted,
               quantity: it.quantity,
@@ -135,9 +133,9 @@ export default function CollectionClient({ initialItems, actions }: CollectionCl
 
   const getSetName = (code: string): string =>
     sets.find(s => s.code === code)?.name || 'Nom inconnu'
-  const getSetIcon = (code: string): string => sets.find(s => s.code === code)?.icon_svg_uri || ''
+  const getSetIcon = (code: string): string => sets.find(s => s.code === code)?.iconUri || ''
   const getSetTotalCards = (code: string): number | null =>
-    sets.find(s => s.code === code)?.card_count || null
+    sets.find(s => s.code === code)?.cardCount || null
 
   const handleSelectedSet = (code: string): void => {
     if (selectedSet === code) {
@@ -154,10 +152,9 @@ export default function CollectionClient({ initialItems, actions }: CollectionCl
       ? enrichedCollection
       : selectedSetCards
           .map(card => {
-            const formatted = formatCard(card)
-            const owned = collection.find(c => c.scryfallId === formatted.id)
+            const owned = collection.find(c => c.scryfallId === card.id)
             return {
-              ...formatted,
+              ...card,
               quantity: owned?.quantity || 0,
               priceHistory: owned?.priceHistory || [],
               dbId: owned?.dbId,

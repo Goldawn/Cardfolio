@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useState, useTransition, useMemo } from 'react'
-import { formatCard } from '../../../services/FormatCard'
+import { formatCard } from '@/app/services/FormatCard'
+import { CardServiceFactory } from '@/card-api-service'
 import DeckSettingsPanel from '../../../components/deck/DeckSettingsPanel'
 import AddFromCollection from '../../../components/deck/AddFromCollection'
 import DeckHeader from '../../../components/deck/DeckHeader'
@@ -29,6 +30,7 @@ export default function DeckClient({
   actions,
 }: DeckClientProps): JSX.Element {
   // console.log(deck)
+  const cardService = CardServiceFactory.create()
   const [deckState, setDeckState] = useState(deck) // { id, name, format, showcasedCard }
   const [deckCards, setDeckCards] = useState(initialDeckCards || [])
   const [enriched, setEnriched] = useState<GameCard[]>([]) // cartes formatées  { deckCardId, decklistQuantity }
@@ -47,12 +49,7 @@ export default function DeckClient({
       try {
         const out = await Promise.all(
           deckCards.map(async dc => {
-            const res = await fetch(
-              `https://api.scryfall.com/cards/${dc.scryfallId}`,
-              { cache: 'no-store' }
-            )
-            const raw = await res.json()
-            const formatted = formatCard(raw)
+            const formatted = await cardService.fetchCard({ cardId: dc.scryfallId })
             return {
               ...formatted,
               decklistQuantity: dc.quantity,
