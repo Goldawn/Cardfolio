@@ -1,29 +1,18 @@
 /**
- * Nouveau service Scryfall utilisant l'architecture Card API Service
+ * Service Scryfall utilisant le CardApiManager centralisé
  * Remplace src/app/services/Scryfall.ts
  */
 
-import { CardServiceFactory } from '@/card-api-service'
+import { cardApiManager } from './CardApiManager'
 import type { GameSet } from '@/card-api-service/dto'
 import type { MTGCard } from '@/types/games/magic'
-
-// Instance singleton du service
-let cardServiceInstance: any = null
-
-const getCardService = () => {
-  if (!cardServiceInstance) {
-    cardServiceInstance = CardServiceFactory.create()
-  }
-  return cardServiceInstance
-}
 
 /**
  * Récupère tous les sets disponibles
  * Remplace l'ancienne fonction fetchSets()
  */
 export const fetchSets = async (): Promise<GameSet[]> => {
-  const cardService = getCardService()
-  return await cardService.fetchSets()
+  return await cardApiManager.fetchSets()
 }
 
 /**
@@ -36,18 +25,14 @@ export const fetchSetCards = async (setCode: string, lang: string = 'en'): Promi
   next_page?: string
   total_cards: number
 }> => {
-  const cardService = getCardService()
-  const cards = await cardService.fetchSetCards({
-    setCode,
-    language: lang,
-    options: {
-      fetchAllPages: false // Récupère seulement la première page pour compatibilité
-    }
+  const cards = await cardApiManager.searchCards(`set:${setCode}`, {
+    unique: 'prints',
+    language: lang
   })
 
   // Retourne le format attendu par l'ancien code
   return {
-    data: cards,
+    data: cards as MTGCard[],
     has_more: false, // TODO: Implémenter la pagination si nécessaire
     total_cards: cards.length
   }
@@ -63,11 +48,11 @@ export const fetchMoreCards = async (nextPage: string): Promise<{
   next_page?: string
   total_cards: number
 }> => {
-  const cardService = getCardService()
-  const cards = await cardService.fetchMoreCards(nextPage)
+  // Pour l'instant, on utilise searchCards avec une pagination basique
+  const cards = await cardApiManager.searchCards('', { page: nextPage })
 
   return {
-    data: cards,
+    data: cards as MTGCard[],
     has_more: false, // TODO: Implémenter la pagination si nécessaire
     total_cards: cards.length
   }
@@ -78,8 +63,7 @@ export const fetchMoreCards = async (nextPage: string): Promise<{
  * Nouvelle fonctionnalité
  */
 export const fetchCard = async (cardId: string): Promise<MTGCard> => {
-  const cardService = getCardService()
-  return await cardService.fetchCard({ cardId })
+  return await cardApiManager.fetchCard(cardId) as MTGCard
 }
 
 /**
@@ -87,8 +71,11 @@ export const fetchCard = async (cardId: string): Promise<MTGCard> => {
  * Nouvelle fonctionnalité
  */
 export const fetchCardByName = async (cardName: string): Promise<MTGCard> => {
-  const cardService = getCardService()
-  return await cardService.fetchCardByName(cardName)
+  const results = await cardApiManager.searchCards(`!"${cardName}"`, { 
+    unique: 'prints' 
+  })
+  
+  return results.length > 0 ? results[0] as MTGCard : null as any
 }
 
 /**
@@ -96,8 +83,7 @@ export const fetchCardByName = async (cardName: string): Promise<MTGCard> => {
  * Nouvelle fonctionnalité
  */
 export const searchCards = async (query: string): Promise<MTGCard[]> => {
-  const cardService = getCardService()
-  return await cardService.searchCards({ query })
+  return await cardApiManager.searchCards(query) as MTGCard[]
 }
 
 // Export des types pour compatibilité

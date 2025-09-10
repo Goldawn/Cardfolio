@@ -1,20 +1,10 @@
 /**
- * Service de prix utilisant le nouveau PricingService
+ * Service de prix utilisant le CardApiManager centralisé
  * Remplace l'ancienne implémentation directe avec Scryfall
  */
 
-import { CardServiceFactory } from '@/card-api-service'
+import { cardApiManager } from './CardApiManager'
 import type { PriceData } from '@/card-api-service/dto'
-
-// Instance singleton du service de pricing
-let pricingServiceInstance: any = null
-
-const getPricingService = () => {
-  if (!pricingServiceInstance) {
-    pricingServiceInstance = CardServiceFactory.createPricingService()
-  }
-  return pricingServiceInstance
-}
 
 /**
  * Récupère le prix d'une carte par son nom
@@ -25,8 +15,7 @@ export const fetchCardPrice = async (cardName: string): Promise<{
   eur: number
 }> => {
   try {
-    const pricingService = getPricingService()
-    return await pricingService.fetchSimplePrice(cardName)
+    return await cardApiManager.fetchCardPrice(cardName)
   } catch (error) {
     console.error('Erreur lors de la récupération du prix:', error)
     return { usd: 0, eur: 0 }
@@ -42,8 +31,9 @@ export const fetchCardPriceById = async (cardId: string): Promise<{
   eur: number
 }> => {
   try {
-    const pricingService = getPricingService()
-    return await pricingService.fetchSimplePriceById(cardId)
+    // Pour l'instant, on utilise fetchCardPrice avec le nom de la carte
+    // TODO: Implémenter fetchCardPriceById dans le CardApiManager
+    return await cardApiManager.fetchCardPrice(cardId)
   } catch (error) {
     console.error('Erreur lors de la récupération du prix:', error)
     return { usd: 0, eur: 0 }
@@ -60,10 +50,9 @@ export const fetchBulkCardPrices = async (cardNames: string[]): Promise<Array<{
   eur: number
 }>> => {
   try {
-    const pricingService = getPricingService()
     const results = await Promise.allSettled(
       cardNames.map(async (cardName) => {
-        const price = await pricingService.fetchSimplePrice(cardName)
+        const price = await cardApiManager.fetchCardPrice(cardName)
         return {
           cardName,
           usd: price.usd,

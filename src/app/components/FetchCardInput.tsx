@@ -1,56 +1,37 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Card from './Card'
 import styles from './FetchCardInput.module.css'
-import { CardServiceFactory } from '@/card-api-service'
+import { useCardSearch } from '@/app/hooks/useCardApi'
 import type { JSX } from 'react'
-import type { GameCard } from '@/types'
 
 export default function FetchCardInput(): JSX.Element {
-  const [searchInput, setSearchInput] = useState('')
-  const [suggestions, setSuggestions] = useState<string[]>([])
-  const [searchResults, setSearchResults] = useState<GameCard[]>([])
   const [hoveredCardImageByList, setHoveredCardImageByList] = useState<Record<string, string>>({})
+  
+  // Utilisation du hook personnalisé pour la recherche
+  const {
+    query,
+    results: searchResults,
+    suggestions,
+    loading,
+    error,
+    search,
+    updateSuggestions,
+    setQuery
+  } = useCardSearch()
 
-  const [loading, setLoading] = useState(false)
+  // Rechercher des cartes complètes (résultats)
+  const handleSearch = async (searchQuery: string): Promise<void> => {
+    await search(searchQuery, {
+      unique: 'prints' // Pour afficher toutes les variations d'une carte
+    })
+  }
 
-  // Instance du service Card API
-  const cardService = CardServiceFactory.create()
-
-  // Suggestions (autocomplete) - NOUVEAU: Utilise le CardService
-  useEffect(() => {
-    const fetchSuggestions = async () => {
-      if (searchInput.length < 3) return setSuggestions([])
-      try {
-        // Utilisation du nouveau service d'autocomplete
-        const suggestions = await cardService.getAutocompleteSuggestions(searchInput)
-        setSuggestions(suggestions)
-      } catch (error) {
-        console.error('Erreur chargement suggestions:', error)
-        setSuggestions([])
-      }
-    }
-    fetchSuggestions()
-  }, [searchInput, cardService])
-
-  // Rechercher des cartes complètes (résultats) - NOUVEAU
-  const handleSearch = async (query: string): Promise<void> => {
-    setLoading(true)
-    try {
-      // Utilisation du nouveau service
-      const results = await cardService.searchCards({ 
-        query,
-        options: {
-          unique: 'prints' // Pour afficher toutes les variations d'une carte
-        }
-      })
-      setSearchResults(results as GameCard[])
-    } catch (error) {
-      console.error('Erreur chargement résultats:', error)
-    } finally {
-      setLoading(false)
-    }
+  // Mise à jour des suggestions
+  const handleInputChange = (value: string) => {
+    setQuery(value)
+    updateSuggestions(value)
   }
 
   const handleHoverCard = (listId: string, imageUrl: string): void => {
@@ -69,18 +50,18 @@ export default function FetchCardInput(): JSX.Element {
         <div className={styles.inputContainer}>
           <input
             type="text"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
+            value={query}
+            onChange={(e) => handleInputChange(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
-                handleSearch(searchInput)
+                handleSearch(query)
               }
             }}
             placeholder="Nom de la carte..."
             className={styles.searchInput}
           />
           <button
-            onClick={() => handleSearch(searchInput)}
+            onClick={() => handleSearch(query)}
             disabled={loading}
             className={styles.searchButton}
           >
@@ -96,7 +77,7 @@ export default function FetchCardInput(): JSX.Element {
                 key={index}
                 className={styles.suggestionItem}
                 onClick={() => {
-                  setSearchInput(suggestion)
+                  setQuery(suggestion)
                   handleSearch(suggestion)
                 }}
               >
