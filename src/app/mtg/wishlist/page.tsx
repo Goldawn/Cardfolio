@@ -8,19 +8,27 @@ import WishlistList from '../../components/WishlistList'
 import Card from '../../components/Card'
 import { formatCard } from '../../services/FormatCard'
 import styles from './page.module.css'
+import type { GameCard } from '@/types'
+import type { JSX } from 'react'
 
-export default function WishlistPage() {
+interface WishlistList {
+  id: string
+  name: string
+  [key: string]: any
+}
+
+export default function WishlistPage(): JSX.Element {
   const { data: session, status } = useSession()
-  const [lists, setLists] = useState([])
-  const [cardsByList, setCardsByList] = useState({})
-  const [loading, setLoading] = useState(true)
-  const [newListName, setNewListName] = useState('')
-  const [activeListId, setActiveListId] = useState(null)
-  const [hoveredCardImageByList, setHoveredCardImageByList] = useState({})
+  const [lists, setLists] = useState<WishlistList[]>([])
+  const [cardsByList, setCardsByList] = useState<Record<string, GameCard[]>>({})
+  const [loading, setLoading] = useState<boolean>(true)
+  const [newListName, setNewListName] = useState<string>('')
+  const [activeListId, setActiveListId] = useState<string | null>(null)
+  const [hoveredCardImageByList, setHoveredCardImageByList] = useState<Record<string, string>>({})
 
-  const userId = session?.user?.id
+  const userId: string | undefined = session?.user?.id
 
-  const fetchWishlistLists = async () => {
+  const fetchWishlistLists = async (): Promise<void> => {
     if (!userId) return
     try {
       const res = await fetch(`/api/users/${userId}/wishlist/lists`)
@@ -43,7 +51,7 @@ export default function WishlistPage() {
     const fetchAllCards = async () => {
       if (!userId || lists.length === 0) return
 
-      const allCards = {}
+      const allCards: Record<string, GameCard[]> = {}
 
       await Promise.all(
         lists.map(async list => {
@@ -54,7 +62,7 @@ export default function WishlistPage() {
             const items = await res.json()
 
             const enriched = await Promise.all(
-              items.map(async item => {
+              items.map(async (item: any) => {
                 const r = await fetch(
                   `https://api.scryfall.com/cards/${item.scryfallId}`
                 )
@@ -85,7 +93,7 @@ export default function WishlistPage() {
     fetchAllCards()
   }, [lists, userId])
 
-  const handleCreateList = async () => {
+  const handleCreateList = async (): Promise<void> => {
     if (!newListName.trim()) return
     try {
       const res = await fetch(`/api/users/${userId}/wishlist/lists`, {
@@ -101,7 +109,7 @@ export default function WishlistPage() {
     }
   }
 
-  const handleRenameList = async (listId, newName) => {
+  const handleRenameList = async (listId: string, newName: string): Promise<void> => {
     try {
       const res = await fetch(`/api/users/${userId}/wishlist/lists`, {
         method: 'PATCH',
@@ -119,7 +127,7 @@ export default function WishlistPage() {
     }
   }
 
-  const handleDeleteList = async listId => {
+  const handleDeleteList = async (listId: string): Promise<void> => {
     if (!confirm('Supprimer cette liste ?')) return
     try {
       await fetch(`/api/users/${userId}/wishlist/lists`, {
@@ -133,18 +141,18 @@ export default function WishlistPage() {
     }
   }
 
-  const handleOpenAddCard = listId => setActiveListId(listId)
+  const handleOpenAddCard = (listId: string): void => setActiveListId(listId)
 
-  const handleCloseAddCard = () => {
+  const handleCloseAddCard = (): void => {
     setActiveListId(null)
     setHoveredCardImageByList({})
   }
 
-  const handleHoverCard = (listId, imageUrl) => {
+  const handleHoverCard = (listId: string, imageUrl: string): void => {
     setHoveredCardImageByList(prev => ({ ...prev, [listId]: imageUrl }))
   }
 
-  const removeCard = async (wishlistId, cardId) => {
+  const removeCard = async (wishlistId: string, cardId: string): Promise<void> => {
     if (!cardId || !wishlistId) return
     try {
       const res = await fetch(
@@ -162,7 +170,7 @@ export default function WishlistPage() {
     }
   }
 
-  const updateQuantity = async (wishlistId, cardId, delta) => {
+  const updateQuantity = async (wishlistId: string, cardId: string, delta: number): Promise<void> => {
     if (!cardId || !wishlistId) return
     try {
       const res = await fetch(
@@ -193,7 +201,7 @@ export default function WishlistPage() {
             type="text"
             placeholder="Nom de la nouvelle liste"
             value={newListName}
-            onChange={e => setNewListName(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewListName(e.target.value)}
           />
           <button onClick={handleCreateList}>➕ Créer la liste</button>
         </div>
@@ -204,28 +212,28 @@ export default function WishlistPage() {
 
       {!loading && lists.length > 0 && (
         <div className={styles.listsContainer}>
-          {lists.map(list => (
+          {lists.map((list: WishlistList) => (
             <section key={list.id} className={styles.wishlistSection}>
               <WishlistList
                 list={list}
-                onRename={newName => handleRenameList(list.id, newName)}
+                onRename={(newName: string) => handleRenameList(list.id, newName)}
                 onDelete={() => handleDeleteList(list.id)}
               />
 
               <div className={styles.cardGrid}>
-                {(cardsByList[list.id] || []).map((card, index) => (
+                {(cardsByList[list.id] || []).map((card: GameCard, index: number) => (
                   <Card
                     key={card.id}
-                    listId={list.id}
+                    // listId={list.id}
                     card={card}
                     currentIndex={index}
                     cardList={cardsByList[list.id]}
-                    name
+                    showName
                     modal
                     showWishlistQuantity
                     showDeleteButton
                     onRemove={cardId => removeCard(list.id, cardId)}
-                    editableQuantity
+                    // editableQuantity
                     updateQuantity={(cardId, delta) =>
                       updateQuantity(list.id, cardId, delta)
                     }
@@ -248,7 +256,7 @@ export default function WishlistPage() {
                       wishlistLists={lists}
                       StopAddingToWishlist={handleCloseAddCard}
                       wishlistId={list.id}
-                      onHoverCard={imageUrl =>
+                      onHoverCard={(imageUrl: string) =>
                         handleHoverCard(list.id, imageUrl)
                       }
                       onCardAdded={fetchWishlistLists}

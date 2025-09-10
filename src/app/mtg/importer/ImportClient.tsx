@@ -5,24 +5,41 @@ import {
   fetchSets,
   fetchSetCards,
   fetchMoreCards,
-} from '../../services/Scryfall.js'
+} from '../../services/Scryfall'
 import Card from '../../components/Card'
 import Loader from '../../components/Loader'
-import { fetchCardPrice } from '../../services/pricing.js'
-import { formatCard } from '../../services/FormatCard.js'
+import { fetchCardPrice } from '../../services/pricing'
+import { formatCard } from '../../services/FormatCard'
 import useCardFilters from '../../hooks/useCardFilters'
 import CollectionActionBar from '../../components/CollectionActionBar'
 import FetchCardInput from '../../components/FetchCardInput'
 import styles from './page.module.css'
+import type { JSX } from 'react'
+import type { GameCard } from '@/types'
+import type { ScryfallSet, ScryfallCard } from '../../services/Scryfall'
+
+interface ImportClientProps {
+  initialCollection: any[]
+  initialWishlistLists: any[]
+  actions: any
+  userId: string
+}
 
 export default function ImportClient({
   initialCollection,
   initialWishlistLists,
-  actions, // { addToCollection, undoAddToCollection, addToWishlist, removeFromCollection }
-}) {
-  const [sets, setSets] = useState([])
-  const [filteredSets, setFilteredSets] = useState([])
-  const [selectedSet, setSelectedSet] = useState({
+  actions,
+  userId,
+}: ImportClientProps): JSX.Element {
+  const [sets, setSets] = useState<ScryfallSet[]>([])
+  const [filteredSets, setFilteredSets] = useState<ScryfallSet[]>([])
+  const [selectedSet, setSelectedSet] = useState<{
+    name: string
+    code: string
+    card_count: number
+    released_at: string
+    icon_svg_uri: string
+  }>({
     name: '',
     code: '',
     card_count: 0,
@@ -30,24 +47,28 @@ export default function ImportClient({
     icon_svg_uri: '',
   })
 
-  const [cards, setCards] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [displaySetList, setDisplaySetList] = useState(false)
-  const [nextPage, setNextPage] = useState(undefined)
+  const [cards, setCards] = useState<ScryfallCard[]>([])
+  const [loading, setLoading] = useState<boolean>(false)
+  const [displaySetList, setDisplaySetList] = useState<boolean>(false)
+  const [nextPage, setNextPage] = useState<string | undefined>(undefined)
   // const [recentlyAddedToCollection, setRecentlyAddedToCollection] = useState([]);
 
   // [{ id: scryfallId, card, count }]
-  const [recentlyAdded, setRecentlyAdded] = useState([])
+  const [recentlyAdded, setRecentlyAdded] = useState<Array<{ id: string; card: any; count: number }>>([])
 
-  const [isReduced, setIsReduced] = useState(false)
+  const [isReduced, setIsReduced] = useState<boolean>(false)
   const [isPending, startTransition] = useTransition()
 
   // ✅ wishlists (source de vérité)
-  const [wishlistLists, setWishlistLists] = useState(initialWishlistLists || [])
+  const [wishlistLists, setWishlistLists] = useState<any[]>(initialWishlistLists || [])
 
   // ✅ état collection local (simplifié)
-  const [collection, setCollection] = useState(
-    (initialCollection || []).map(c => ({
+  const [collection, setCollection] = useState<Array<{
+    scryfallId: string
+    quantity: number
+    priceHistory: any[]
+  }>>(
+    (initialCollection || []).map((c: any) => ({
       scryfallId: c.scryfallId,
       quantity: c.quantity,
       priceHistory: c.priceHistory,
@@ -56,9 +77,9 @@ export default function ImportClient({
 
   // ✅ totaux wishlist par scryfallId (toutes listes)
   const wishlistTotals = useMemo(() => {
-    const map = new Map()
-    ;(wishlistLists || []).forEach(list => {
-      ;(list.items || []).forEach(it => {
+    const map = new Map<string, number>()
+    ;(wishlistLists || []).forEach((list: any) => {
+      ;(list.items || []).forEach((it: any) => {
         const prev = map.get(it.scryfallId) || 0
         map.set(it.scryfallId, prev + (it.quantity || 0))
       })
@@ -68,7 +89,7 @@ export default function ImportClient({
 
   // Mise en forme des cartes
   const formattedCards = cards.length > 0 ? cards.map(formatCard) : []
-  const enrichedCards = formattedCards.map(card => {
+  const enrichedCards = formattedCards.map((card: GameCard) => {
     const owned = collection.find(c => c.scryfallId === card.id)
     const totalWished = wishlistTotals.get(card.id) || 0
     return {
@@ -103,29 +124,29 @@ export default function ImportClient({
     loadSets()
   }, [])
 
-  const handleInputChange = e => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const query = e.target.value.toLowerCase()
     if (query.length > 2) {
-      const matchingSets = sets.filter(set =>
+      const matchingSets = sets.filter((set: ScryfallSet) =>
         set.name.toLowerCase().includes(query)
       )
 
-      const structuredSets = []
-      const parentSets = matchingSets.filter(set => !set.parent_set_code)
-      const subSets = matchingSets.filter(set => set.parent_set_code)
+      const structuredSets: ScryfallSet[] = []
+      const parentSets = matchingSets.filter((set: ScryfallSet) => !set.parent_set_code)
+      const subSets = matchingSets.filter((set: ScryfallSet) => set.parent_set_code)
 
-      parentSets.forEach(parent => {
+      parentSets.forEach((parent: ScryfallSet) => {
         structuredSets.push(parent)
         subSets
-          .filter(sub => sub.parent_set_code === parent.code)
-          .forEach(sub => structuredSets.push(sub))
+          .filter((sub: ScryfallSet) => sub.parent_set_code === parent.code)
+          .forEach((sub: ScryfallSet) => structuredSets.push(sub))
       })
 
       subSets
         .filter(
-          sub => !parentSets.some(parent => parent.code === sub.parent_set_code)
+          (sub: ScryfallSet) => !parentSets.some((parent: ScryfallSet) => parent.code === sub.parent_set_code)
         )
-        .forEach(sub => structuredSets.push(sub))
+        .forEach((sub: ScryfallSet) => structuredSets.push(sub))
 
       setFilteredSets(structuredSets)
     }
@@ -136,7 +157,7 @@ export default function ImportClient({
     setDisplaySetList(filteredSets.length > 0)
   }, [filteredSets])
 
-  const handleSetSelect = set => {
+  const handleSetSelect = (set: ScryfallSet): void => {
     setSelectedSet({ ...set })
     setDisplaySetList(false)
   }
@@ -173,7 +194,7 @@ export default function ImportClient({
     loadMoreCards()
   }, [nextPage])
 
-  const bumpRecent = (card, delta) => {
+  const bumpRecent = (card: any, delta: number): void => {
     if (!card?.id || !delta) return
     setRecentlyAdded(prev => {
       const idx = prev.findIndex(e => e.id === card.id)
@@ -199,7 +220,7 @@ export default function ImportClient({
     })
   }
 
-  const handleRecentCardClick = cardId => {
+  const handleRecentCardClick = (cardId: string): void => {
     const cardObj = formattedCards.find(c => c.id === cardId) || { id: cardId }
     startTransition(async () => {
       try {
@@ -227,7 +248,7 @@ export default function ImportClient({
   }
 
   // ---- Collection (Server Actions) ----
-  const handleAddToCollection = card => {
+  const handleAddToCollection = (card: any): void => {
     const scryfallId = card.id
 
     startTransition(async () => {
@@ -273,7 +294,7 @@ export default function ImportClient({
   }
 
   // ---- Met à jour la quantité d'une carte dans la collection (Server Action) ----
-  const handleUpdateQuantity = (cardId, delta) => {
+  const handleUpdateQuantity = (cardId: string, delta: number): void => {
     startTransition(async () => {
       try {
         const result = await actions.updateCollectionQuantity(cardId, delta)
@@ -340,7 +361,7 @@ export default function ImportClient({
     }
   }
 
-  const handleAddToWishlist = (listId, card) => {
+  const handleAddToWishlist = (listId: string, card: any): void => {
     if (!listId) return // aucune liste dispo
     startTransition(async () => {
       try {
@@ -351,7 +372,7 @@ export default function ImportClient({
         setWishlistLists(prev =>
           prev.map(list => {
             if (list.id !== listId) return list
-            const idx = list.items.findIndex(it => it.scryfallId === card.id)
+            const idx = list.items.findIndex((it: any) => it.scryfallId === card.id)
             if (idx === -1) {
               return {
                 ...list,
@@ -373,7 +394,7 @@ export default function ImportClient({
   }
 
   // --- suppression de tous les exemplaires d'une carte de la collection ---
-  const handleRemoveFromCollection = cardId => {
+  const handleRemoveFromCollection = (cardId: string): void => {
     const card = formattedCards.find(c => c.id === cardId)
     if (!card) return
 
@@ -406,7 +427,7 @@ export default function ImportClient({
         />
         {displaySetList && (
           <ul id={styles.scrollbar}>
-            {filteredSets.map(set => (
+            {filteredSets.map((set: ScryfallSet) => (
               <li
                 key={set.code}
                 className={set.parent_set_code ? styles.subSet : ''}
@@ -486,7 +507,7 @@ export default function ImportClient({
                   wishlistLists={wishlistLists}
                   onAddToCollection={() => handleAddToCollection(card)}
                   onCreateWishlist={handleCreateWishlist}
-                  onAddToWishlist={handleAddToWishlist}
+                  onAddToWishlist={async (listId: string, card: GameCard) => handleAddToWishlist(listId, card)}
                   onRemove={handleRemoveFromCollection}
                   disabled={isPending}
                 />
@@ -512,7 +533,7 @@ export default function ImportClient({
             </div>
           </div>
           <div className={styles.cardContainer}>
-            {recentlyAdded.map(({ id, card, count }, index) => (
+            {recentlyAdded.map(({ id, card, count }: { id: string; card: any; count: number }, index: number) => (
               <div
                 key={`${id}-${index}`}
                 onClick={() => handleRecentCardClick(id)} // 👈 clique = -1
@@ -522,9 +543,9 @@ export default function ImportClient({
                   card={card}
                   cardList={recentlyAdded.map(e => e.card)}
                   currentIndex={index}
-                  hasOtherFace={card.layout !== 'normal'}
+                  // hasOtherFace={(card as any).layout !== 'normal'}
                   className={index === 0 ? styles.cardAppear : ''}
-                  name={false}
+                  showName={false}
                   modal={false}
                 />
                 <p>

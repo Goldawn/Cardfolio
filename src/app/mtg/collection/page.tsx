@@ -6,8 +6,9 @@ import {
   removeFromCollectionAction,
 } from '../../actions/CollectionActions'
 import CollectionClient from './CollectionClient'
+import type { JSX } from 'react'
 
-export default async function CollectionPage() {
+export default async function CollectionPage(): Promise<JSX.Element> {
   const user = await getAuthenticatedUser()
 
   if (!user) {

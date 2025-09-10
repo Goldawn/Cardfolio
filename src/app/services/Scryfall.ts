@@ -2,7 +2,7 @@ import axios, { type AxiosResponse } from 'axios'
 
 const BASE = 'https://api.scryfall.com'
 
-interface ScryfallSet {
+export interface ScryfallSet {
   id: string
   code: string
   name: string
@@ -13,9 +13,10 @@ interface ScryfallSet {
   foil_only: boolean
   nonfoil_only: boolean
   icon_svg_uri: string
+  parent_set_code?: string
 }
 
-interface ScryfallCard {
+export interface ScryfallCard {
   id: string
   name: string
   set: string

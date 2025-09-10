@@ -1,8 +1,9 @@
 import { prisma } from '@/lib/prisma'
 import { getAuthenticatedUser } from '@/lib/getAuthenticatedUser'
 import DecklistClient from './DecklistClient'
+import type { JSX } from 'react'
 
-export default async function DecklistPage() {
+export default async function DecklistPage(): Promise<JSX.Element> {
   const user = await getAuthenticatedUser()
   if (!user) {
     return <p>Veuillez vous connecter.</p>
@@ -30,7 +31,7 @@ export default async function DecklistPage() {
   const initialDecks = JSON.parse(JSON.stringify(decklists))
 
   // --- Server Action: créer un deck ---
-  async function createDeckAction(name) {
+  async function createDeckAction(name: string): Promise<any> {
     'use server'
     const authed = await getAuthenticatedUser({ throwError: true })
 

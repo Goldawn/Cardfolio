@@ -18,8 +18,13 @@ import {
   updateDeckNotesAction,
   duplicateDeckAction,
 } from '../../../actions/DeckActions'
+import type { JSX } from 'react'
 
-export default async function SingleDeckPage({ params }) {
+interface SingleDeckPageProps {
+  params: Promise<{ id: string }>
+}
+
+export default async function SingleDeckPage({ params }: SingleDeckPageProps): Promise<JSX.Element> {
   const user = await getAuthenticatedUser()
   if (!user) {
     return <p>Veuillez vous connecter pour accéder à cette page.</p>

@@ -6,30 +6,33 @@ import {
   fetchSets,
   fetchSetCards,
   fetchMoreCards,
-} from '../services/Scryfall.js'
-import { formatCard } from '../services/FormatCard.js'
+} from '../services/Scryfall'
+import { formatCard } from '../services/FormatCard'
 import useCardFilters from '../hooks/useCardFilters'
 import { useCurrencyContext } from '@/context/'
 import Link from 'next/link'
 import Card from '../components/Card'
 import CollectionActionBar from '../components/CollectionActionBar'
-import { fetchCardPrice } from '../services/pricing.js'
+import { fetchCardPrice } from '../services/pricing'
 import styles from './page.module.css'
+import type { GameCard, Currency } from '@/types'
+import type { ScryfallSet, ScryfallCard } from '../services/Scryfall'
+import type { JSX } from 'react'
 
-export default function Collection() {
-  const [collection, setCollection] = useState([])
-  const [sets, setSets] = useState([])
-  const [selectedSet, setSelectedSet] = useState()
-  const [selectedSetCards, setSelectedSetCards] = useState([])
-  const [nextPage, setNextPage] = useState()
-  const [hideNotOwned, setHideNotOwned] = useState(false)
+export default function Collection(): JSX.Element {
+  const [collection, setCollection] = useState<GameCard[]>([])
+  const [sets, setSets] = useState<ScryfallSet[]>([])
+  const [selectedSet, setSelectedSet] = useState<string | undefined>()
+  const [selectedSetCards, setSelectedSetCards] = useState<ScryfallCard[]>([])
+  const [nextPage, setNextPage] = useState<string | undefined>()
+  const [hideNotOwned, setHideNotOwned] = useState<boolean>(false)
   const { currency } = useCurrencyContext()
 
-  const cardsToFilter =
+  const cardsToFilter: GameCard[] =
     selectedSetCards.length === 0
       ? collection
       : selectedSetCards
-          .map(card => {
+          .map((card: ScryfallCard): GameCard => {
             const formatted = formatCard(card)
             const owned = collection.find(c => c.id === formatted.id)
 
@@ -37,13 +40,13 @@ export default function Collection() {
               ...formatted,
               quantity: owned?.quantity || 0,
               priceHistory: owned?.priceHistory || [],
-              dbId: owned?.dbId,
-            }
+              dbId: (owned as any)?.dbId,
+            } as GameCard
           })
-          .filter(card => !hideNotOwned || card.quantity > 0)
+          .filter(card => !hideNotOwned || (card.quantity || 0) > 0)
 
   const { data: session, status } = useSession()
-  const userId = session?.user?.id
+  const userId: string | undefined = session?.user?.id
 
   const {
     sortOption,
@@ -64,39 +67,44 @@ export default function Collection() {
   const collectionStats = useMemo(() => {
     let totalCards = 0
     let totalValue = 0
-    const uniqueSets = new Set()
-    const cardsPerSet = {}
-    const uniqueCardsPerSet = {}
+    const uniqueSets = new Set<string>()
+    const cardsPerSet: Record<string, number> = {}
+    const uniqueCardsPerSet: Record<string, Set<string>> = {}
 
-    collection.forEach(card => {
-      totalCards += card.quantity
-      uniqueSets.add(card.setCode)
+    collection.forEach((card: GameCard) => {
+      totalCards += card.quantity || 0
+      if (card.setCode) {
+        uniqueSets.add(card.setCode)
 
-      if (!cardsPerSet[card.setCode]) {
-        cardsPerSet[card.setCode] = 0
+        if (!cardsPerSet[card.setCode]) {
+          cardsPerSet[card.setCode] = 0
+        }
+        cardsPerSet[card.setCode] += card.quantity || 0
+
+        if (!uniqueCardsPerSet[card.setCode]) {
+          uniqueCardsPerSet[card.setCode] = new Set<string>()
+        }
+        uniqueCardsPerSet[card.setCode].add(card.id)
       }
-      cardsPerSet[card.setCode] += card.quantity
-
-      if (!uniqueCardsPerSet[card.setCode]) {
-        uniqueCardsPerSet[card.setCode] = new Set()
-      }
-      uniqueCardsPerSet[card.setCode].add(card.id)
 
       // console.log(card.priceHistory)
-      let lastPrice =
-        card.priceHistory.length > 0
-          ? parseFloat(card.priceHistory.at(-1)[currency])
-          : 0
+      let lastPrice = 0
+      if (card.priceHistory && card.priceHistory.length > 0) {
+        const lastPriceEntry = card.priceHistory.at(-1)
+        if (lastPriceEntry && (lastPriceEntry as any)[currency]) {
+          lastPrice = parseFloat(String((lastPriceEntry as any)[currency]))
+        }
+      }
       if (isNaN(lastPrice)) {
         console.warn(
-          `Prix invalide pour la carte ${card.name} (${card.id}): ${card.priceHistory.at(-1)[currency]}`
+          `Prix invalide pour la carte ${card.name} (${card.id}): ${(card.priceHistory?.at(-1) as any)?.[currency]}`
         )
         lastPrice = 0
       }
-      totalValue += lastPrice * card.quantity
+      totalValue += lastPrice * (card.quantity || 0)
     })
 
-    const uniqueCardsPerSetCounts = {}
+    const uniqueCardsPerSetCounts: Record<string, number> = {}
     for (const [setCode, idSet] of Object.entries(uniqueCardsPerSet)) {
       uniqueCardsPerSetCounts[setCode] = idSet.size
     }
@@ -124,7 +132,7 @@ export default function Collection() {
         const data = await res.json()
         console.log('Collection DATA :', data)
         const enrichedCards = await Promise.all(
-          data.map(async item => {
+          data.map(async (item: any) => {
             const res = await fetch(
               `https://api.scryfall.com/cards/${item.scryfallId}`
             )
@@ -182,7 +190,7 @@ export default function Collection() {
     }
   }, [nextPage])
 
-  const toggleHideCards = () => {
+  const toggleHideCards = (): void => {
     setHideNotOwned(!hideNotOwned)
   }
 
@@ -190,9 +198,9 @@ export default function Collection() {
     console.log(hideNotOwned)
   }, [hideNotOwned])
 
-  const updateQuantity = async (cardId, delta) => {
+  const updateQuantity = async (cardId: string, delta: number): Promise<void> => {
     const card = collection.find(c => c.id === cardId)
-    if (!card || !card.dbId) return
+    if (!card || !(card as any).dbId) return
 
     try {
       const res = await fetch(`/api/users/${userId}/collection`, {
@@ -221,9 +229,9 @@ export default function Collection() {
     }
   }
 
-  const removeCard = async cardId => {
+  const removeCard = async (cardId: string): Promise<void> => {
     const card = collection.find(c => c.id === cardId)
-    if (!card || !card.dbId) return
+    if (!card || !(card as any).dbId) return
 
     try {
       const res = await fetch(`/api/users/${userId}/collection`, {
@@ -240,30 +248,30 @@ export default function Collection() {
     }
   }
 
-  const getSetName = setCode =>
+  const getSetName = (setCode: string): string =>
     sets.find(set => set.code === setCode)?.name || 'Nom inconnu'
-  const getSetIcon = setCode =>
+  const getSetIcon = (setCode: string): string =>
     sets.find(set => set.code === setCode)?.icon_svg_uri || ''
-  const getSetTotalCards = setCode =>
+  const getSetTotalCards = (setCode: string): number | null =>
     sets.find(set => set.code === setCode)?.card_count || null
 
-  const handleSelectedSet = setCode => {
+  const handleSelectedSet = (setCode: string): void => {
     if (selectedSet === setCode) {
-      setSelectedSet()
+      setSelectedSet(undefined)
       setSelectedSetCards([])
     } else {
       setSelectedSet(setCode)
     }
   }
 
-  const handleAddToCollection = async card => {
+  const handleAddToCollection = async (card: GameCard): Promise<void> => {
     const scryfallId = card.id
     const { usd, eur } = await fetchCardPrice(card.name)
     const lastPrice = eur || usd || 0
-    const currency = eur ? 'eur' : 'usd'
+    const priceCurrency: Currency = eur ? 'eur' : 'usd'
     const newPriceEntry = {
       date: new Date().toISOString().split('T')[0],
-      [currency]: lastPrice,
+      [priceCurrency]: lastPrice,
     }
 
     try {
@@ -317,7 +325,7 @@ export default function Collection() {
           type="text"
           placeholder="Rechercher une carte..."
           value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value.toLowerCase())}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value.toLowerCase())}
         />
       </div>
 
@@ -348,7 +356,7 @@ export default function Collection() {
 
         {collection && (
           <div className={styles.setsContainer}>
-            {collectionStats.totalSetsCodes.map((setCode, index) => (
+            {collectionStats.totalSetsCodes.map((setCode: string, index: number) => (
               <div
                 className={`${styles.setNames} ${selectedSet === setCode ? styles.active : ''}`}
                 key={index}
@@ -381,7 +389,7 @@ export default function Collection() {
         />
 
         <div className={styles.cardContainer}>
-          {sortedAndFilteredCards.map((card, index) => (
+          {sortedAndFilteredCards.map((card: GameCard, index: number) => (
             <Card
               key={card.id}
               card={card}
@@ -395,7 +403,7 @@ export default function Collection() {
               showDeleteButton
               updateQuantity={updateQuantity}
               onRemove={removeCard}
-              currency={currency}
+              currency={currency as Currency}
               compareWithCollection={Boolean(selectedSet)}
             />
           ))}

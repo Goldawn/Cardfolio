@@ -10,6 +10,16 @@ import DeckCardsTabs from '../../../components/deck/DeckCardsTabs'
 import Card from '../../../components/Card'
 import { evaluateDeckLegality } from '../../../services/Legalities'
 import styles from './page.module.css'
+import type { JSX } from 'react'
+import type { GameCard } from '@/types'
+
+interface DeckClientProps {
+  deck: any
+  initialDeckCards: any[]
+  initialUserCollectionItems: any[]
+  wishlistLists: any[]
+  actions: any
+}
 
 export default function DeckClient({
   deck,
@@ -17,14 +27,14 @@ export default function DeckClient({
   initialUserCollectionItems,
   wishlistLists,
   actions,
-}) {
+}: DeckClientProps): JSX.Element {
   // console.log(deck)
   const [deckState, setDeckState] = useState(deck) // { id, name, format, showcasedCard }
   const [deckCards, setDeckCards] = useState(initialDeckCards || [])
-  const [enriched, setEnriched] = useState([]) // cartes formatées  { deckCardId, decklistQuantity }
-  const [tab, setTab] = useState('fromCollection') // "fromCollection" | "manual" | "import"
+  const [enriched, setEnriched] = useState<GameCard[]>([]) // cartes formatées  { deckCardId, decklistQuantity }
+  const [tab, setTab] = useState<string>('fromCollection') // "fromCollection" | "manual" | "import"
   const [isPending, startTransition] = useTransition()
-  const [deckColors, setDeckColors] = useState([]) // ["W","U","B","R","G","C"]
+  const [deckColors, setDeckColors] = useState<string[]>([]) // ["W","U","B","R","G","C"]
 
   // -------- Enrichissement Scryfall des cartes du deck --------
   useEffect(() => {
@@ -64,22 +74,22 @@ export default function DeckClient({
 
   // Recalcule les couleurs du deck à partir des cartes présentes
   useEffect(() => {
-    const set = new Set()
+    const set = new Set<string>()
     // on s’appuie sur "enriched" + "deckCards" pour ne compter que les cartes présentes
     const qtyById = new Map(
       deckCards.map(dc => [dc.scryfallId, dc.quantity || 0])
     )
-    enriched.forEach(c => {
+    enriched.forEach((c: GameCard) => {
       const qty = qtyById.get(c.id) || 0
       if (qty <= 0) return
-      if (c.type.includes('Basic Land')) return // ignore lands de base
+      if ((c as any).type?.includes('Basic Land')) return // ignore lands de base
       if (Array.isArray(c.colors)) {
-        c.colors.forEach(clr => set.add(clr || 'C'))
+        c.colors.forEach((clr: any) => set.add(clr || 'C'))
       }
       // fallback "incolore" si pas de colors mais cout de mana présent
       if (
         (!c.colors || c.colors.length === 0) &&
-        (c.manaCost || '').length > 0
+        ((c as any).manaCost || '').length > 0
       ) {
         set.add('C')
       }
@@ -100,12 +110,12 @@ export default function DeckClient({
     )
   }, [deckState.format, deckCards, enriched])
 
-  const isCardProblematic = card => {
+  const isCardProblematic = (card: any): boolean => {
     return legality.issues.some(i => i.scryfallId === card.id)
   }
 
   // -------- Handlers deck (server actions) --------
-  const addCardToDeck = (scryfallId, qty = 1) => {
+  const addCardToDeck = (scryfallId: string, qty: number = 1): void => {
     startTransition(async () => {
       try {
         const res = await actions.addCardToDeck(deck.id, scryfallId, qty)
@@ -132,7 +142,7 @@ export default function DeckClient({
     })
   }
 
-  const updateDeckCardQty = (deckCardId, nextQty) => {
+  const updateDeckCardQty = (deckCardId: string, nextQty: number): void => {
     startTransition(async () => {
       try {
         const res = await actions.updateDeckCardQty(deckCardId, nextQty)
@@ -153,7 +163,7 @@ export default function DeckClient({
     })
   }
 
-  const removeCardFromDeck = deckCardId => {
+  const removeCardFromDeck = (deckCardId: string): void => {
     startTransition(async () => {
       try {
         const res = await actions.removeCardFromDeck(deckCardId)
@@ -166,14 +176,14 @@ export default function DeckClient({
     })
   }
 
-  const setShowcased = (deckCardId, artUrl) => {
+  const setShowcased = (deckCardId: string, artUrl: string): void => {
     startTransition(async () => {
       try {
         const updated = await actions.setShowcasedCard(deckState.id, {
           deckCardId,
           artUrl,
         })
-        setDeckState(prev => ({
+        setDeckState((prev: any) => ({
           ...prev,
           showcasedDeckCardId: updated.showcasedDeckCardId ?? null,
           showcasedArt: updated.showcasedArt ?? null,
@@ -185,8 +195,8 @@ export default function DeckClient({
   }
 
   // Mise à jour locale depuis le panneau paramètres
-  const applyDeckLocalUpdate = partial => {
-    setDeckState(prev => ({ ...prev, ...partial }))
+  const applyDeckLocalUpdate = (partial: any): void => {
+    setDeckState((prev: any) => ({ ...prev, ...partial }))
   }
 
   return (
@@ -199,7 +209,7 @@ export default function DeckClient({
           <DeckHeader deck={deckState} colors={deckColors} cards={enriched} />
 
           <DeckCardsTabs
-            cards={enriched}
+            cards={enriched as any}
             deckState={deckState}
             isPending={isPending}
             legality={legality}
@@ -232,14 +242,14 @@ export default function DeckClient({
             deckId={deckState.id}
             collectionItems={initialUserCollectionItems}
             currentDeckCards={deckCards}
-            onAdd={addCardToDeck}
+            onAdd={async (scryfallId: string, qty: number) => { await addCardToDeck(scryfallId, qty) }}
           />
         )}
 
         {tab === 'manual' && (
           <ManualAdd
             deckId={deckState.id}
-            onAdd={(scryfallId, qty) => addCardToDeck(scryfallId, qty)}
+            onAdd={async (scryfallId: string, qty: number) => { await addCardToDeck(scryfallId, qty) }}
           />
         )}
 

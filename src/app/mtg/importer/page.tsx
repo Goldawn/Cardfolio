@@ -1,8 +1,9 @@
 import { getAuthenticatedUser } from '@/lib/getAuthenticatedUser'
 import { prisma } from '@/lib/prisma'
 import ImportClient from './ImportClient'
+import type { JSX } from 'react'
 
-export default async function MTGImportPage() {
+export default async function MTGImportPage(): Promise<JSX.Element> {
   const user = await getAuthenticatedUser()
 
   if (!user) {
@@ -48,7 +49,7 @@ export default async function MTGImportPage() {
   // ------------------- Server Actions -------------------
 
   /** Ajoute/incrémente une carte dans la collection par défaut (CollectionItem) */
-  async function addToCollectionAction(scryfallId, newPriceEntry) {
+  async function addToCollectionAction(scryfallId: string, newPriceEntry: any): Promise<any> {
     'use server'
 
     // Cherche l’item pour (collectionId, scryfallId)
@@ -110,7 +111,7 @@ export default async function MTGImportPage() {
   }
 
   /** Décrémente ou supprime la carte dans la collection par défaut */
-  async function undoAddToCollectionAction(scryfallId) {
+  async function undoAddToCollectionAction(scryfallId: string): Promise<any> {
     'use server'
 
     const existing = await prisma.collectionItem.findFirst({
@@ -158,7 +159,7 @@ export default async function MTGImportPage() {
   }
 
   /** Met à jour la quantité d'une carte dans la collection */
-  async function updateCollectionQuantityAction(scryfallId, delta) {
+  async function updateCollectionQuantityAction(scryfallId: string, delta: number): Promise<any> {
     'use server'
 
     if (!delta || typeof delta !== 'number') {
@@ -169,7 +170,7 @@ export default async function MTGImportPage() {
     // if (!collectionId) return JSON.parse(JSON.stringify({ kind: "noop" }));
 
     const existing = await prisma.collectionItem.findFirst({
-      where: { collectionId: collectionsFromDb.id, scryfallId },
+      where: { collectionId: collectionsFromDb[0]?.id, scryfallId },
       select: { id: true, quantity: true },
     })
 
@@ -178,9 +179,10 @@ export default async function MTGImportPage() {
       if (delta > 0) {
         const created = await prisma.collectionItem.create({
           data: {
-            collectionId: collectionsFromDb.id,
+            collectionId: collectionsFromDb[0]?.id,
             scryfallId,
             quantity: delta,
+            priceHistory: [],
           },
           select: { id: true, scryfallId: true, quantity: true },
         })
@@ -234,7 +236,7 @@ export default async function MTGImportPage() {
   }
 
   /**  Crée une nouvelle wishlist */
-  async function createWishlistAction(name = 'wishlist') {
+  async function createWishlistAction(name: string = 'wishlist'): Promise<any> {
     'use server'
 
     const user = await getAuthenticatedUser({ throwError: true })
@@ -250,7 +252,7 @@ export default async function MTGImportPage() {
   }
 
   /** Ajoute à une wishlist */
-  async function addToWishlistAction(listId, scryfallId, quantity = 1) {
+  async function addToWishlistAction(listId: string, scryfallId: string, quantity: number = 1): Promise<any> {
     'use server'
 
     // sécurise la liste pour ce user
@@ -300,7 +302,7 @@ export default async function MTGImportPage() {
   }
 
   // Supprime tous les exemplaires d'une carte de la collection
-  async function removeFromCollectionAction(scryfallId) {
+  async function removeFromCollectionAction(scryfallId: string): Promise<any> {
     'use server'
 
     // retrouve la collection par défaut (sécurité : on relit à chaque action)
