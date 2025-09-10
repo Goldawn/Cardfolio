@@ -59,6 +59,7 @@ export {
 
 // Providers
 export { ScryfallProvider } from './providers/ScryfallProvider'
+export { ScryfallPricingProvider } from './providers/ScryfallPricingProvider'
 
 // Adapters
 export { ScryfallAdapter } from './adapters/ScryfallAdapter'
@@ -68,6 +69,6 @@ export { CardServiceFactory } from './factory/CardServiceFactory'
 
 // Services principaux
 export { CardService } from './services/CardService'
+export { PricingService } from './services/PricingService'
 // TODO: Autres services
 // export { SetService } from './services/SetService'
-// export { PricingService } from './services/PricingService'

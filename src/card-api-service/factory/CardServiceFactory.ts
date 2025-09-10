@@ -3,6 +3,7 @@ import { DEFAULT_SERVICE_CONFIG } from '../config'
 import { ScryfallProvider } from '../providers/ScryfallProvider'
 import { ScryfallAdapter } from '../adapters/ScryfallAdapter'
 import { CardService } from '../services/CardService'
+import { PricingService } from '../services/PricingService'
 
 /**
  * Factory pour créer les services Card API
@@ -37,6 +38,27 @@ export class CardServiceFactory {
 
     // Création du service principal
     return new CardService(providers, adapters, finalConfig)
+  }
+
+  /**
+   * Crée une instance du service Pricing avec la configuration fournie
+   */
+  static createPricingService(config: Partial<ServiceConfig> = {}): PricingService {
+    const finalConfig = { ...DEFAULT_SERVICE_CONFIG, ...config }
+    return new PricingService(finalConfig)
+  }
+
+  /**
+   * Crée tous les services (Card + Pricing) avec la configuration fournie
+   */
+  static createAllServices(config: Partial<ServiceConfig> = {}): {
+    cardService: CardService
+    pricingService: PricingService
+  } {
+    return {
+      cardService: this.create(config),
+      pricingService: this.createPricingService(config)
+    }
   }
 
   /**

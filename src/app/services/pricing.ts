@@ -1,40 +1,32 @@
 /**
- * Nouveau service de prix utilisant l'architecture Card API Service
- * Remplace src/app/services/pricing.ts
+ * Service de prix utilisant le nouveau PricingService
+ * Remplace l'ancienne implémentation directe avec Scryfall
  */
 
 import { CardServiceFactory } from '@/card-api-service'
 import type { PriceData } from '@/card-api-service/dto'
 
-// Instance singleton du service
-let cardServiceInstance: any = null
+// Instance singleton du service de pricing
+let pricingServiceInstance: any = null
 
-const getCardService = () => {
-  if (!cardServiceInstance) {
-    cardServiceInstance = CardServiceFactory.create()
+const getPricingService = () => {
+  if (!pricingServiceInstance) {
+    pricingServiceInstance = CardServiceFactory.createPricingService()
   }
-  return cardServiceInstance
+  return pricingServiceInstance
 }
 
 /**
  * Récupère le prix d'une carte par son nom
- * Remplace l'ancienne fonction fetchCardPrice()
+ * Utilise le nouveau PricingService avec fallback automatique
  */
 export const fetchCardPrice = async (cardName: string): Promise<{
   usd: number
   eur: number
 }> => {
   try {
-    const cardService = getCardService()
-    const card = await cardService.fetchCardByName(cardName)
-    
-    // Extraire les prix depuis l'historique des prix
-    const latestPrice = card.priceHistory?.[0]
-    
-    return {
-      usd: latestPrice?.usd || 0,
-      eur: latestPrice?.eur || 0,
-    }
+    const pricingService = getPricingService()
+    return await pricingService.fetchSimplePrice(cardName)
   } catch (error) {
     console.error('Erreur lors de la récupération du prix:', error)
     return { usd: 0, eur: 0 }
@@ -43,23 +35,15 @@ export const fetchCardPrice = async (cardName: string): Promise<{
 
 /**
  * Récupère le prix d'une carte par son ID
- * Nouvelle fonctionnalité
+ * Utilise le nouveau PricingService avec fallback automatique
  */
 export const fetchCardPriceById = async (cardId: string): Promise<{
   usd: number
   eur: number
 }> => {
   try {
-    const cardService = getCardService()
-    const card = await cardService.fetchCard({ cardId })
-    
-    // Extraire les prix depuis l'historique des prix
-    const latestPrice = card.priceHistory?.[0]
-    
-    return {
-      usd: latestPrice?.usd || 0,
-      eur: latestPrice?.eur || 0,
-    }
+    const pricingService = getPricingService()
+    return await pricingService.fetchSimplePriceById(cardId)
   } catch (error) {
     console.error('Erreur lors de la récupération du prix:', error)
     return { usd: 0, eur: 0 }
@@ -68,7 +52,7 @@ export const fetchCardPriceById = async (cardId: string): Promise<{
 
 /**
  * Récupère les prix de plusieurs cartes
- * Nouvelle fonctionnalité
+ * Utilise le nouveau PricingService pour une meilleure performance
  */
 export const fetchBulkCardPrices = async (cardNames: string[]): Promise<Array<{
   cardName: string
@@ -76,16 +60,14 @@ export const fetchBulkCardPrices = async (cardNames: string[]): Promise<Array<{
   eur: number
 }>> => {
   try {
-    const cardService = getCardService()
+    const pricingService = getPricingService()
     const results = await Promise.allSettled(
       cardNames.map(async (cardName) => {
-        const card = await cardService.fetchCardByName(cardName)
-        const latestPrice = card.priceHistory?.[0]
-        
+        const price = await pricingService.fetchSimplePrice(cardName)
         return {
           cardName,
-          usd: latestPrice?.usd || 0,
-          eur: latestPrice?.eur || 0,
+          usd: price.usd,
+          eur: price.eur,
         }
       })
     )

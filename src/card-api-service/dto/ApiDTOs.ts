@@ -14,6 +14,8 @@ export interface ScryfallCardDTO {
     usd: string | null
     eur: string | null
     tix: string | null
+    usd_foil?: string | null
+    eur_foil?: string | null
   }
   rarity?: string
   collector_number?: string
