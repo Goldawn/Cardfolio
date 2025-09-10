@@ -254,11 +254,15 @@ export default function ImportClient({
     startTransition(async () => {
       try {
         const { usd, eur } = await fetchCardPrice(card.name)
-        const lastPrice = eur || usd || 0
+
+        console.log('import eur, usd', eur, usd)
+        const lastPrice = eur || eur || 0
+        // { date: '2025-09-10', eur: 1.0, usd: 1.0 }
         const currency = eur ? 'eur' : 'usd'
         const newPriceEntry = {
           date: new Date().toISOString().split('T')[0],
-          [currency]: lastPrice,
+          usd: usd,
+          eur: eur,
         }
 
         const result = await actions.addToCollection(scryfallId, newPriceEntry)

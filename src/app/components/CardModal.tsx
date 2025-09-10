@@ -32,7 +32,6 @@ export default function CardModal({
   cardList = [],
   currentIndex = 0,
 }: CardModalProps): JSX.Element {
-  console.log(card)
   const [flipped, setFlipped] = useState(false)
   const [currentCardIndex, setCurrentCardIndex] = useState(currentIndex)
   const currentCard = cardList[currentCardIndex] || card
@@ -82,6 +81,8 @@ export default function CardModal({
   const formattedPriceHistory = useMemo(() => {
     if (!currentCard.priceHistory || currentCard.priceHistory.length === 0)
       return []
+
+    // console.log(currentCard.priceHistory)
     return currentCard.priceHistory
       .map(entry => ({
         date: entry.date,
