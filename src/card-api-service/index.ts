@@ -66,7 +66,8 @@ export { ScryfallAdapter } from './adapters/ScryfallAdapter'
 // Factory
 export { CardServiceFactory } from './factory/CardServiceFactory'
 
-// TODO: Services principaux (à implémenter)
-// export { CardService } from './services/CardService'
+// Services principaux
+export { CardService } from './services/CardService'
+// TODO: Autres services
 // export { SetService } from './services/SetService'
 // export { PricingService } from './services/PricingService'

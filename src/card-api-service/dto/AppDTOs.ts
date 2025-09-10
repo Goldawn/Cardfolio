@@ -65,3 +65,6 @@ export interface SearchFilters {
 // Réexport des types existants pour cohérence
 export type { MTGCard } from '@/types/games/magic'
 export type { CardRarity, Currency } from '@/types/base'
+
+// Export direct pour éviter les problèmes d'import
+export type { MTGCard as MTGCardType } from '@/types/games/magic'
