@@ -1,7 +1,6 @@
 // services/legalities.ts
 
 import type { MTGFormat } from '@/types/games/magic'
-import type { GameCard } from '@/types'
 
 /** =========================
  *  Formats & règles de base
