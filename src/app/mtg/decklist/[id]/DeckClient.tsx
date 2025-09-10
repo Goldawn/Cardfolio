@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState, useTransition, useMemo } from 'react'
-import { formatCard } from '@/app/services/FormatCard'
 import { CardServiceFactory } from '@/card-api-service'
 import DeckSettingsPanel from '../../../components/deck/DeckSettingsPanel'
 import AddFromCollection from '../../../components/deck/AddFromCollection'

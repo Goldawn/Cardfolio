@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState, useTransition } from 'react'
-import { formatCard } from '@/app/services/FormatCard'
+import { CardServiceFactory } from '@/card-api-service'
 import styles from './AddFromCollection.module.css'
 import type { GameCard } from '@/types'
 import type { JSX } from 'react'
@@ -30,6 +30,7 @@ export default function AddFromCollection({
   onAdd,
 }: AddFromCollectionProps): JSX.Element {
   console.log(collectionItems)
+  const cardService = CardServiceFactory.create()
   const [isPending, startTransition] = useTransition()
   const [enriched, setEnriched] = useState<(GameCard & { ownedQuantity: number })[]>([])
   const [query, setQuery] = useState('')
@@ -54,33 +55,28 @@ export default function AddFromCollection({
         return
       }
       try {
-        // Scryfall bulk: 75 identifiants max par requête → on chunk si besoin
-        const chunkSize = 75
-        const chunks = []
-        for (let i = 0; i < collectionItems.length; i += chunkSize) {
-          chunks.push(collectionItems.slice(i, i + chunkSize))
-        }
-        const all: (GameCard & { ownedQuantity: number })[] = []
-        for (const chunk of chunks) {
-          const body = {
-            identifiers: chunk.map((it: CollectionItem) => ({ id: it.scryfallId })),
+        // Utilisation du CardService pour le bulk fetch
+        const cardIds = collectionItems.map((it: CollectionItem) => it.scryfallId)
+        const result = await cardService.fetchBulkCards({
+          cardIds,
+          options: {
+            batchSize: 75, // Scryfall limite à 75 identifiants par requête
+            delayBetweenBatches: 1000 // 1 seconde entre les lots
           }
-          const res = await fetch('https://api.scryfall.com/cards/collection', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body),
-            cache: 'no-store',
-          })
-          const data = await res.json()
-          const formatted = (data?.data || []).map((raw: any) => formatCard(raw))
-          // rattache ownedQuantity
-          formatted.forEach((f: GameCard) => {
-            const owned =
-              collectionItems.find((ci: CollectionItem) => ci.scryfallId === f.id)?.quantity || 0
-            all.push({ ...f, ownedQuantity: owned })
-          })
+        })
+        
+        // Rattache ownedQuantity à chaque carte
+        const enriched = result.cards.map((card: GameCard) => {
+          const owned = collectionItems.find((ci: CollectionItem) => ci.scryfallId === card.id)?.quantity || 0
+          return { ...card, ownedQuantity: owned }
+        })
+        
+        // Log des erreurs s'il y en a
+        if (result.errors.length > 0) {
+          console.warn(`${result.errors.length} cartes n'ont pas pu être chargées:`, result.errors)
         }
-        if (!cancelled) setEnriched(all)
+        
+        if (!cancelled) setEnriched(enriched)
       } catch (e) {
         console.error('Erreur enrichissement collection:', e)
         if (!cancelled) setEnriched([])

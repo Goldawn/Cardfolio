@@ -1,6 +1,5 @@
 'use client'
 import { fetchCardPrice } from './pricing'
-import { formatCard } from './FormatCard'
 import type { GameCard } from '@/types'
 
 // Sauvegarder la collection dans le localStorage
@@ -29,7 +28,6 @@ export const addCardToCollection = async (card: GameCard): Promise<void> => {
     const price = await fetchCardPrice(card.name)
 
     // Formater la carte avec notre fonction standardisée
-    // const formattedCard = formatCard(card);
     // console.log("🛠️ Carte formatée avant ajout :", formattedCard);
 
     // Ajouter l'entrée de prix actuelle

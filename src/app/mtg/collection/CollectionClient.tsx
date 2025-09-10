@@ -8,7 +8,6 @@ import {
   fetchSetCards,
   fetchMoreCards,
 } from '../../services/Scryfall'
-import { formatCard } from '@/app/services/FormatCard'
 import { CardServiceFactory } from '@/card-api-service'
 import useCardFilters from '../../hooks/useCardFilters'
 import Card from '../../components/Card'
