@@ -9,14 +9,13 @@ import {
 import Card from '../../components/Card'
 import Loader from '../../components/Loader'
 import { fetchCardPrice } from '../../services/pricing'
-import { formatCard } from '../../services/FormatCard'
 import useCardFilters from '../../hooks/useCardFilters'
 import CollectionActionBar from '../../components/CollectionActionBar'
-import FetchCardInput from '../../components/FetchCardInput'
 import styles from './page.module.css'
 import type { JSX } from 'react'
 import type { GameCard } from '@/types'
-import type { ScryfallSet, ScryfallCard } from '../../services/Scryfall'
+import type { GameSet } from '@/card-api-service/dto'
+import type { MTGCard } from '@/types/games/magic'
 
 interface ImportClientProps {
   initialCollection: any[]
@@ -31,23 +30,20 @@ export default function ImportClient({
   actions,
   userId,
 }: ImportClientProps): JSX.Element {
-  const [sets, setSets] = useState<ScryfallSet[]>([])
-  const [filteredSets, setFilteredSets] = useState<ScryfallSet[]>([])
-  const [selectedSet, setSelectedSet] = useState<{
-    name: string
-    code: string
-    card_count: number
-    released_at: string
-    icon_svg_uri: string
-  }>({
+  const [sets, setSets] = useState<GameSet[]>([])
+  const [filteredSets, setFilteredSets] = useState<GameSet[]>([])
+  const [selectedSet, setSelectedSet] = useState<GameSet>({
+    id: '',
     name: '',
     code: '',
-    card_count: 0,
-    released_at: '',
-    icon_svg_uri: '',
+    cardCount: 0,
+    releaseDate: '',
+    setType: '',
+    digital: false,
+    iconUri: '',
   })
 
-  const [cards, setCards] = useState<ScryfallCard[]>([])
+  const [cards, setCards] = useState<MTGCard[]>([])
   const [loading, setLoading] = useState<boolean>(false)
   const [displaySetList, setDisplaySetList] = useState<boolean>(false)
   const [nextPage, setNextPage] = useState<string | undefined>(undefined)
@@ -87,8 +83,8 @@ export default function ImportClient({
     return map
   }, [wishlistLists])
 
-  // Mise en forme des cartes
-  const formattedCards = cards.length > 0 ? cards.map(formatCard) : []
+  // Les cartes sont déjà formatées par le service
+  const formattedCards = cards
   const enrichedCards = formattedCards.map((card: GameCard) => {
     const owned = collection.find(c => c.scryfallId === card.id)
     const totalWished = wishlistTotals.get(card.id) || 0
@@ -127,26 +123,26 @@ export default function ImportClient({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const query = e.target.value.toLowerCase()
     if (query.length > 2) {
-      const matchingSets = sets.filter((set: ScryfallSet) =>
+      const matchingSets = sets.filter((set: GameSet) =>
         set.name.toLowerCase().includes(query)
       )
 
-      const structuredSets: ScryfallSet[] = []
-      const parentSets = matchingSets.filter((set: ScryfallSet) => !set.parent_set_code)
-      const subSets = matchingSets.filter((set: ScryfallSet) => set.parent_set_code)
+      const structuredSets: GameSet[] = []
+      const parentSets = matchingSets.filter((set: GameSet) => !set.parentSetCode)
+      const subSets = matchingSets.filter((set: GameSet) => set.parentSetCode)
 
-      parentSets.forEach((parent: ScryfallSet) => {
+      parentSets.forEach((parent: GameSet) => {
         structuredSets.push(parent)
         subSets
-          .filter((sub: ScryfallSet) => sub.parent_set_code === parent.code)
-          .forEach((sub: ScryfallSet) => structuredSets.push(sub))
+          .filter((sub: GameSet) => sub.parentSetCode === parent.code)
+          .forEach((sub: GameSet) => structuredSets.push(sub))
       })
 
       subSets
         .filter(
-          (sub: ScryfallSet) => !parentSets.some((parent: ScryfallSet) => parent.code === sub.parent_set_code)
+          (sub: GameSet) => !parentSets.some((parent: GameSet) => parent.code === sub.parentSetCode)
         )
-        .forEach((sub: ScryfallSet) => structuredSets.push(sub))
+        .forEach((sub: GameSet) => structuredSets.push(sub))
 
       setFilteredSets(structuredSets)
     }
@@ -157,7 +153,7 @@ export default function ImportClient({
     setDisplaySetList(filteredSets.length > 0)
   }, [filteredSets])
 
-  const handleSetSelect = (set: ScryfallSet): void => {
+  const handleSetSelect = (set: GameSet): void => {
     setSelectedSet({ ...set })
     setDisplaySetList(false)
   }
@@ -431,19 +427,19 @@ export default function ImportClient({
         />
         {displaySetList && (
           <ul id={styles.scrollbar}>
-            {filteredSets.map((set: ScryfallSet) => (
+            {filteredSets.map((set: GameSet) => (
               <li
                 key={set.code}
-                className={set.parent_set_code ? styles.subSet : ''}
+                className={set.parentSetCode ? styles.subSet : ''}
                 onClick={() => handleSetSelect(set)}
               >
-                <img src={set.icon_svg_uri} alt={set.name} />
+                <img src={set.iconUri} alt={set.name} />
                 <strong
-                  className={!set.parent_set_code ? styles.expansion : ''}
+                  className={!set.parentSetCode ? styles.expansion : ''}
                 >
                   {set.name}
                 </strong>{' '}
-                ({set.code}) ({set.card_count} cartes) <i>{set.released_at}</i>
+                ({set.code}) ({set.cardCount} cartes) <i>{set.releaseDate}</i>
               </li>
             ))}
           </ul>
@@ -458,7 +454,7 @@ export default function ImportClient({
             <div className={styles.setHeader}>
               <img
                 className={styles.setIcon}
-                src={selectedSet.icon_svg_uri}
+                src={selectedSet.iconUri}
                 alt={selectedSet.name}
               />
               <div className={styles.setDetails}>
@@ -466,8 +462,8 @@ export default function ImportClient({
                   {selectedSet.name} ({selectedSet.code})
                 </h2>
                 <p>
-                  {selectedSet.card_count} cartes | sortie le{' '}
-                  {selectedSet.released_at}
+                  {selectedSet.cardCount} cartes | sortie le{' '}
+                  {selectedSet.releaseDate}
                 </p>
               </div>
             </div>
