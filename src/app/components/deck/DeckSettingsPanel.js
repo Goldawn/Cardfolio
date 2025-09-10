@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useMemo } from 'react'
 import AddMissingToWishlistModal from './AddMissingToWishlistModal'
+import ExportFlow from '../ExportFlow'
 import styles from './DeckSettingsPanel.module.css'
 
 const FORMAT_OPTIONS = [
@@ -32,7 +33,7 @@ export default function DeckSettingsPanel({
   collectionItems,
   wishlistLists,
 }) {
-  // console.log("deck", deck);
+
   const [isPending, startTransition] = useTransition()
   const [name, setName] = useState(deck.name || '')
   const [format, setFormat] = useState(deck.format || 'commander')
@@ -64,6 +65,35 @@ export default function DeckSettingsPanel({
       }
     })
   }
+
+ // ---- Shape pour l'export Arena ----
+ const deckShape = useMemo(() => {
+  console.log("deckCards", deckCards)
+   const norm = (c) => {
+     const name = c.name ?? c.card?.name ?? c.print?.name ?? ''
+     const set =
+       (c.set ?? c.setCode ?? c.card?.set ?? c.print?.set)?.toString().toUpperCase()
+     const collectorNumber =
+       c.collectorNumber ?? c.number ?? c.print?.collectorNumber ?? c.print?.number
+     const quantity = Number(c.quantity ?? c.count ?? 1)
+     const zone =
+       (c.zone?.toLowerCase?.() ??
+        (c.isSideboard ? 'sideboard' : 'main') ??
+        'main')
+     return { quantity, name, set, collectorNumber, zone }
+   }
+   const all = Array.isArray(deckCards) ? deckCards.map(norm) : []
+   const byZone = (z) => all.filter((e) => (e.zone ?? 'main') === z).map(({zone, ...rest}) => rest)
+   const shape = {
+     main: byZone('main'),
+     sideboard: byZone('sideboard'),
+     companion: byZone('companion'),
+   }
+   // Nettoyage: retire les zones vides
+   if (!shape.sideboard.length) delete shape.sideboard
+   if (!shape.companion?.length) delete shape.companion
+   return shape
+ }, [deckCards])
 
   return (
     <div className={styles.settingsPanel}>
@@ -106,9 +136,15 @@ export default function DeckSettingsPanel({
         <small>La note est enregistrée quand tu quittes le champ.</small>
       </label>
 
-      <button disabled title="Bientôt">
-        Exporter le deck (à venir)
-      </button>
+      <ExportFlow
+        kind="deck"
+        data={deckShape}
+        label="Exporter le deck"
+        filenameBase={deck?.name || "deck"}
+        defaultFormat="arena"
+        includeSet
+      />
+
       <button onClick={() => setMissingOpen(true)}>
         Ajouter les cartes manquantes à une wishlist
       </button>

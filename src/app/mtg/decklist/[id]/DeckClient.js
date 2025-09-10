@@ -18,13 +18,16 @@ export default function DeckClient({
   wishlistLists,
   actions,
 }) {
-  // console.log(deck)
+  console.log(deck)
+  
   const [deckState, setDeckState] = useState(deck) // { id, name, format, showcasedCard }
   const [deckCards, setDeckCards] = useState(initialDeckCards || [])
   const [enriched, setEnriched] = useState([]) // cartes formatées  { deckCardId, decklistQuantity }
   const [tab, setTab] = useState('fromCollection') // "fromCollection" | "manual" | "import"
   const [isPending, startTransition] = useTransition()
   const [deckColors, setDeckColors] = useState([]) // ["W","U","B","R","G","C"]
+
+  console.log("enriched" , enriched)
 
   // -------- Enrichissement Scryfall des cartes du deck --------
   useEffect(() => {
@@ -260,7 +263,8 @@ export default function DeckClient({
       <aside>
         <DeckSettingsPanel
           deck={deckState}
-          deckCards={deckCards}
+          // deckCards={deckCards}
+          deckCards={enriched}
           collectionItems={initialUserCollectionItems}
           wishlistLists={wishlistLists}
           actions={{

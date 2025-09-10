@@ -23,6 +23,7 @@ export type ApplyImportParams = {
   mode: ImportMode
   summary: ImportSummary
   file?: File
+  deckName?: string
 }
 
 export type ApplyImportResult = {
@@ -47,7 +48,8 @@ export type ResolvedDeck = {
 // ---------------------------------------------------------------
 
 export async function applyImport(params: ApplyImportParams): Promise<ApplyImportResult> {
-  const { destinations, mode, summary } = params
+  // ✅ deckName ajouté ici
+  const { destinations, mode, summary, deckName } = params
 
   try {
     const results: Record<ImportDestination, any> = {
@@ -85,18 +87,22 @@ export async function applyImport(params: ApplyImportParams): Promise<ApplyImpor
         results.deck = { ok: false, error: "Le fichier n'est pas un deck Arena." }
       } else {
         const resolved = await resolveArenaEntries(summary)
+        const count = resolved.main.length
+          + resolved.sideboard.length
+          + (resolved.companion?.length ?? 0)
+
         if (MOCK) {
           await delay(300)
           results.deck = {
             ok: true,
-            message: `Deck importé (${resolved.main.length + resolved.sideboard.length + (resolved.companion?.length ?? 0)} cartes)`,
-            details: resolved,
+            message: `Deck importé${deckName ? `: "${deckName}"` : ""} (${count} carte${count > 1 ? "s" : ""})`,
+            details: { name: deckName, deck: resolved }
           }
         } else {
           const res = await fetch(`${API_BASE}/decks/import`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ mode, deck: resolved }),
+            body: JSON.stringify({ mode, name: deckName, deck: resolved })
           })
           results.deck = res.ok
             ? { ok: true, details: await res.json().catch(() => ({})) }

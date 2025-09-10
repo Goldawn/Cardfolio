@@ -1,29 +1,235 @@
 /* components/import/ImportFlow.module.css */
-.wrapper { display: grid; gap: 6px; }
-.label { font-size: 14px; color: #444; }
-.input { display: block; }
+
+/* --- Layout de base --- */
+.wrapper {
+  display: grid;
+  gap: 10px;
+
+  /* carte */
+  max-width: 980px;
+  margin: 24px auto;
+  padding: 18px;
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.025), transparent),
+    #ffffff;
+  border: 1px solid rgba(0,0,0,.08);
+  box-shadow:
+    0 18px 40px rgba(0,0,0,.08),
+    0 2px 8px rgba(0,0,0,.05);
+}
+
+/* Titre du bloc */
+.label {
+  font-size: 15px;
+  font-weight: 700;
+  color: #2a2a2a;
+  letter-spacing: .01em;
+  margin-bottom: 4px;
+  position: relative;
+}
+
+/* petite ligne décorative sous le titre */
+.label::after {
+  content: "";
+  display: block;
+  height: 2px;
+  width: 56px;
+  margin-top: 6px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #111, rgba(17,17,17,0));
+}
+
+/* (le file input reste caché) */
+.input { display: none; }
 .error { color: #b00020; font-size: 12px; }
 
-.controls { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 4px; margin-bottom: 12px; }
-.fieldset { border: 1px solid rgba(0,0,0,.08); border-radius: 8px; padding: 8px 10px; }
-.legend { font-size: 12px; color: #666; padding: 0 6px; }
-.radios { display: flex; gap: 12px; margin-top: 8px; }
-.radioLabel { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; }
-
-.preview { margin-top: 4px; }
-
-.btnPrimary, .btnSecondary {
-  appearance: none; border: none; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-weight: 600;
+/* --- Bloc d’ajout : textarea + dropzone --- */
+.addBlock {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
 }
-.btnPrimary { background: #111; color: #fff; }
-.btnPrimary[disabled] { opacity: .55; cursor: not-allowed; }
-.btnSecondary { background: #e9e9e9; color: #111; }
-.btnSecondary:hover { filter: brightness(.97); }
 
+.textCol { display: grid; gap: 10px; }
+.subLabel { font-size: 12px; color: #666; }
+
+.textarea {
+  width: 100%;
+  min-height: 160px;
+  resize: vertical;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,.12);
+  background: #fff;
+  color: #111;
+  box-shadow: 0 1px 0 rgba(0,0,0,.02) inset;
+  transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+  line-height: 1.45;
+}
+.textarea::placeholder { color: #999; }
+.textarea:focus-visible {
+  outline: none;
+  border-color: #111;
+  box-shadow: 0 0 0 3px rgba(0,0,0,.08);
+}
+
+.actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+/* --- Dropzone --- */
+.dropzone {
+  border: 2px dashed rgba(0,0,0,.18);
+  border-radius: 14px;
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  user-select: none;
+  background: linear-gradient(180deg, rgba(0,0,0,.02), transparent);
+  transition: border-color .15s ease, background .15s ease, transform .08s ease;
+}
+.dropzone:hover {
+  border-color: rgba(0,0,0,.35);
+  background: linear-gradient(180deg, rgba(0,0,0,.03), transparent);
+}
+.dropzone:active { transform: scale(.997); }
+
+.dropzoneActive {
+  border-color: rgba(17,17,17,.6);
+  background:
+    radial-gradient(ellipse at center, rgba(0,0,0,.05), transparent 60%),
+    linear-gradient(180deg, rgba(0,0,0,.04), transparent);
+}
+
+.dropInner { text-align: center; padding: 10px 12px; }
+.dropTitle { font-weight: 700; color: #222; }
+.dropHint { font-size: 12px; color: #666; margin-top: 4px; }
+
+/* --- Contrôles dans la modale --- */
+.controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 4px;
+  margin-bottom: 12px;
+}
+
+.fieldset {
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: #fff;
+  box-shadow: 0 1px 0 rgba(0,0,0,.02) inset;
+}
+.legend { font-size: 12px; color: #666; padding: 0 6px; font-weight: 600; }
+
+.radios { display: flex; gap: 14px; margin-top: 8px; flex-wrap: wrap; }
+.radioLabel {
+  display: inline-flex; align-items: center; gap: 8px; font-size: 14px;
+}
+.radioLabel input {
+  width: 16px; height: 16px;
+}
+
+/* --- Preview --- */
+.preview { margin-top: 6px; }
+
+/* --- Boutons --- */
+.btnPrimary, .btnSecondary {
+  appearance: none;
+  border: none;
+  border-radius: 10px;
+  padding: 9px 14px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 14px;
+  transition: transform .06s ease, filter .12s ease, box-shadow .12s ease, background .12s ease, color .12s ease;
+}
+.btnPrimary {
+  background: #111; color: #fff;
+  box-shadow: 0 1px 0 rgba(0,0,0,.2), 0 6px 16px rgba(0,0,0,.08);
+}
+.btnPrimary:hover { filter: brightness(1.05); }
+.btnPrimary:active { transform: translateY(1px); }
+.btnPrimary[disabled] { opacity: .55; cursor: not-allowed; box-shadow: none; }
+
+.btnSecondary {
+  background: #efefef; color: #111;
+  box-shadow: 0 1px 0 rgba(0,0,0,.06) inset;
+}
+.btnSecondary:hover { filter: brightness(.98); }
+.btnSecondary:active { transform: translateY(1px); }
+
+/* --- Responsif --- */
+@media (max-width: 900px) {
+  .addBlock { grid-template-columns: 1fr; }
+  .controls { grid-template-columns: 1fr; }
+}
+
+/* --- Dark mode --- */
 @media (prefers-color-scheme: dark) {
-  .label { color: #ccc; }
-  .fieldset { border-color: rgba(255,255,255,.14); }
-  .legend { color: #bbb; }
-  .btnSecondary { background: #2a2a2a; color: #eee; }
+   .wrapper {
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.04), transparent),
+      #111111;
+    border-color: rgba(255,255,255,.12);
+    box-shadow:
+      0 18px 40px rgba(0,0,0,.45),
+      0 2px 8px rgba(0,0,0,.35);
+  }
+  .label { color: #e9e9e9; }
+  .label::after {
+    background: linear-gradient(90deg, #ffffff, rgba(255,255,255,0));
+  }
+  .error { color: #ff6b6b; }
+
+  .textarea {
+    background: #171717; color: #eee; border-color: rgba(255,255,255,.12);
+    box-shadow: 0 1px 0 rgba(255,255,255,.03) inset;
+  }
+  .textarea:focus-visible {
+    border-color: #fff;
+    box-shadow: 0 0 0 3px rgba(255,255,255,.12);
+  }
+
+  .dropzone {
+    border-color: rgba(255,255,255,.18);
+    background: linear-gradient(180deg, rgba(255,255,255,.04), transparent);
+  }
+  .dropzone:hover {
+    border-color: rgba(255,255,255,.4);
+    background: linear-gradient(180deg, rgba(255,255,255,.06), transparent);
+  }
+  .dropzoneActive {
+    border-color: rgba(255,255,255,.6);
+    background:
+      radial-gradient(ellipse at center, rgba(255,255,255,.08), transparent 60%),
+      linear-gradient(180deg, rgba(255,255,255,.06), transparent);
+  }
+  .dropTitle { color: #f0f0f0; }
+  .dropHint { color: #bdbdbd; }
+
+  .fieldset {
+    background: #0f0f0f;
+    border-color: rgba(255,255,255,.14);
+    box-shadow: 0 1px 0 rgba(255,255,255,.03) inset;
+  }
+  .legend { color: #cfcfcf; }
+
+  .btnSecondary { background: #222; color: #eee; }
   .btnPrimary { background: #fff; color: #111; }
 }
+
+.field { display: grid; gap: 6px; }
+.textInput {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,.12);
+  background: #fff;
+  color: #111;
+  outline: none;
+  transition: border-color .12s ease, box-shadow .12s ease;
+}
+.textInput:focus { border-color: #111; box-shadow: 0 0 0 3px rgba(0,0,0,.08); }

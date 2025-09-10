@@ -14,7 +14,8 @@ import Card from '../../components/Card.js'
 import CollectionActionBar from '../../components/CollectionActionBar.js'
 import Loader from '../../components/Loader.js'
 import { fetchCardPrice } from '../../services/pricing.js'
-import SetBar from '../../components/SetBar' // ✅ intégré
+import SetBar from '../../components/SetBar'
+import ExportFlow from '../../components/ExportFlow'
 import styles from './page.module.css'
 
 export default function CollectionClient({ initialItems, actions }) {
@@ -335,6 +336,16 @@ export default function CollectionClient({ initialItems, actions }) {
       <Link className={styles.addCardsBtn} href="/mtg/importer">
         Importer de nouvelles cartes
       </Link>
+
+      <ExportFlow
+        kind="collection"
+        // kind="deck"
+        data={collection}         // Array<{ scryfallId, quantity, dateAdded? }>
+        filenameBase="ma-collection"
+        defaultFormat="csv"            // ou "json"
+        csvSeparator=";"               // "," par défaut
+        onExported={(name) => console.log("export ok:", name)}
+      />
 
       <div className={styles.searchBar}>
         <input
