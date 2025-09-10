@@ -1,0 +1,72 @@
+/**
+ * Point d'entrée principal du service Card API
+ */
+
+// Interfaces
+export type {
+  ICardProvider,
+  ISetProvider,
+  IPricingProvider,
+  ICardAdapter,
+  RateLimitInfo
+} from './interfaces'
+
+// DTOs
+export type {
+  CardFetchRequestDTO,
+  SetFetchRequestDTO,
+  SearchRequestDTO,
+  BulkFetchRequestDTO,
+  FetchOptionsDTO,
+  SetFetchOptionsDTO,
+  SearchOptionsDTO,
+  BulkFetchOptionsDTO,
+  CardServiceResponseDTO,
+  SetServiceResponseDTO,
+  PriceServiceResponseDTO,
+  BulkCardResponseDTO,
+  ServiceMetadataDTO,
+  BulkServiceMetadataDTO,
+  ServiceErrorDTO,
+  RateLimitInfoDTO,
+  GameSet,
+  PriceData,
+  CardSearchResult,
+  SearchFilters,
+  ScryfallCardDTO,
+  ScryfallCardFaceDTO,
+  ScryfallSetDTO,
+  ScryfallSearchResultDTO,
+  MTGGoldfishCardDTO,
+  MTGGoldfishSetDTO,
+  TCGPlayerCardDTO,
+  TCGPlayerSetDTO
+} from './dto'
+
+// Configuration
+export type {
+  ProviderConfig,
+  CacheConfig,
+  MonitoringConfig,
+  ServiceConfig,
+  EnvironmentConfig
+} from './config'
+
+export {
+  DEFAULT_SERVICE_CONFIG,
+  getEnvironmentConfig
+} from './config'
+
+// Providers
+export { ScryfallProvider } from './providers/ScryfallProvider'
+
+// Adapters
+export { ScryfallAdapter } from './adapters/ScryfallAdapter'
+
+// Factory
+export { CardServiceFactory } from './factory/CardServiceFactory'
+
+// TODO: Services principaux (à implémenter)
+// export { CardService } from './services/CardService'
+// export { SetService } from './services/SetService'
+// export { PricingService } from './services/PricingService'
