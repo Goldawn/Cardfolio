@@ -25,7 +25,8 @@ export class ScryfallProvider implements ICardProvider {
       const response: AxiosResponse<T> = await axios.get(`${this.baseUrl}${endpoint}`, {
         timeout: 10000,
         headers: {
-          'User-Agent': 'Cardfolio/1.0'
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
         }
       })
       return response.data
