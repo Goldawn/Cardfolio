@@ -1,0 +1,29 @@
+/* components/import/ImportFlow.module.css */
+.wrapper { display: grid; gap: 6px; }
+.label { font-size: 14px; color: #444; }
+.input { display: block; }
+.error { color: #b00020; font-size: 12px; }
+
+.controls { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 4px; margin-bottom: 12px; }
+.fieldset { border: 1px solid rgba(0,0,0,.08); border-radius: 8px; padding: 8px 10px; }
+.legend { font-size: 12px; color: #666; padding: 0 6px; }
+.radios { display: flex; gap: 12px; margin-top: 8px; }
+.radioLabel { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; }
+
+.preview { margin-top: 4px; }
+
+.btnPrimary, .btnSecondary {
+  appearance: none; border: none; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-weight: 600;
+}
+.btnPrimary { background: #111; color: #fff; }
+.btnPrimary[disabled] { opacity: .55; cursor: not-allowed; }
+.btnSecondary { background: #e9e9e9; color: #111; }
+.btnSecondary:hover { filter: brightness(.97); }
+
+@media (prefers-color-scheme: dark) {
+  .label { color: #ccc; }
+  .fieldset { border-color: rgba(255,255,255,.14); }
+  .legend { color: #bbb; }
+  .btnSecondary { background: #2a2a2a; color: #eee; }
+  .btnPrimary { background: #fff; color: #111; }
+}
