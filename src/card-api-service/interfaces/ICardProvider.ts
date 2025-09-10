@@ -1,5 +1,5 @@
 import type { CardFetchRequestDTO, SetFetchRequestDTO } from '../dto'
-import type { CardServiceResponseDTO, SetServiceResponseDTO } from '../dto'
+import type { CardServiceResponseDTO, SetServiceResponseDTO, SetsServiceResponseDTO } from '../dto'
 
 /**
  * Interface pour les providers de cartes
@@ -40,6 +40,11 @@ export interface ICardProvider {
    * Récupère la suite des cartes (pagination)
    */
   fetchMoreCards(nextPageUrl: string): Promise<SetServiceResponseDTO>
+
+  /**
+   * Récupère tous les sets disponibles
+   */
+  fetchSets(): Promise<SetsServiceResponseDTO>
 
   /**
    * Vérifie si le provider est disponible

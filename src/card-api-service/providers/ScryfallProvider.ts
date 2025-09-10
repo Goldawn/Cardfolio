@@ -5,6 +5,7 @@ import type {
   SetFetchRequestDTO,
   CardServiceResponseDTO,
   SetServiceResponseDTO,
+  SetsServiceResponseDTO,
   ServiceErrorDTO,
   ServiceMetadataDTO,
   ScryfallCardDTO, 
@@ -192,6 +193,41 @@ export class ScryfallProvider implements ICardProvider {
         },
         error: {
           code: 'SCRYFALL_MORE_CARDS_ERROR',
+          message: error.message,
+          provider: this.name,
+          retryable: true,
+          timestamp: new Date().toISOString()
+        }
+      }
+    }
+  }
+
+  async fetchSets(): Promise<SetsServiceResponseDTO> {
+    const startTime = Date.now()
+    
+    try {
+      const result = await this.makeRequest<{ data: ScryfallSetDTO[] }>('/sets')
+      
+      return {
+        data: result.data as any,
+        metadata: {
+          provider: this.name,
+          cached: false,
+          fetchTime: Date.now() - startTime,
+          timestamp: new Date().toISOString()
+        }
+      }
+    } catch (error: any) {
+      return {
+        data: [] as any,
+        metadata: {
+          provider: this.name,
+          cached: false,
+          fetchTime: Date.now() - startTime,
+          timestamp: new Date().toISOString()
+        },
+        error: {
+          code: 'SCRYFALL_SETS_ERROR',
           message: error.message,
           provider: this.name,
           retryable: true,

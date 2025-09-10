@@ -18,6 +18,7 @@ export type {
 export type {
   CardServiceResponseDTO,
   SetServiceResponseDTO,
+  SetsServiceResponseDTO,
   PriceServiceResponseDTO,
   BulkCardResponseDTO,
   ServiceMetadataDTO,

@@ -1,69 +1,105 @@
-import axios, { type AxiosResponse } from 'axios'
+/**
+ * Nouveau service Scryfall utilisant l'architecture Card API Service
+ * Remplace src/app/services/Scryfall.ts
+ */
 
-const BASE = 'https://api.scryfall.com'
+import { CardServiceFactory } from '@/card-api-service'
+import type { GameSet } from '@/card-api-service/dto'
+import type { MTGCard } from '@/types/games/magic'
 
-export interface ScryfallSet {
-  id: string
-  code: string
-  name: string
-  released_at: string
-  set_type: string
-  card_count: number
-  digital: boolean
-  foil_only: boolean
-  nonfoil_only: boolean
-  icon_svg_uri: string
-  parent_set_code?: string
-}
+// Instance singleton du service
+let cardServiceInstance: any = null
 
-export interface ScryfallCard {
-  id: string
-  name: string
-  set: string
-  set_name: string
-  lang: string
-  prices: {
-    usd: string | null
-    eur: string | null
+const getCardService = () => {
+  if (!cardServiceInstance) {
+    cardServiceInstance = CardServiceFactory.create()
   }
-  [key: string]: any
+  return cardServiceInstance
 }
 
-interface ScryfallResponse {
-  data: ScryfallCard[]
+/**
+ * Récupère tous les sets disponibles
+ * Remplace l'ancienne fonction fetchSets()
+ */
+export const fetchSets = async (): Promise<GameSet[]> => {
+  const cardService = getCardService()
+  return await cardService.fetchSets()
+}
+
+/**
+ * Récupère les cartes d'un set
+ * Remplace l'ancienne fonction fetchSetCards()
+ */
+export const fetchSetCards = async (setCode: string, lang: string = 'en'): Promise<{
+  data: MTGCard[]
   has_more: boolean
   next_page?: string
   total_cards: number
-}
+}> => {
+  const cardService = getCardService()
+  const cards = await cardService.fetchSetCards({
+    setCode,
+    language: lang,
+    options: {
+      fetchAllPages: false // Récupère seulement la première page pour compatibilité
+    }
+  })
 
-export const fetchSets = async (): Promise<ScryfallSet[]> => {
-  try {
-    const response: AxiosResponse<{ data: ScryfallSet[] }> = await axios.get('https://api.scryfall.com/sets')
-    return response.data.data // Liste de tous les sets
-  } catch (error) {
-    console.error('Error fetching sets:', error)
-    return []
+  // Retourne le format attendu par l'ancien code
+  return {
+    data: cards,
+    has_more: false, // TODO: Implémenter la pagination si nécessaire
+    total_cards: cards.length
   }
 }
 
-export const fetchSetCards = async (setCode: string, lang: string = 'en'): Promise<ScryfallResponse> => {
-  try {
-    const response: AxiosResponse<ScryfallResponse> = await axios.get(
-      `https://api.scryfall.com/cards/search?order=set&q=set%3A${setCode}+lang%3A${lang}&unique=prints`
-    )
-    return response.data
-  } catch (error) {
-    console.error('Error fetching cards:', error)
-    return { data: [], has_more: false, total_cards: 0 }
+/**
+ * Récupère la suite des cartes (pagination)
+ * Remplace l'ancienne fonction fetchMoreCards()
+ */
+export const fetchMoreCards = async (nextPage: string): Promise<{
+  data: MTGCard[]
+  has_more: boolean
+  next_page?: string
+  total_cards: number
+}> => {
+  const cardService = getCardService()
+  const cards = await cardService.fetchMoreCards(nextPage)
+
+  return {
+    data: cards,
+    has_more: false, // TODO: Implémenter la pagination si nécessaire
+    total_cards: cards.length
   }
 }
 
-export const fetchMoreCards = async (nextPage: string): Promise<ScryfallResponse> => {
-  try {
-    const response: AxiosResponse<ScryfallResponse> = await axios.get(nextPage)
-    return response.data
-  } catch (error) {
-    console.error('Error fetching more cards:', error)
-    return { data: [], has_more: false, total_cards: 0 }
-  }
+/**
+ * Récupère une carte par son ID
+ * Nouvelle fonctionnalité
+ */
+export const fetchCard = async (cardId: string): Promise<MTGCard> => {
+  const cardService = getCardService()
+  return await cardService.fetchCard({ cardId })
 }
+
+/**
+ * Récupère une carte par son nom
+ * Nouvelle fonctionnalité
+ */
+export const fetchCardByName = async (cardName: string): Promise<MTGCard> => {
+  const cardService = getCardService()
+  return await cardService.fetchCardByName(cardName)
+}
+
+/**
+ * Recherche des cartes
+ * Nouvelle fonctionnalité
+ */
+export const searchCards = async (query: string): Promise<MTGCard[]> => {
+  const cardService = getCardService()
+  return await cardService.searchCards({ query })
+}
+
+// Export des types pour compatibilité
+export type { GameSet } from '@/card-api-service/dto'
+export type { MTGCard } from '@/types/games/magic'

@@ -17,6 +17,12 @@ export interface SetServiceResponseDTO {
   error?: ServiceErrorDTO
 }
 
+export interface SetsServiceResponseDTO {
+  data: GameSet[]
+  metadata: ServiceMetadataDTO
+  error?: ServiceErrorDTO
+}
+
 export interface PriceServiceResponseDTO {
   data: PriceData
   metadata: ServiceMetadataDTO

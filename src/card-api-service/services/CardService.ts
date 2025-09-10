@@ -170,12 +170,34 @@ export class CardService {
 
   /**
    * Récupère tous les sets disponibles
-   * TODO: Implémenter fetchSets dans ICardProvider
    */
   async fetchSets(providerName?: string): Promise<GameSet[]> {
-    // Pour l'instant, on utilise l'ancien système
-    // TODO: Implémenter fetchSets dans ICardProvider
-    throw new Error('fetchSets not yet implemented in CardService')
+    const provider = this.providers.get(providerName || this.defaultProvider)
+    const adapter = this.adapters.get(providerName || this.defaultProvider)
+
+    if (!provider || !adapter) {
+      throw new Error(`Provider or adapter not found: ${providerName || this.defaultProvider}`)
+    }
+
+    try {
+      const response = await provider.fetchSets()
+      
+      if (response.error) {
+        // Tentative de fallback si configuré
+        if (this.config.fallbackProviders.length > 0) {
+          return this.fetchSetsWithFallback(providerName)
+        }
+        throw new Error(response.error.message)
+      }
+
+      return adapter.transformSets(response.data)
+    } catch (error) {
+      // Fallback automatique
+      if (this.config.fallbackProviders.length > 0) {
+        return this.fetchSetsWithFallback(providerName)
+      }
+      throw error
+    }
   }
 
   /**

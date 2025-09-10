@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Card from './Card'
 import styles from './FetchCardInput.module.css'
-import { formatCard } from '../services/FormatCard'
+import { CardServiceFactory } from '@/card-api-service'
 import type { JSX } from 'react'
 import type { GameCard } from '@/types'
 
@@ -15,11 +15,16 @@ export default function FetchCardInput(): JSX.Element {
 
   const [loading, setLoading] = useState(false)
 
-  // Suggestions (autocomplete)
+  // Instance du service Card API
+  const cardService = CardServiceFactory.create()
+
+  // Suggestions (autocomplete) - TODO: Implémenter dans le service
   useEffect(() => {
     const fetchSuggestions = async () => {
       if (searchInput.length < 3) return setSuggestions([])
       try {
+        // Pour l'instant, on garde l'ancien système d'autocomplete
+        // TODO: Implémenter l'autocomplete dans le CardService
         const res = await fetch(
           `https://api.scryfall.com/cards/autocomplete?q=${searchInput}`
         )
@@ -32,16 +37,18 @@ export default function FetchCardInput(): JSX.Element {
     fetchSuggestions()
   }, [searchInput])
 
-  // Rechercher des cartes complètes (résultats)
+  // Rechercher des cartes complètes (résultats) - NOUVEAU
   const handleSearch = async (query: string): Promise<void> => {
     setLoading(true)
     try {
-      const res = await fetch(
-        `https://api.scryfall.com/cards/search?q=${query}&unique=prints`
-      ) //unique prints pour afficher toutes les variations d'une carte - ajouter case à cocher
-      const data = await res.json()
-      const formattedResults = data.data.map(formatCard)
-      setSearchResults(formattedResults)
+      // Utilisation du nouveau service
+      const results = await cardService.searchCards({ 
+        query,
+        options: {
+          unique: 'prints' // Pour afficher toutes les variations d'une carte
+        }
+      })
+      setSearchResults(results as GameCard[])
     } catch (error) {
       console.error('Erreur chargement résultats:', error)
     } finally {
@@ -58,66 +65,78 @@ export default function FetchCardInput(): JSX.Element {
 
   return (
     <section className={styles.searchSection}>
-      <div className={styles.searchBox}>
-        <input
-          type="text"
-          placeholder="Nom de la carte"
-          value={searchInput}
-          onChange={e => setSearchInput(e.target.value)}
-        />
-        <button onClick={() => handleSearch(searchInput)}>Rechercher</button>
-      </div>
-      {suggestions.length > 0 && (
-        <ul className={styles.suggestionList}>
-          {suggestions.map((s, index) => (
-            <li
-              key={index}
-              onMouseEnter={async () => {
-                try {
-                  const res = await fetch(
-                    `https://api.scryfall.com/cards/named?fuzzy=${s}`
-                  )
-                  const card = await res.json()
-                  const formatted = formatCard(card)
-                  const image =
-                    formatted.image?.small || (formatted as any).image_uris?.small
-                  if (image) handleHoverCard(s, image)
-                } catch (e) {
-                  console.error('Erreur chargement image hover', e)
-                }
-              }}
-              onMouseLeave={() => handleHoverCard(s, '')}
-              onClick={() => {
-                setSearchInput(s)
-                setSuggestions([])
-                handleSearch(s)
-              }}
-            >
-              {s}
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {loading && <p>Chargement des cartes...</p>}
-
-      {searchResults.length > 0 && !loading && (
-        <div className={styles.cardResults}>
-          {searchResults.map((card, index) => (
-            <div key={index} className={styles.cardResultsItem}>
-              <Card
-                key={card.id}
-                card={card}
-                currentIndex={index}
-                cardList={searchResults}
-                modal={true}
-                showName={true}
-              />
-              {/* <button onClick={() => handleAddToSpecificWishlist(card)}>Ajouter à la wishlist</button> */}
-            </div>
-          ))}
+      <div className={styles.searchContainer}>
+        <h2>Rechercher des cartes</h2>
+        
+        {/* Input de recherche */}
+        <div className={styles.inputContainer}>
+          <input
+            type="text"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleSearch(searchInput)
+              }
+            }}
+            placeholder="Nom de la carte..."
+            className={styles.searchInput}
+          />
+          <button
+            onClick={() => handleSearch(searchInput)}
+            disabled={loading}
+            className={styles.searchButton}
+          >
+            {loading ? 'Recherche...' : 'Rechercher'}
+          </button>
         </div>
-      )}
+
+        {/* Suggestions */}
+        {suggestions.length > 0 && (
+          <div className={styles.suggestions}>
+            {suggestions.slice(0, 10).map((suggestion, index) => (
+              <div
+                key={index}
+                className={styles.suggestionItem}
+                onClick={() => {
+                  setSearchInput(suggestion)
+                  handleSearch(suggestion)
+                }}
+              >
+                {suggestion}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Résultats de recherche */}
+        {searchResults.length > 0 && (
+          <div className={styles.resultsContainer}>
+            <h3>Résultats ({searchResults.length})</h3>
+            <div className={styles.cardsGrid}>
+              {searchResults.map((card) => (
+                <div
+                  key={card.id}
+                  className={styles.cardWrapper}
+                  onMouseEnter={() => handleHoverCard(card.id, card.image?.normal || '')}
+                  onMouseLeave={() => handleHoverCard(card.id, '')}
+                >
+                  <Card card={card} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Image hover */}
+        {Object.entries(hoveredCardImageByList).map(([listId, imageUrl]) => 
+          imageUrl && (
+            <div key={listId} className={styles.hoverImage}>
+              <img src={imageUrl} alt="Card preview" />
+            </div>
+          )
+        )}
+      </div>
     </section>
   )
 }
