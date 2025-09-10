@@ -50,24 +50,21 @@ export default function WishlistSearchSection({
   // Instance du service Card API
   const cardService = CardServiceFactory.create()
 
-  // Suggestions (autocomplete) - TODO: Implémenter dans le service
+  // Suggestions (autocomplete) - NOUVEAU: Utilise le CardService
   useEffect(() => {
     const fetchSuggestions = async () => {
       if (debouncedQuery.length < 3 || freezeAutocomplete) return setSuggestions([])
       try {
-        // Pour l'instant, on garde l'ancien système d'autocomplete
-        // TODO: Implémenter l'autocomplete dans le CardService
-        const res = await fetch(
-          `https://api.scryfall.com/cards/autocomplete?q=${debouncedQuery}`
-        )
-        const data = await res.json()
-        setSuggestions(data.data || [])
+        // Utilisation du nouveau service d'autocomplete
+        const suggestions = await cardService.getAutocompleteSuggestions(debouncedQuery)
+        setSuggestions(suggestions)
       } catch (error) {
         console.error('Erreur chargement suggestions:', error)
+        setSuggestions([])
       }
     }
     fetchSuggestions()
-  }, [debouncedQuery, freezeAutocomplete])
+  }, [debouncedQuery, freezeAutocomplete, cardService])
 
   // Recherche générale - NOUVEAU
   const handleSearch = async (query: string): Promise<void> => {

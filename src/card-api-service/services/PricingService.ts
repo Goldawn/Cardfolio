@@ -4,6 +4,7 @@ import type {
   PriceData
 } from '../dto'
 import type { ServiceConfig } from '../config'
+import { DEFAULT_SERVICE_CONFIG } from '../config'
 import { ScryfallPricingProvider } from '../providers/ScryfallPricingProvider'
 import { ScryfallAdapter } from '../adapters/ScryfallAdapter'
 
@@ -17,20 +18,24 @@ export class PricingService {
   private adapter: ScryfallAdapter
 
   constructor(config?: Partial<ServiceConfig>) {
-    this.defaultProvider = 'scryfall-pricing' // Toujours utiliser scryfall-pricing comme défaut
+    // Utiliser la configuration fournie ou la configuration par défaut
+    const finalConfig = { ...DEFAULT_SERVICE_CONFIG, ...config }
+    this.defaultProvider = finalConfig.defaultProvider
     this.adapter = new ScryfallAdapter()
     
     // Initialisation des providers
-    this.initializeProviders(config)
+    this.initializeProviders(finalConfig)
   }
 
   /**
    * Initialise les providers disponibles
    */
-  private initializeProviders(config?: Partial<ServiceConfig>) {
+  private initializeProviders(config: ServiceConfig) {
     // Provider Scryfall pour les prix
-    const scryfallPricingProvider = new ScryfallPricingProvider()
-    this.providers.set('scryfall-pricing', scryfallPricingProvider)
+    if (config.providers.scryfall?.enabled) {
+      const scryfallPricingProvider = new ScryfallPricingProvider()
+      this.providers.set('scryfall', scryfallPricingProvider)
+    }
 
     // TODO: Ajouter d'autres providers (MTGGoldfish, TCGPlayer, etc.)
   }
@@ -60,17 +65,20 @@ export class PricingService {
    */
   async fetchCardPriceByName(cardName: string, setCode?: string, providerName?: string): Promise<PriceData | null> {
     try {
+      console.log(`[PricingService] fetchCardPriceByName called with: cardName=${cardName}, setCode=${setCode}, providerName=${providerName}`)
       const provider = this.getProvider(providerName)
+      console.log(`[PricingService] Using provider:`, provider.name)
       const response = await provider.fetchCardPriceByName(cardName, setCode)
       
       if (response.error) {
-        console.error('Erreur lors de la récupération du prix par nom:', response.error)
+        console.error('[PricingService] Erreur lors de la récupération du prix par nom:', response.error)
         return null
       }
 
+      console.log(`[PricingService] Provider response:`, response)
       return response.data
     } catch (error) {
-      console.error('Erreur dans PricingService.fetchCardPriceByName:', error)
+      console.error('[PricingService] Erreur dans PricingService.fetchCardPriceByName:', error)
       return null
     }
   }
@@ -139,20 +147,26 @@ export class PricingService {
    */
   async fetchCardPriceByNameWithFallback(cardName: string, setCode?: string): Promise<PriceData | null> {
     const providers = Array.from(this.providers.keys())
+    console.log(`[PricingService] fetchCardPriceByNameWithFallback called for card: ${cardName}`)
+    console.log(`[PricingService] Available providers:`, providers)
+    console.log(`[PricingService] Default provider:`, this.defaultProvider)
     
     for (const providerName of providers) {
       try {
+        console.log(`[PricingService] Trying provider: ${providerName}`)
         const price = await this.fetchCardPriceByName(cardName, setCode, providerName)
         if (price && (price.prices.usd || price.prices.eur)) {
+          console.log(`[PricingService] Success with provider ${providerName}:`, price)
           return price
         }
+        console.log(`[PricingService] Provider ${providerName} returned no valid price:`, price)
       } catch (error) {
-        console.warn(`Provider ${providerName} failed, trying next...`, error)
+        console.warn(`[PricingService] Provider ${providerName} failed, trying next...`, error)
         continue
       }
     }
     
-    console.error('Tous les providers ont échoué pour récupérer le prix par nom')
+    console.error('[PricingService] Tous les providers ont échoué pour récupérer le prix par nom')
     return null
   }
 

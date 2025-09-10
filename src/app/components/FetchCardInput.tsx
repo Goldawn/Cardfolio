@@ -18,24 +18,21 @@ export default function FetchCardInput(): JSX.Element {
   // Instance du service Card API
   const cardService = CardServiceFactory.create()
 
-  // Suggestions (autocomplete) - TODO: Implémenter dans le service
+  // Suggestions (autocomplete) - NOUVEAU: Utilise le CardService
   useEffect(() => {
     const fetchSuggestions = async () => {
       if (searchInput.length < 3) return setSuggestions([])
       try {
-        // Pour l'instant, on garde l'ancien système d'autocomplete
-        // TODO: Implémenter l'autocomplete dans le CardService
-        const res = await fetch(
-          `https://api.scryfall.com/cards/autocomplete?q=${searchInput}`
-        )
-        const data = await res.json()
-        setSuggestions(data.data || [])
+        // Utilisation du nouveau service d'autocomplete
+        const suggestions = await cardService.getAutocompleteSuggestions(searchInput)
+        setSuggestions(suggestions)
       } catch (error) {
         console.error('Erreur chargement suggestions:', error)
+        setSuggestions([])
       }
     }
     fetchSuggestions()
-  }, [searchInput])
+  }, [searchInput, cardService])
 
   // Rechercher des cartes complètes (résultats) - NOUVEAU
   const handleSearch = async (query: string): Promise<void> => {

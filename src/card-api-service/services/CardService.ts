@@ -310,4 +310,31 @@ export class CardService {
     }
     throw new Error('All providers failed')
   }
+
+  /**
+   * Récupère les suggestions d'autocomplete pour une requête
+   */
+  async getAutocompleteSuggestions(query: string, providerName?: string): Promise<string[]> {
+    const provider = providerName || this.defaultProvider
+    const providerInstance = this.providers.get(provider)
+
+    if (!providerInstance) {
+      console.error(`Provider not found: ${provider}`)
+      return []
+    }
+
+    try {
+      const response = await providerInstance.fetchAutocomplete(query)
+      
+      if (response.error) {
+        console.error('Erreur lors de la récupération des suggestions:', response.error)
+        return []
+      }
+
+      return response.data
+    } catch (error) {
+      console.error('Erreur dans CardService.getAutocompleteSuggestions:', error)
+      return []
+    }
+  }
 }

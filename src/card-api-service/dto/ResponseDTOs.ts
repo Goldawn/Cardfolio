@@ -38,6 +38,12 @@ export interface BulkCardResponseDTO {
   metadata: BulkServiceMetadataDTO
 }
 
+export interface AutocompleteResponseDTO {
+  data: string[]
+  metadata: ServiceMetadataDTO
+  error?: ServiceErrorDTO
+}
+
 export interface ServiceMetadataDTO {
   provider: string
   cached: boolean

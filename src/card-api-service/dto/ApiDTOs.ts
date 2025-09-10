@@ -99,6 +99,10 @@ export interface ScryfallSearchResultDTO {
   total_cards: number
 }
 
+export interface ScryfallAutocompleteDTO {
+  data: string[]
+}
+
 // ===== MTGGOLDFISH DTOs =====
 export interface MTGGoldfishCardDTO {
   id: string

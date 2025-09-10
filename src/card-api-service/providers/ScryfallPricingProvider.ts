@@ -12,7 +12,7 @@ import type {
  * Implémente IPricingProvider pour récupérer les informations de prix
  */
 export class ScryfallPricingProvider implements IPricingProvider {
-  readonly name = 'scryfall-pricing'
+  readonly name = 'scryfall'
   readonly baseUrl = 'https://api.scryfall.com'
 
   private async makeRequest<T>(endpoint: string): Promise<T> {
@@ -85,10 +85,15 @@ export class ScryfallPricingProvider implements IPricingProvider {
         endpoint = `/cards/named?exact=${encodeURIComponent(cardName)}`
       }
 
+      console.log(`[ScryfallPricingProvider] Making request to: ${this.baseUrl}${endpoint}`)
       const rawCard = await this.makeRequest<ScryfallCardDTO>(endpoint)
+      console.log(`[ScryfallPricingProvider] Raw card data:`, rawCard)
+      
+      const transformedData = this.transformPriceData(rawCard)
+      console.log(`[ScryfallPricingProvider] Transformed price data:`, transformedData)
       
       return {
-        data: this.transformPriceData(rawCard),
+        data: transformedData,
         metadata: {
           provider: this.name,
           cached: false,
@@ -97,6 +102,7 @@ export class ScryfallPricingProvider implements IPricingProvider {
         }
       }
     } catch (error: any) {
+      console.error(`[ScryfallPricingProvider] Error fetching price for ${cardName}:`, error)
       return {
         data: this.getEmptyPriceData('', cardName),
         metadata: {

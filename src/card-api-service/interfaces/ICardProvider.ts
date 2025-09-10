@@ -1,5 +1,5 @@
 import type { CardFetchRequestDTO, SetFetchRequestDTO } from '../dto'
-import type { CardServiceResponseDTO, SetServiceResponseDTO, SetsServiceResponseDTO } from '../dto'
+import type { CardServiceResponseDTO, SetServiceResponseDTO, SetsServiceResponseDTO, AutocompleteResponseDTO } from '../dto'
 
 /**
  * Interface pour les providers de cartes
@@ -55,6 +55,11 @@ export interface ICardProvider {
    * Récupère les informations de rate limiting
    */
   getRateLimitInfo(): Promise<RateLimitInfo>
+
+  /**
+   * Récupère les suggestions d'autocomplete pour une requête
+   */
+  fetchAutocomplete(query: string): Promise<AutocompleteResponseDTO>
 }
 
 export interface RateLimitInfo {

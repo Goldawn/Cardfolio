@@ -6,11 +6,13 @@ import type {
   CardServiceResponseDTO,
   SetServiceResponseDTO,
   SetsServiceResponseDTO,
+  AutocompleteResponseDTO,
   ServiceErrorDTO,
   ServiceMetadataDTO,
   ScryfallCardDTO, 
   ScryfallSetDTO, 
-  ScryfallSearchResultDTO
+  ScryfallSearchResultDTO,
+  ScryfallAutocompleteDTO
 } from '../dto'
 
 /**
@@ -254,6 +256,45 @@ export class ScryfallProvider implements ICardProvider {
       remaining: 50,
       resetTime: Date.now() + 60000, // 1 minute
       limit: 50
+    }
+  }
+
+  /**
+   * Récupère les suggestions d'autocomplete pour une requête
+   */
+  async fetchAutocomplete(query: string): Promise<AutocompleteResponseDTO> {
+    const startTime = Date.now()
+    
+    try {
+      const endpoint = `/cards/autocomplete?q=${encodeURIComponent(query)}`
+      const rawData = await this.makeRequest<ScryfallAutocompleteDTO>(endpoint)
+      
+      return {
+        data: rawData.data || [],
+        metadata: {
+          provider: this.name,
+          cached: false,
+          fetchTime: Date.now() - startTime,
+          timestamp: new Date().toISOString()
+        }
+      }
+    } catch (error: any) {
+      return {
+        data: [],
+        metadata: {
+          provider: this.name,
+          cached: false,
+          fetchTime: Date.now() - startTime,
+          timestamp: new Date().toISOString()
+        },
+        error: {
+          code: 'SCRYFALL_AUTOCOMPLETE_ERROR',
+          message: error.message,
+          provider: this.name,
+          retryable: true,
+          timestamp: new Date().toISOString()
+        }
+      }
     }
   }
 }
