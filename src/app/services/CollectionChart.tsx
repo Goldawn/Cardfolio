@@ -10,19 +10,31 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import styles from './CollectionChart.module.css'
+import type { GameCard } from '@/types'
+import type { JSX } from 'react'
 
-const generateCollectionValueHistory = (collection, currency) => {
-  const historyMap = new Map()
+interface CollectionHistoryPoint {
+  date: string
+  totalValue: string
+}
+
+interface CollectionChartProps {
+  collection: GameCard[]
+  currency: 'eur' | 'usd'
+}
+
+const generateCollectionValueHistory = (collection: GameCard[], currency: 'eur' | 'usd'): CollectionHistoryPoint[] => {
+  const historyMap = new Map<string, number>()
 
   collection.forEach(card => {
-    card.priceHistory.forEach(({ date, eur, usd }) => {
-      const price = currency === 'eur' ? parseFloat(eur) : parseFloat(usd)
-      const totalValueForCard = price * card.quantity
+    card.priceHistory?.forEach(({ date, eur, usd }) => {
+      const price = currency === 'eur' ? parseFloat(String(eur)) : parseFloat(String(usd))
+      const totalValueForCard = price * (card.quantity || 0)
 
       if (!historyMap.has(date)) {
         historyMap.set(date, 0)
       }
-      historyMap.set(date, historyMap.get(date) + totalValueForCard)
+      historyMap.set(date, historyMap.get(date)! + totalValueForCard)
     })
   })
 
@@ -32,8 +44,8 @@ const generateCollectionValueHistory = (collection, currency) => {
   }))
 }
 
-export default function CollectionChart({ collection, currency }) {
-  const [collectionHistory, setCollectionHistory] = useState([])
+export default function CollectionChart({ collection, currency }: CollectionChartProps): JSX.Element {
+  const [collectionHistory, setCollectionHistory] = useState<CollectionHistoryPoint[]>([])
 
   useEffect(() => {
     setCollectionHistory(generateCollectionValueHistory(collection, currency))

@@ -23,28 +23,74 @@ import CardPreviewPopover from './CardPreviewPopover'
 import Image from 'next/image'
 import styles from './DeckCardsTabs.module.css'
 
+// Types
+import type { MTGCard } from '@/types/games/magic'
+
+interface DeckState {
+  id: string
+  name: string
+  format: string
+  showcasedCard?: any
+  [key: string]: any
+}
+
+interface LegalityData {
+  issues: Array<{ scryfallId: string; [key: string]: any }>
+  [key: string]: any
+}
+
+interface DeckCardsTabsProps {
+  cards: MTGCard[]
+  deckState: DeckState
+  isPending: boolean
+  legality: LegalityData
+  updateDeckCardQty: (deckCardId: string, qty: number) => void
+  removeCardFromDeck: (deckCardId: string) => void
+  setShowcased: (deckCardId: string, artUrl: string) => void
+  isCardProblematic: (card: MTGCard) => boolean
+  CardComponent?: any
+}
+
+interface ViewProps {
+  cards: MTGCard[]
+  deckState: DeckState
+  isPending: boolean
+  legality: LegalityData
+  updateDeckCardQty: (deckCardId: string, qty: number) => void
+  removeCardFromDeck: (deckCardId: string) => void
+  setShowcased: (deckCardId: string, artUrl: string) => void
+  editMode: boolean
+  showLegality: boolean
+  sortKey: string
+  getRowHoverHandlers?: any
+  gridCols?: number
+  stackCols?: number
+  listCols?: number
+  compactCols?: number
+  isCardProblematic?: (card: MTGCard) => boolean
+}
+
 /* =========================== TABS HOST =========================== */
 
-export default function DeckCardsTabs(props) {
+export default function DeckCardsTabs(props: DeckCardsTabsProps) {
   const {
-    active,
-    setActive,
-    editMode,
-    setEditMode,
-    showLegality,
-    setShowLegality,
-    sortKey,
+    prefs,
+    setView,
+    setEdit,
+    setLegality,
     setSortKey,
-    getColsFor,
-    setColsFor,
+    getCols,
+    setCols,
     isColsEnabled,
   } = useDeckCardsPrefs()
+  
+  const { view: active, edit: editMode, legality: showLegality, sortKey } = prefs
 
   const { preview, getRowHoverHandlers } = useHoverPreview()
 
   const VIEWS = useMemo(
     () => ({
-      stack: { id: 'stack', label: 'Stack', render: DeckStacksView },
+      piles: { id: 'piles', label: 'Stack', render: DeckStacksView },
       grid: { id: 'grid', label: 'Grille', render: DeckGridView },
       list: { id: 'list', label: 'Liste', render: DeckListView },
       compact: { id: 'compact', label: 'Compact', render: DeckCompactView },
@@ -70,7 +116,7 @@ export default function DeckCardsTabs(props) {
               type="button"
               aria-selected={active === v.id}
               className={`${styles.tab} ${active === v.id ? styles.activeTab : ''}`}
-              onClick={() => setActive(v.id)}
+              onClick={() => setView(v.id as any)}
             >
               {v.label}
             </button>
@@ -80,8 +126,8 @@ export default function DeckCardsTabs(props) {
         <ColsControl
           viewId={active}
           sortKey={sortKey}
-          value={getColsFor(active)}
-          onChange={n => setColsFor(active, n)}
+          value={getCols(active)}
+          onChange={(n: number) => setCols(active, n)}
           disabled={!isColsEnabled(active, sortKey)}
         />
 
@@ -93,7 +139,7 @@ export default function DeckCardsTabs(props) {
             title={
               editMode ? 'Quitter le mode édition' : 'Activer le mode édition'
             }
-            onClick={() => setEditMode(v => !v)}
+            onClick={() => setEdit(!editMode)}
           >
             {editMode ? 'Édition' : 'Lecture'}
           </button>
@@ -107,7 +153,7 @@ export default function DeckCardsTabs(props) {
                 ? 'Masquer les problèmes de légalité'
                 : 'Vérifier les légalités'
             }
-            onClick={() => setShowLegality(v => !v)}
+            onClick={() => setLegality(!showLegality)}
           >
             {showLegality ? 'Légalité : ON' : 'Légalité : OFF'}
           </button>
@@ -117,7 +163,7 @@ export default function DeckCardsTabs(props) {
             <select
               className={styles.sortSelect}
               value={sortKey}
-              onChange={e => setSortKey(e.target.value)}
+              onChange={e => setSortKey(e.target.value as any)}
             >
               <option value="mv">Coût converti</option>
               <option value="name">Nom</option>
@@ -144,10 +190,10 @@ export default function DeckCardsTabs(props) {
               ? getRowHoverHandlers
               : undefined
           }
-          gridCols={getColsFor('grid')}
-          stackCols={getColsFor('stack')}
-          listCols={getColsFor('list')}
-          compactCols={getColsFor('compact')}
+          gridCols={getCols('grid')}
+          stackCols={getCols('piles')}
+          listCols={getCols('list')}
+          compactCols={getCols('compact')}
         />
       </div>
 
@@ -171,26 +217,26 @@ function DeckGridView({
   showLegality,
   sortKey,
   gridCols = 2,
-}) {
-  const listByName = useMemo(() => buildNameList(cards), [cards])
+}: ViewProps) {
+  const listByName = useMemo(() => buildNameList(cards as any), [cards])
   const { sections: mvSections, lands: mvLands } = useMemo(
-    () => buildMvSections(cards),
+    () => buildMvSections(cards as any),
     [cards]
   )
   const { sections: typeSections } = useMemo(
-    () => buildTypeSections(cards),
+    () => buildTypeSections(cards as any),
     [cards]
   )
   const { sections: colorSections, lands: colorLands } = useMemo(
-    () => buildColorSections(cards),
+    () => buildColorSections(cards as any),
     [cards]
   )
 
-  const renderTile = (card, i) => (
+  const renderTile = (card: MTGCard, i: number) => (
     <DeckTile
-      key={card.deckCardId || card.id || i}
+      key={(card as any).deckCardId || card.id || i}
       card={card}
-      qty={Number(card.decklistQuantity || 0)}
+      qty={Number((card as any).decklistQuantity || 0)}
       deckState={deckState}
       editMode={editMode}
       isPending={isPending}
@@ -199,6 +245,7 @@ function DeckGridView({
       removeCardFromDeck={removeCardFromDeck}
       showLegality={showLegality}
       isProblem={showLegality && (isCardProblematic?.(card) ?? false)}
+      onClickShowcase={() => {}}
     />
   )
 
@@ -208,13 +255,13 @@ function DeckGridView({
 
   if (sortKey === 'type') {
     return (
-      <Masonry className={styles.masonryCols} cols={gridCols}>
+      <Masonry className={styles.masonryCols} cols={gridCols} style={{}}>
         {typeSections.map(sec => {
           const total = sec.items.reduce(
-            (s, c) => s + Number(c?.decklistQuantity || 0),
+            (s: number, c: any) => s + Number(c?.decklistQuantity || 0),
             0
           )
-          const meta = TYPE_META[sec.title] || { label: sec.title, icon: null }
+          const meta = (TYPE_META as any)[sec.title] || { label: sec.title, icon: null }
           return (
             <section key={sec.key} className={styles.typeSection}>
               <header className={styles.sectionHeader}>
@@ -234,7 +281,7 @@ function DeckGridView({
               </header>
               <ul
                 className={styles.overlapList}
-                style={{ ['--tile-w']: '180px', ['--overlap']: '200px' }}
+                style={{ ['--tile-w' as any]: '180px', ['--overlap' as any]: '200px' }}
               >
                 {sec.items.map(renderTile)}
               </ul>
@@ -247,15 +294,15 @@ function DeckGridView({
 
   if (sortKey === 'color') {
     return (
-      <Masonry className={styles.listMasonry} cols={gridCols}>
+      <Masonry className={styles.listMasonry} cols={gridCols} style={{}}>
         {colorSections.map(sec => {
           const total = sec.items.reduce(
-            (s, c) => s + Number(c?.decklistQuantity || 0),
+            (s: number, c: any) => s + Number(c?.decklistQuantity || 0),
             0
           )
           const k = sec.title
           const meta =
-            COLOR_META[k] ||
+            (COLOR_META as any)[k] ||
             (k === 'M'
               ? { label: 'Multicolore', icon: null }
               : { label: k, icon: null })
@@ -278,7 +325,7 @@ function DeckGridView({
               </header>
               <ul
                 className={styles.overlapList}
-                style={{ ['--tile-w']: '180px', ['--overlap']: '200px' }}
+                style={{ ['--tile-w' as any]: '180px', ['--overlap' as any]: '200px' }}
               >
                 {sec.items.map(renderTile)}
               </ul>
@@ -293,14 +340,14 @@ function DeckGridView({
               <span className={styles.sectionBadge}>
                 ×
                 {colorLands.reduce(
-                  (s, c) => s + Number(c?.decklistQuantity || 0),
+                  (s: number, c: any) => s + Number(c?.decklistQuantity || 0),
                   0
                 )}
               </span>
             </header>
             <ul
               className={styles.overlapList}
-              style={{ ['--tile-w']: '180px', ['--overlap']: '200px' }}
+              style={{ ['--tile-w' as any]: '180px', ['--overlap' as any]: '200px' }}
             >
               {colorLands.map(renderTile)}
             </ul>
@@ -316,9 +363,9 @@ function DeckGridView({
     <div
       className={styles.gridByMV}
       style={{
-        ['--cols']: colsCount,
-        ['--tile-w']: '180px',
-        ['--overlap']: '200px',
+        ['--cols' as any]: colsCount,
+        ['--tile-w' as any]: '180px',
+        ['--overlap' as any]: '200px',
       }}
     >
       {mvSections.map(sec => (
@@ -351,15 +398,15 @@ function DeckListView({
   sortKey, // "name" | "mv" | "type" | "color"
   getRowHoverHandlers,
   listCols = 2,
-}) {
-  const { issuesById } = useLegalityIndex(legality)
+}: ViewProps) {
+  const { issuesById } = useLegalityIndex(legality as any)
 
-  const listByName = useMemo(() => buildNameList(cards), [cards])
+  const listByName = useMemo(() => buildNameList(cards as any), [cards])
   const mvData = useMemo(() => buildMvSections(cards), [cards])
   const typeData = useMemo(() => buildTypeSections(cards), [cards])
   const colorData = useMemo(() => buildColorSections(cards), [cards])
 
-  const renderSections = (sections, lands, titleForLands = 'Terrains') => {
+  const renderSections = (sections: any[], lands: any[], titleForLands = 'Terrains') => {
     const ordered = [
       ...sections,
       ...(lands.length
@@ -368,16 +415,16 @@ function DeckListView({
     ]
 
     return (
-      <Masonry className={styles.listMasonry} cols={listCols}>
+      <Masonry className={styles.listMasonry} cols={listCols} style={{}}>
         {ordered.map(sec => {
           const count = sec.items.reduce(
-            (s, c) => s + Number(c?.decklistQuantity || 0),
+            (s: number, c: any) => s + Number(c?.decklistQuantity || 0),
             0
           )
           const title = sec.key?.startsWith('type-')
-            ? (TYPE_META?.[sec.title]?.label ?? sec.title)
+            ? ((TYPE_META as any)?.[sec.title]?.label ?? sec.title)
             : sec.key?.startsWith('color-')
-              ? (COLOR_META?.[sec.title]?.label ?? sec.title)
+              ? ((COLOR_META as any)?.[sec.title]?.label ?? sec.title)
               : sec.title
 
           return (
@@ -389,9 +436,9 @@ function DeckListView({
             >
               <table className={styles.listTable}>
                 <tbody>
-                  {sec.items.map(card => (
+                  {sec.items.map((card: MTGCard) => (
                     <DeckRow
-                      key={card.deckCardId || card.id}
+                      key={(card as any).deckCardId || card.id}
                       variant="list"
                       card={card}
                       deckState={deckState}
@@ -402,7 +449,7 @@ function DeckListView({
                       removeCardFromDeck={removeCardFromDeck}
                       setShowcased={setShowcased}
                       getRowHoverHandlers={getRowHoverHandlers}
-                      problems={issuesById.get(card.id) || []}
+                      problems={issuesById.get(card.id) || [] as any}
                     />
                   ))}
                 </tbody>
@@ -420,12 +467,13 @@ function DeckListView({
         items={listByName}
         cols={listCols}
         className={styles.listCols}
-        render={col => (
+        style={{}}
+        render={(col: any) => (
           <table className={styles.listTable}>
             <tbody>
-              {col.map(card => (
+              {col.map((card: MTGCard) => (
                 <DeckRow
-                  key={card.deckCardId || card.id}
+                  key={(card as any).deckCardId || card.id}
                   variant="list"
                   card={card}
                   deckState={deckState}
@@ -436,7 +484,7 @@ function DeckListView({
                   removeCardFromDeck={removeCardFromDeck}
                   setShowcased={setShowcased}
                   getRowHoverHandlers={getRowHoverHandlers}
-                  problems={issuesById.get(card.id) || []}
+                  problems={issuesById.get(card.id) || [] as any}
                 />
               ))}
             </tbody>
@@ -452,7 +500,7 @@ function DeckListView({
     return renderSections(
       typeData.sections,
       typeData.lands,
-      TYPE_META?.land?.label ?? 'Terrains'
+      (TYPE_META as any)?.land?.label ?? 'Terrains'
     )
   return renderSections(colorData.sections, colorData.lands, 'Terrains')
 }
@@ -472,15 +520,15 @@ function DeckCompactView({
   sortKey, // "name" | "mv" | "type" | "color"
   getRowHoverHandlers,
   compactCols = 2,
-}) {
-  const { issuesById } = useLegalityIndex(legality)
+}: ViewProps) {
+  const { issuesById } = useLegalityIndex(legality as any)
 
-  const listByName = useMemo(() => buildNameList(cards), [cards])
+  const listByName = useMemo(() => buildNameList(cards as any), [cards])
   const mvData = useMemo(() => buildMvSections(cards), [cards])
   const typeData = useMemo(() => buildTypeSections(cards), [cards])
   const colorData = useMemo(() => buildColorSections(cards), [cards])
 
-  const renderSections = (sections, lands, titleForLands = 'Terrains') => {
+  const renderSections = (sections: any[], lands: any[], titleForLands = 'Terrains') => {
     const ordered = [
       ...sections,
       ...(lands.length
@@ -489,25 +537,25 @@ function DeckCompactView({
     ]
 
     return (
-      <Masonry className={styles.listMasonry} cols={compactCols}>
+      <Masonry className={styles.listMasonry} cols={compactCols} style={{}}>
         {ordered.map(sec => {
           const count = sec.items.reduce(
-            (s, c) => s + Number(c?.decklistQuantity || 0),
+            (s: number, c: any) => s + Number(c?.decklistQuantity || 0),
             0
           )
           const title = sec.key?.startsWith('type-')
-            ? (TYPE_META?.[sec.title]?.label ?? sec.title)
+            ? ((TYPE_META as any)?.[sec.title]?.label ?? sec.title)
             : sec.key?.startsWith('color-')
-              ? (COLOR_META?.[sec.title]?.label ?? sec.title)
+              ? ((COLOR_META as any)?.[sec.title]?.label ?? sec.title)
               : sec.title
 
           return (
             <SectionBlock key={sec.key} title={title} count={count} icon={null}>
               <table className={styles.sectionTable}>
                 <tbody>
-                  {sec.items.map(card => (
+                  {sec.items.map((card: MTGCard) => (
                     <DeckRow
-                      key={card.deckCardId || card.id}
+                      key={(card as any).deckCardId || card.id}
                       variant="compact"
                       card={card}
                       deckState={deckState}
@@ -518,7 +566,7 @@ function DeckCompactView({
                       removeCardFromDeck={removeCardFromDeck}
                       setShowcased={setShowcased}
                       getRowHoverHandlers={getRowHoverHandlers}
-                      problems={issuesById.get(card.id) || []}
+                      problems={issuesById.get(card.id) || [] as any}
                     />
                   ))}
                 </tbody>
@@ -536,12 +584,13 @@ function DeckCompactView({
         items={listByName}
         cols={compactCols}
         className={styles.listCols}
-        render={col => (
+        style={{}}
+        render={(col: any) => (
           <table className={styles.listTable}>
             <tbody>
-              {col.map(card => (
+              {col.map((card: MTGCard) => (
                 <DeckRow
-                  key={card.deckCardId || card.id}
+                  key={(card as any).deckCardId || card.id}
                   variant="compact"
                   card={card}
                   deckState={deckState}
@@ -552,7 +601,7 @@ function DeckCompactView({
                   removeCardFromDeck={removeCardFromDeck}
                   setShowcased={setShowcased}
                   getRowHoverHandlers={getRowHoverHandlers}
-                  problems={issuesById.get(card.id) || []}
+                  problems={issuesById.get(card.id) || [] as any}
                 />
               ))}
             </tbody>
@@ -568,7 +617,7 @@ function DeckCompactView({
     return renderSections(
       typeData.sections,
       typeData.lands,
-      TYPE_META?.land?.label ?? 'Terrains'
+      (TYPE_META as any)?.land?.label ?? 'Terrains'
     )
   return renderSections(colorData.sections, colorData.lands, 'Terrains')
 }
@@ -587,7 +636,7 @@ function DeckStacksView({
   showLegality,
   sortKey,
   stackCols = 2,
-}) {
+}: ViewProps) {
   // Config d’affichage pour DeckPile
   const CARD_W = 140
   const CARD_H = 200
@@ -595,30 +644,30 @@ function DeckStacksView({
   const VISIBLE_CAP = Number.POSITIVE_INFINITY
   const pileCfg = { CARD_W, CARD_H, OFFSET_Y, CAP: VISIBLE_CAP }
 
-  const { issuesById } = useLegalityIndex(legality)
+  const { issuesById } = useLegalityIndex(legality as any)
 
-  const listByName = useMemo(() => buildNameList(cards), [cards])
+  const listByName = useMemo(() => buildNameList(cards as any), [cards])
   const { sections: mvSections, lands: mvLands } = useMemo(
-    () => buildMvSections(cards),
+    () => buildMvSections(cards as any),
     [cards]
   )
   const { sections: typeSections } = useMemo(
-    () => buildTypeSections(cards),
+    () => buildTypeSections(cards as any),
     [cards]
   )
   const { sections: colorSections, lands: colorLands } = useMemo(
-    () => buildColorSections(cards),
+    () => buildColorSections(cards as any),
     [cards]
   )
 
-  const renderPile = card => {
-    const problems = issuesById.get(card.id) || []
+  const renderPile = (card: MTGCard) => {
+    const problems = issuesById.get(card.id) || [] as any
     const isProblem = showLegality && problems.length > 0
     return (
       <DeckPile
-        key={card.deckCardId || card.id}
+        key={(card as any).deckCardId || card.id}
         card={card}
-        qty={Number(card.decklistQuantity || 0)}
+        qty={Number((card as any).decklistQuantity || 0)}
         deckState={deckState}
         editMode={editMode}
         isPending={isPending}
@@ -637,7 +686,7 @@ function DeckStacksView({
     return (
       <ul
         className={styles.pilesFlow}
-        style={{ ['--card-w']: `${CARD_W}px`, ['--card-h']: `${CARD_H}px` }}
+        style={{ ['--card-w' as any]: `${CARD_W}px`, ['--card-h' as any]: `${CARD_H}px` }}
       >
         {listByName.map(renderPile)}
       </ul>
@@ -646,13 +695,13 @@ function DeckStacksView({
 
   if (sortKey === 'type') {
     return (
-      <Masonry className={styles.listMasonry} cols={stackCols}>
+      <Masonry className={styles.listMasonry} cols={stackCols} style={{}}>
         {typeSections.map(sec => {
           const total = sec.items.reduce(
-            (s, c) => s + Number(c?.decklistQuantity || 0),
+            (s: number, c: any) => s + Number(c?.decklistQuantity || 0),
             0
           )
-          const meta = TYPE_META[sec.title] || { label: sec.title, icon: null }
+          const meta = (TYPE_META as any)[sec.title] || { label: sec.title, icon: null }
           return (
             <section key={sec.key} className={styles.typeSection}>
               <header className={styles.sectionHeader}>
@@ -680,15 +729,15 @@ function DeckStacksView({
 
   if (sortKey === 'color') {
     return (
-      <Masonry className={styles.listMasonry} cols={stackCols}>
+      <Masonry className={styles.listMasonry} cols={stackCols} style={{}}>
         {colorSections.map(sec => {
           const total = sec.items.reduce(
-            (s, c) => s + Number(c?.decklistQuantity || 0),
+            (s: number, c: any) => s + Number(c?.decklistQuantity || 0),
             0
           )
           const k = sec.title
           const meta =
-            COLOR_META[k] ||
+            (COLOR_META as any)[k] ||
             (k === 'M'
               ? { label: 'Multicolore', icon: null }
               : { label: k, icon: null })
@@ -721,7 +770,7 @@ function DeckStacksView({
               <span className={styles.sectionBadge}>
                 ×
                 {colorLands.reduce(
-                  (s, c) => s + Number(c?.decklistQuantity || 0),
+                  (s: number, c: any) => s + Number(c?.decklistQuantity || 0),
                   0
                 )}
               </span>
@@ -739,9 +788,9 @@ function DeckStacksView({
     <div
       className={styles.pilesByMV}
       style={{
-        ['--cols']: colsCount,
-        ['--card-w']: `${CARD_W}px`,
-        ['--card-h']: `${CARD_H}px`,
+        ['--cols' as any]: colsCount,
+        ['--card-w' as any]: `${CARD_W}px`,
+        ['--card-h' as any]: `${CARD_H}px`,
       }}
     >
       {mvSections.map(sec => (

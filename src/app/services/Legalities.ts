@@ -1,9 +1,12 @@
-// services/legalities.js
+// services/legalities.ts
+
+import type { MTGFormat } from '@/types/games/magic'
+import type { GameCard } from '@/types'
 
 /** =========================
  *  Formats & règles de base
  *  ========================= */
-export const SINGLETON_FORMATS = new Set([
+export const SINGLETON_FORMATS = new Set<MTGFormat>([
   'commander',
   'paupercommander',
   'brawl',
@@ -12,7 +15,7 @@ export const SINGLETON_FORMATS = new Set([
   'oathbreaker',
 ])
 
-export const MIN_SIZE_BY_FORMAT = {
+export const MIN_SIZE_BY_FORMAT: Record<MTGFormat, number> = {
   commander: 100,
   paupercommander: 100,
   oathbreaker: 60,
@@ -20,10 +23,19 @@ export const MIN_SIZE_BY_FORMAT = {
   standardbrawl: 60,
   gladiator: 100,
   // défaut: 60 pour les autres (modern, legacy, standard, pioneer, etc.)
+  standard: 60,
+  modern: 60,
+  legacy: 60,
+  vintage: 60,
+  pioneer: 60,
+  historic: 60,
+  timeless: 60,
+  alchemy: 60,
+  penny: 60,
 }
 
-/** Cartes avec copies “spéciales” (ignore 4× ou limite spécifique) - source : https://mtg.fandom.com/wiki/Relentless  */
-export const SPECIAL_COPIES_RULES = {
+/** Cartes avec copies "spéciales" (ignore 4× ou limite spécifique) - source : https://mtg.fandom.com/wiki/Relentless  */
+export const SPECIAL_COPIES_RULES: Record<string, number> = {
   // White
   'hare apparent': Infinity,
   'templar knight': Infinity,
@@ -46,26 +58,63 @@ export const SPECIAL_COPIES_RULES = {
   'slime against humanity': Infinity,
 }
 
+interface DeckCard {
+  id: string
+  scryfallId: string
+  quantity: number
+}
+
+interface EnrichedCard {
+  id: string
+  name: string
+  type?: string
+  legalities?: Record<string, string>
+  rarity?: string
+}
+
+interface LegalityIssue {
+  scryfallId: string
+  name: string
+  qty: number
+  problems: string[]
+}
+
+interface DeckLegalityResult {
+  format: string
+  total: number
+  minRequired: number
+  sizeOk: boolean
+  isSingleton: boolean
+  issues: LegalityIssue[]
+}
+
+interface RarityCheckOptions {
+  format: string
+  enriched: EnrichedCard[]
+  countsByCard: Map<string, number>
+  commanderScryfallId?: string | null
+}
+
 /** =========================
  *  Helpers
  *  ========================= */
-export const canonicalName = c => (c?.name ?? '').toLowerCase()
+export const canonicalName = (c: { name?: string }): string => (c?.name ?? '').toLowerCase()
 
-export const isBasicLand = card =>
+export const isBasicLand = (card: { type?: string }): boolean =>
   typeof card?.type === 'string' && /(^|\s)basic\s+land(\s|$)/i.test(card.type)
 
 /**
  * Retourne le nombre max de copies autorisées pour cette carte,
- * en fonction du format, de la rareté “restricted” Vintage, et des exceptions “relentless”.
+ * en fonction du format, de la rareté "restricted" Vintage, et des exceptions "relentless".
  * - Terrains de base : illimités
  * - Singleton : 1
  * - Vintage restricted : 1
  * - Exceptions : Infinity / quota spécial
  * - Sinon : 4
  */
-export function getAllowedCopies(card, format, leg) {
+export function getAllowedCopies(card: { name?: string; type?: string }, format: string, leg: string): number {
   if (isBasicLand(card)) return Infinity
-  if (SINGLETON_FORMATS.has(format)) return 1
+  if (SINGLETON_FORMATS.has(format as MTGFormat)) return 1
   if (format === 'vintage' && leg === 'restricted') return 1
 
   const special = SPECIAL_COPIES_RULES[canonicalName(card)]
@@ -77,9 +126,9 @@ export function getAllowedCopies(card, format, leg) {
 /** =========================
  *  Règles de rareté (best effort)
  *  =========================
- * Pauper (classique) : toutes les cartes doivent exister en “common” (côté Scryfall: card.rarity === 'common')
+ * Pauper (classique) : toutes les cartes doivent exister en "common" (côté Scryfall: card.rarity === 'common')
  * Pauper Commander : idem, mais EXCEPTION possible pour le commandant (souvent uncommon).
- *  -> Sans “commanderId” explicite côté data, on propose 2 modes :
+ *  -> Sans "commanderId" explicite côté data, on propose 2 modes :
  *     - strict: toutes common
  *     - commanderException: on ignore 1 carte non-common si vous la désignez en amont (param).
  */
@@ -88,11 +137,11 @@ export function checkRarityRules({
   enriched,
   countsByCard,
   commanderScryfallId = null,
-}) {
-  const issues = []
+}: RarityCheckOptions): LegalityIssue[] {
+  const issues: LegalityIssue[] = []
 
   // helper: check si une carte (cette impression) est common
-  const isCommon = c => (c?.rarity || '').toLowerCase() === 'common'
+  const isCommon = (c: { rarity?: string }): boolean => (c?.rarity || '').toLowerCase() === 'common'
 
   if (format === 'pauper') {
     enriched.forEach(c => {
@@ -110,7 +159,7 @@ export function checkRarityRules({
 
   if (format === 'paupercommander') {
     // Mode simple par défaut: toutes common.
-    // Si vous gérez un commandant explicitement, passez commanderScryfallId pour l’exempter.
+    // Si vous gérez un commandant explicitement, passez commanderScryfallId pour l'exempter.
     enriched.forEach(c => {
       const qty = countsByCard.get(c.id) || 0
       if (qty === 0) return
@@ -137,14 +186,19 @@ export function checkRarityRules({
  * @param enriched  cartes enrichies formatCard() (id==scryfallId, name, type, legalities, rarity, ...)
  * @param opts { commanderScryfallId?: string | null }
  */
-export function evaluateDeckLegality(deck, deckCards, enriched, opts = {}) {
+export function evaluateDeckLegality(
+  deck: { format?: string },
+  deckCards: DeckCard[],
+  enriched: EnrichedCard[],
+  opts: { commanderScryfallId?: string | null } = {}
+): DeckLegalityResult {
   const format = (deck?.format || 'commander').toLowerCase()
 
   const total = deckCards.reduce((sum, dc) => sum + (dc.quantity || 0), 0)
-  const minRequired = MIN_SIZE_BY_FORMAT[format] ?? 60
+  const minRequired = MIN_SIZE_BY_FORMAT[format as MTGFormat] ?? 60
 
   // Compteurs
-  const countsByCard = new Map() // scryfallId -> qty
+  const countsByCard = new Map<string, number>() // scryfallId -> qty
   deckCards.forEach(dc =>
     countsByCard.set(
       dc.scryfallId,
@@ -152,22 +206,22 @@ export function evaluateDeckLegality(deck, deckCards, enriched, opts = {}) {
     )
   )
 
-  const countsByName = new Map() // nom canonique -> total qty (toutes éditions)
+  const countsByName = new Map<string, number>() // nom canonique -> total qty (toutes éditions)
   enriched.forEach(c => {
     const qty = countsByCard.get(c.id) || 0
     const key = canonicalName(c)
     countsByName.set(key, (countsByName.get(key) || 0) + qty)
   })
 
-  const issues = []
+  const issues: LegalityIssue[] = []
 
-  // Parcours par carte enrichie pour lever des problèmes “par carte”
+  // Parcours par carte enrichie pour lever des problèmes "par carte"
   enriched.forEach(c => {
     const qty = countsByCard.get(c.id) || 0
     if (qty === 0) return
 
     const leg = c.legalities?.[format] || 'not_legal'
-    const perCardIssues = []
+    const perCardIssues: string[] = []
 
     // (A) Légalité de format brute
     if (leg === 'not_legal' || leg === 'banned') {
@@ -175,11 +229,11 @@ export function evaluateDeckLegality(deck, deckCards, enriched, opts = {}) {
     }
 
     // (B) Singleton : >1 exemplaire sur CETTE impression (hors basic land)
-    if (SINGLETON_FORMATS.has(format) && qty > 1 && !isBasicLand(c)) {
+    if (SINGLETON_FORMATS.has(format as MTGFormat) && qty > 1 && !isBasicLand(c)) {
       perCardIssues.push('Singleton: 1 exemplaire max sur cette carte')
     }
 
-    // (C) Limite globale par NOM (4 par défaut, exceptions “relentless”, Vintage restricted)
+    // (C) Limite globale par NOM (4 par défaut, exceptions "relentless", Vintage restricted)
     const nameQty = countsByName.get(canonicalName(c)) || 0
     const allowed = getAllowedCopies(c, format, leg)
     if (Number.isFinite(allowed) && nameQty > allowed) {
@@ -216,7 +270,7 @@ export function evaluateDeckLegality(deck, deckCards, enriched, opts = {}) {
     total,
     minRequired,
     sizeOk,
-    isSingleton: SINGLETON_FORMATS.has(format),
+    isSingleton: SINGLETON_FORMATS.has(format as MTGFormat),
     issues, // [{ scryfallId, name, qty, problems:[] }]
   }
 }

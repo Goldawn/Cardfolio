@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 
-type ViewType = 'grid' | 'list' | 'compact' | 'piles' | 'listByType'
+type ViewType = 'grid' | 'list' | 'compact' | 'piles'
 type SortKey = 'mv' | 'name' | 'type' | 'color'
 
 interface ColsByView {
@@ -8,7 +8,6 @@ interface ColsByView {
   list: number
   grid: number
   piles: number
-  listByType: number
 }
 
 interface DeckCardsPrefs {
@@ -39,9 +38,8 @@ const DEFAULTS: DeckCardsPrefs = {
     // nb colonnes par vue (quand activé)
     compact: 2,
     list: 2,
-    grid: 2, // utilisé seulement quand c’est autorisé (type/couleur)
+    grid: 2, // utilisé seulement quand c'est autorisé (type/couleur)
     piles: 2, // idem
-    listByType: 2, // si besoin
   },
 }
 
@@ -110,9 +108,8 @@ function migrateOldKeys() {
           compact: Number(parsed?.masonry) || DEFAULTS.colsByView.compact,
           list: Number(parsed?.list) || DEFAULTS.colsByView.list,
           grid: Number(parsed?.grid) || DEFAULTS.colsByView.grid,
-          // piles/listByType si tu veux reprendre "masonry"
+          // piles si tu veux reprendre "masonry"
           piles: Number(parsed?.masonry) || DEFAULTS.colsByView.piles,
-          listByType: Number(parsed?.masonry) || DEFAULTS.colsByView.listByType,
         }
         writeJSON(LS_KEYS.cols, colsByView)
       } catch {}
@@ -182,8 +179,6 @@ export function useDeckCardsPrefs(): {
       // grid & piles : seulement quand tri par type/couleur
       if (view === 'grid' && (key === 'type' || key === 'color')) return true
       if (view === 'piles' && (key === 'type' || key === 'color')) return true
-      // listByType : up to you (ex: autorisé)
-      if (view === 'listByType') return true
       return false
     },
     []

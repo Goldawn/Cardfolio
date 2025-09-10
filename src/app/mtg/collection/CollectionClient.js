@@ -7,13 +7,13 @@ import {
   fetchSets,
   fetchSetCards,
   fetchMoreCards,
-} from '../../services/Scryfall.js'
-import { formatCard } from '../../services/FormatCard.js'
+} from '../../services/Scryfall'
+import { formatCard } from '../../services/FormatCard'
 import useCardFilters from '../../hooks/useCardFilters'
 import Card from '../../components/Card'
 import CollectionActionBar from '../../components/CollectionActionBar'
 import Loader from '../../components/Loader'
-import { fetchCardPrice } from '../../services/pricing.js'
+import { fetchCardPrice } from '../../services/pricing'
 import SetBar from '../../components/SetBar' // ✅ intégré
 import styles from './page.module.css'
 
