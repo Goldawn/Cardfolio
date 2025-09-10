@@ -71,6 +71,27 @@ export { CardServiceFactory } from './factory/CardServiceFactory'
 
 // Services principaux
 export { CardService } from './services/CardService'
+export { SetService } from './services/SetService'
 export { PricingService } from './services/PricingService'
-// TODO: Autres services
-// export { SetService } from './services/SetService'
+
+// Infrastructure
+export {
+  CacheService,
+  MemoryCacheProvider,
+  RedisCacheProvider,
+  RateLimitService,
+  MonitoringService,
+  type RateLimitConfig,
+  DEFAULT_RATE_LIMIT_CONFIG,
+  DEFAULT_MONITORING_CONFIG
+} from './infrastructure'
+
+// Stratégies
+export {
+  ProviderSelectionStrategyFactory,
+  FallbackService,
+  type IProviderSelectionStrategy,
+  type IFallbackStrategy,
+  type FallbackConfig,
+  DEFAULT_FALLBACK_CONFIG
+} from './strategy'
