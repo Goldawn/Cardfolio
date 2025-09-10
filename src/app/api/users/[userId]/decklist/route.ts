@@ -1,7 +1,18 @@
 import { prisma } from '@/lib/prisma'
+import { NextRequest } from 'next/server'
+
+// Types pour les paramètres de route
+interface RouteParams {
+  params: Promise<{ userId: string }>
+}
+
+// Types pour les requêtes
+interface CreateDeckRequest {
+  name: string
+}
 
 // Récupération de tous les decks d'un utilisateur
-export async function GET(request, { params }) {
+export async function GET(request: NextRequest, { params }: RouteParams) {
   const { userId } = await params
   console.log('ENTRE DE LA ROUTE GET ALL DECKS')
   console.log('userID :', userId)
@@ -25,9 +36,9 @@ export async function GET(request, { params }) {
   }
 }
 
-export async function POST(request, { params }) {
+export async function POST(request: NextRequest, { params }: RouteParams) {
   const { userId } = await params
-  const { name } = await request.json()
+  const { name }: CreateDeckRequest = await request.json()
 
   if (!name) {
     return new Response(JSON.stringify({ error: 'Nom du deck requis' }), {

@@ -1,6 +1,37 @@
 import { prisma } from '@/lib/prisma'
+import { NextRequest } from 'next/server'
 
-export async function GET(request, { params }) {
+// Types pour les paramètres de route
+interface RouteParams {
+  params: Promise<{ userId: string }>
+}
+
+// Types pour les requêtes
+interface AddCardRequest {
+  scryfallId: string
+  quantity: number
+  priceHistory?: Array<{
+    date: string
+    usd: number
+    eur: number
+  }>
+}
+
+interface UpdateCardRequest {
+  scryfallId: string
+  quantityDelta: number
+  newPriceEntry?: {
+    date: string
+    usd: number
+    eur: number
+  }
+}
+
+interface DeleteCardRequest {
+  scryfallId: string
+}
+
+export async function GET(request: NextRequest, { params }: RouteParams) {
   const { userId } = await params
 
   try {
@@ -10,7 +41,7 @@ export async function GET(request, { params }) {
       include: { items: true }, // <- CollectionItem[]
     })
 
-    return Response.json(defaultCollection.items)
+    return Response.json(defaultCollection?.items || [])
   } catch (error) {
     console.error('Erreur API collection :', error)
     return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
@@ -19,9 +50,9 @@ export async function GET(request, { params }) {
   }
 }
 
-export async function POST(request, { params }) {
-  const { userId } = params
-  const body = await request.json()
+export async function POST(request: NextRequest, { params }: RouteParams) {
+  const { userId } = await params
+  const body: AddCardRequest = await request.json()
 
   const { scryfallId, quantity, priceHistory } = body
 
@@ -37,10 +68,8 @@ export async function POST(request, { params }) {
         scryfallId,
         quantity,
         priceHistory: priceHistory || [],
-        user: {
-          connect: { id: userId },
-        },
-      },
+        userId,
+      } as any,
     })
 
     // 🆕 Création du log
@@ -63,9 +92,9 @@ export async function POST(request, { params }) {
   }
 }
 
-export async function PATCH(request, { params }) {
-  const { userId } = params
-  const { scryfallId, quantityDelta, newPriceEntry } = await request.json()
+export async function PATCH(request: NextRequest, { params }: RouteParams) {
+  const { userId } = await params
+  const { scryfallId, quantityDelta, newPriceEntry }: UpdateCardRequest = await request.json()
 
   if (!scryfallId || typeof quantityDelta !== 'number') {
     return new Response(
@@ -79,9 +108,9 @@ export async function PATCH(request, { params }) {
   try {
     const existing = await prisma.collectionItem.findFirst({
       where: {
-        userId,
+        userId: userId,
         scryfallId,
-      },
+      } as any,
     })
 
     if (!existing) {
@@ -142,9 +171,9 @@ export async function PATCH(request, { params }) {
   }
 }
 
-export async function DELETE(request, { params }) {
-  const { userId } = params
-  const { scryfallId } = await request.json()
+export async function DELETE(request: NextRequest, { params }: RouteParams) {
+  const { userId } = await params
+  const { scryfallId }: DeleteCardRequest = await request.json()
 
   if (!scryfallId) {
     return new Response(JSON.stringify({ error: 'scryfallId manquant' }), {
@@ -155,9 +184,9 @@ export async function DELETE(request, { params }) {
   try {
     const existing = await prisma.collectionItem.findFirst({
       where: {
-        userId,
+        userId: userId,
         scryfallId,
-      },
+      } as any,
     })
 
     if (!existing) {

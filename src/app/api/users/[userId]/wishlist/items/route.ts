@@ -1,7 +1,25 @@
 import { prisma } from '@/lib/prisma'
+import { NextRequest } from 'next/server'
+
+// Types pour les paramètres de route
+interface RouteParams {
+  params: Promise<{ userId: string }>
+}
+
+// Types pour les requêtes
+interface UpdateWishlistItemRequest {
+  itemId: string
+  quantityDelta?: number
+  newListId?: string
+}
+
+interface DeleteWishlistItemRequest {
+  scryfallId: string
+  wishlistId?: string
+}
 
 // GET – Liste tous les items de wishlist de l'utilisateur (avec la liste associée)
-export async function GET(request, { params }) {
+export async function GET(request: NextRequest, { params }: RouteParams) {
   const { userId } = await params
 
   try {
@@ -87,9 +105,9 @@ export async function GET(request, { params }) {
 // }
 
 // PATCH – Met à jour la quantité ou déplace une carte vers une autre liste
-export async function PATCH(request, { params }) {
+export async function PATCH(request: NextRequest, { params }: RouteParams) {
   const { userId } = await params
-  const { itemId, quantityDelta = 0, newListId } = await request.json()
+  const { itemId, quantityDelta = 0, newListId }: UpdateWishlistItemRequest = await request.json()
 
   if (!itemId) {
     return new Response(JSON.stringify({ error: 'ID item manquant' }), {
@@ -131,9 +149,9 @@ export async function PATCH(request, { params }) {
 }
 
 // DELETE – Supprime un item OU tous les items d'une wishlist
-export async function DELETE(request, { params }) {
+export async function DELETE(request: NextRequest, { params }: RouteParams) {
   const { userId } = await params
-  const { scryfallId, wishlistId } = await request.json()
+  const { scryfallId, wishlistId }: DeleteWishlistItemRequest = await request.json()
   console.log('UserId de la route DELETE', userId)
   console.log('entrée dans la route de delete', scryfallId)
 

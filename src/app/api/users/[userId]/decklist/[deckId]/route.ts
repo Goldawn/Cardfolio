@@ -1,8 +1,13 @@
 import { prisma } from '@/lib/prisma'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+
+// Types pour les paramètres de route
+interface RouteParams {
+  params: Promise<{ userId: string; deckId: string }>
+}
 
 // GET - Récupération de toutes les cartes d'un deck spécifique
-export async function GET(request, { params }) {
+export async function GET(request: NextRequest, { params }: RouteParams) {
   console.log('ENTREE DANS LE ROUTE DE DECK ID')
   const { userId, deckId } = await params
   console.log('userId:', userId, 'deckId:', deckId)

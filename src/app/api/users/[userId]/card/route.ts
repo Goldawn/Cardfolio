@@ -1,9 +1,36 @@
 import { prisma } from '@/lib/prisma'
+import { NextRequest } from 'next/server'
+
+// Types pour les paramètres de route
+interface RouteParams {
+  params: Promise<{ userId: string }>
+}
+
+// Types pour les requêtes
+interface CardUsageRequest {
+  scryfallIds: string[]
+}
+
+interface CardUsage {
+  collection: number
+  wishlists: Array<{
+    listId: string
+    name: string
+    quantity: number
+  }>
+  decklists: Array<{
+    deckId: string
+    name: string
+    quantity: number
+  }>
+}
+
+type CardUsageMap = Record<string, CardUsage>
 
 // SETUP de la route pour récupérer
-export async function POST(req, { params }) {
-  const { userId } = params
-  const { scryfallIds } = await req.json()
+export async function POST(req: NextRequest, { params }: RouteParams) {
+  const { userId } = await params
+  const { scryfallIds }: CardUsageRequest = await req.json()
 
   console.log('userID :', userId)
   console.log('scryfallIds :', scryfallIds)
@@ -15,7 +42,7 @@ export async function POST(req, { params }) {
   const [collection, wishlists] = await Promise.all([
     // const [collection, wishlists, decklists] = await Promise.all([
     prisma.collectionItem.findMany({
-      where: { userId, scryfallId: { in: scryfallIds } },
+      where: { userId: userId, scryfallId: { in: scryfallIds } } as any,
       select: { scryfallId: true, quantity: true },
     }),
     prisma.wishlistList.findMany({
@@ -38,7 +65,7 @@ export async function POST(req, { params }) {
     // })
   ])
 
-  const usage = {}
+  const usage: CardUsageMap = {}
 
   scryfallIds.forEach(id => {
     usage[id] = { collection: 0, wishlists: [], decklists: [] }

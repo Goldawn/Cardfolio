@@ -1,8 +1,28 @@
 import { prisma } from '@/lib/prisma'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+
+// Types pour les paramètres de route
+interface RouteParams {
+  params: Promise<{ userId: string; wishlistId: string }>
+}
+
+// Types pour les requêtes
+interface AddWishlistItemRequest {
+  scryfallId: string
+  quantity?: number
+}
+
+interface UpdateWishlistItemRequest {
+  scryfallId: string
+  quantityDelta: number
+}
+
+interface DeleteWishlistItemRequest {
+  scryfallId: string
+}
 
 // GET - Récupération de tous les items d'une liste spécifique
-export async function GET(request, { params }) {
+export async function GET(request: NextRequest, { params }: RouteParams) {
   const { userId, wishlistId } = await params
 
   if (!userId || !wishlistId) {
@@ -44,9 +64,9 @@ export async function GET(request, { params }) {
 }
 
 // POST – Ajoute une carte à une liste de souhaits spécifique
-export async function POST(request, { params }) {
+export async function POST(request: NextRequest, { params }: RouteParams) {
   const { userId, wishlistId } = await params
-  const { scryfallId, quantity = 1 } = await request.json()
+  const { scryfallId, quantity = 1 }: AddWishlistItemRequest = await request.json()
 
   if (!userId || !scryfallId || !wishlistId) {
     return new Response(
@@ -112,14 +132,14 @@ export async function POST(request, { params }) {
 }
 
 // PATCH - Modification d'un item d'une wishlist spécifique
-export async function PATCH(request, { params }) {
+export async function PATCH(request: NextRequest, { params }: RouteParams) {
   console.log('ENTREE dans le PATCH')
   const { userId, wishlistId } = await params
-  const { scryfallId, quantityDelta } = await request.json()
+  const { scryfallId, quantityDelta }: UpdateWishlistItemRequest = await request.json()
   console.log('scryfallId', scryfallId, 'delta', quantityDelta)
 
   if (
-    (!userId, !wishlistId, !scryfallId || typeof quantityDelta !== 'number')
+    !userId || !wishlistId || !scryfallId || typeof quantityDelta !== 'number'
   ) {
     return new Response(
       JSON.stringify({ error: 'Données manquantes ou invalides' }),
@@ -160,9 +180,9 @@ export async function PATCH(request, { params }) {
 }
 
 // DELETE - Suppression d'un item d'une wishlist spécifique
-export async function DELETE(request, { params }) {
+export async function DELETE(request: NextRequest, { params }: RouteParams) {
   const { userId, wishlistId } = await params
-  const { scryfallId } = await request.json()
+  const { scryfallId }: DeleteWishlistItemRequest = await request.json()
 
   if (!userId || !wishlistId || !scryfallId) {
     return NextResponse.json(

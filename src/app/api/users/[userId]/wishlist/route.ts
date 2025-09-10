@@ -1,14 +1,26 @@
 import { prisma } from '@/lib/prisma'
+import { NextRequest } from 'next/server'
+
+// Types pour les paramètres de route
+interface RouteParams {
+  params: Promise<{ userId: string }>
+}
+
+// Types pour les requêtes
+interface AddWishlistItemRequest {
+  scryfallId: string
+  quantity?: number
+}
 
 // GET /api/users/[userId]/wishlist
 // Renvoie toutes les cartes de wishlist de l'utilisateur, toutes listes confondues
-export async function GET(request, { params }) {
-  const { userId } = params
+export async function GET(request: NextRequest, { params }: RouteParams) {
+  const { userId } = await params
 
   try {
     const allItems = await prisma.wishlistItem.findMany({
-      where: { userId },
-      include: { list: true },
+      where: { userId: userId } as any,
+      include: { list: true } as any,
       orderBy: { dateAdded: 'desc' },
     })
 
@@ -23,9 +35,9 @@ export async function GET(request, { params }) {
 
 // POST /api/users/[userId]/wishlist
 // Ajoute une carte à la liste par défaut de l'utilisateur
-export async function POST(request, { params }) {
-  const { userId } = params
-  const { scryfallId, quantity = 1 } = await request.json()
+export async function POST(request: NextRequest, { params }: RouteParams) {
+  const { userId } = await params
+  const { scryfallId, quantity = 1 }: AddWishlistItemRequest = await request.json()
 
   if (!scryfallId || quantity < 1) {
     return new Response(JSON.stringify({ error: 'Données invalides' }), {
@@ -37,7 +49,7 @@ export async function POST(request, { params }) {
     // Chercher la liste par défaut de l'utilisateur
     let defaultList = await prisma.wishlistList.findFirst({
       where: {
-        userId,
+        userId: userId,
         isDefault: true,
       },
     })
@@ -56,10 +68,10 @@ export async function POST(request, { params }) {
     // Vérifier si la carte est déjà présente dans cette liste
     const existing = await prisma.wishlistItem.findFirst({
       where: {
-        userId,
+        userId: userId,
         listId: defaultList.id,
         scryfallId,
-      },
+      } as any,
     })
 
     if (existing) {
@@ -78,9 +90,9 @@ export async function POST(request, { params }) {
         data: {
           scryfallId,
           quantity,
-          user: { connect: { id: userId } },
-          list: { connect: { id: defaultList.id } },
-        },
+          userId,
+          listId: defaultList.id,
+        } as any,
       })
 
       return Response.json(newItem)

@@ -1,7 +1,28 @@
 import { prisma } from '@/lib/prisma'
+import { NextRequest } from 'next/server'
+
+// Types pour les paramètres de route
+interface RouteParams {
+  params: Promise<{ userId: string }>
+}
+
+// Types pour les requêtes
+interface CreateWishlistRequest {
+  name: string
+}
+
+interface UpdateWishlistRequest {
+  listId: string
+  name: string
+  duplicate?: boolean
+}
+
+interface DeleteWishlistRequest {
+  listId: string
+}
 
 // GET - Récupérer toutes les listes de wishlist d'un utilisateur
-export async function GET(request, { params }) {
+export async function GET(request: NextRequest, { params }: RouteParams) {
   const { userId } = await params
 
   try {
@@ -38,9 +59,9 @@ export async function GET(request, { params }) {
 }
 
 // POST - Créer une nouvelle liste de wishlist
-export async function POST(request, { params }) {
+export async function POST(request: NextRequest, { params }: RouteParams) {
   const { userId } = await params
-  const { name } = await request.json()
+  const { name }: CreateWishlistRequest = await request.json()
 
   if (!name) {
     return new Response(JSON.stringify({ error: 'Nom de liste requis' }), {
@@ -66,9 +87,9 @@ export async function POST(request, { params }) {
 }
 
 // PATCH - Renommer ou dupliquer une liste de souhaits
-export async function PATCH(request, { params }) {
+export async function PATCH(request: NextRequest, { params }: RouteParams) {
   const { userId } = await params
-  const { listId, name, duplicate } = await request.json() // 👈 name au lieu de newName
+  const { listId, name, duplicate }: UpdateWishlistRequest = await request.json() // 👈 name au lieu de newName
 
   if (!listId || !name) {
     return new Response(JSON.stringify({ error: 'Données manquantes' }), {
@@ -120,9 +141,9 @@ export async function PATCH(request, { params }) {
 }
 
 // DELETE - Supprimer une liste de wishlist (et ses cartes associées)
-export async function DELETE(request, { params }) {
+export async function DELETE(request: NextRequest, { params }: RouteParams) {
   const { userId } = await params
-  const { listId } = await request.json()
+  const { listId }: DeleteWishlistRequest = await request.json()
 
   if (!listId) {
     return new Response(JSON.stringify({ error: 'ID de liste manquant' }), {
