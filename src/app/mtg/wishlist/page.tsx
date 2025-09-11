@@ -7,7 +7,7 @@ import MagicCardPlaceholder from '../../components/MagicCardPlaceholder'
 import WishlistList from '../../components/WishlistList'
 import Card from '../../components/Card'
 import { formatCard } from '@/app/services/FormatCard'
-import { CardServiceFactory } from '@/card-api-service'
+import { cardApiManager } from '@/app/services/CardApiManager'
 import styles from './page.module.css'
 import type { GameCard } from '@/types'
 import type { JSX } from 'react'
@@ -20,7 +20,7 @@ interface WishlistList {
 
 export default function WishlistPage(): JSX.Element {
   const { data: session, status } = useSession()
-  const cardService = CardServiceFactory.create()
+  const cardService = cardApiManager.getCardService()
   const [lists, setLists] = useState<WishlistList[]>([])
   const [cardsByList, setCardsByList] = useState<Record<string, GameCard[]>>({})
   const [loading, setLoading] = useState<boolean>(true)

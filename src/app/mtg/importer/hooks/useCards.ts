@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { CardServiceFactory } from '@/card-api-service'
+import { cardApiManager } from '@/app/services/CardApiManager'
 import type { GameSet } from '@/card-api-service/dto'
 import type { MTGCard } from '@/types/games/magic'
 
@@ -9,7 +9,7 @@ export function useCards() {
   const [error, setError] = useState<string | null>(null)
 
   // Instance du service Card API
-  const cardService = useMemo(() => CardServiceFactory.create(), [])
+  const cardService = useMemo(() => cardApiManager.getCardService(), [])
 
   // Charger les cartes d'un set
   const loadSetCards = useCallback(async (selectedSet: GameSet) => {

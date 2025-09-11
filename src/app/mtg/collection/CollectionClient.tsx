@@ -8,7 +8,7 @@ import {
   fetchSetCards,
   fetchMoreCards,
 } from '../../services/Scryfall'
-import { CardServiceFactory } from '@/card-api-service'
+import { cardApiManager } from '@/app/services/CardApiManager'
 import useCardFilters from '../../hooks/useCardFilters'
 import Card from '../../components/Card'
 import CollectionActionBar from '../../components/CollectionActionBar'
@@ -41,7 +41,7 @@ interface CollectionClientProps {
 
 export default function CollectionClient({ initialItems, actions }: CollectionClientProps): JSX.Element {
   const { currency } = useCurrencyContext()
-  const cardService = CardServiceFactory.create()
+  const cardService = cardApiManager.getCardService()
 
   // collection brute (scryfallId, qty, priceHistory, dbId)
   const [collection, setCollection] = useState<CollectionItem[]>(

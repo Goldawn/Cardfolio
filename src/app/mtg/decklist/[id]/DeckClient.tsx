@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useTransition, useMemo } from 'react'
-import { CardServiceFactory } from '@/card-api-service'
+import { cardApiManager } from '@/app/services/CardApiManager'
 import DeckSettingsPanel from '../../../components/deck/DeckSettingsPanel'
 import AddFromCollection from '../../../components/deck/AddFromCollection'
 import DeckHeader from '../../../components/deck/DeckHeader'
@@ -29,7 +29,7 @@ export default function DeckClient({
   actions,
 }: DeckClientProps): JSX.Element {
   // console.log(deck)
-  const cardService = CardServiceFactory.create()
+  const cardService = cardApiManager.getCardService()
   const [deckState, setDeckState] = useState(deck) // { id, name, format, showcasedCard }
   const [deckCards, setDeckCards] = useState(initialDeckCards || [])
   const [enriched, setEnriched] = useState<GameCard[]>([]) // cartes formatées  { deckCardId, decklistQuantity }

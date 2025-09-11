@@ -3,19 +3,23 @@
  * Remplace src/app/services/FormatCard.ts
  */
 
-import { ScryfallAdapter } from '@/card-api-service'
+import { cardApiManager } from '@/app/services/CardApiManager'
 import type { ScryfallCardDTO } from '@/card-api-service/dto'
 import type { MTGCard } from '@/types/games/magic'
 
-// Instance singleton de l'adapter
-const scryfallAdapter = new ScryfallAdapter()
+// Instance de l'adapter via le manager
+const getScryfallAdapter = () => {
+  const cardService = cardApiManager.getCardService()
+  return cardService.adapters.get('scryfall')
+}
 
 /**
  * Formate une carte Scryfall vers le format de l'application
  * Remplace l'ancienne fonction formatCard()
  */
 export const formatCard = (rawCard: ScryfallCardDTO): MTGCard => {
-  return scryfallAdapter.transformCard(rawCard)
+  const adapter = getScryfallAdapter()
+  return adapter.transformCard(rawCard)
 }
 
 /**
@@ -23,7 +27,8 @@ export const formatCard = (rawCard: ScryfallCardDTO): MTGCard => {
  * Nouvelle fonctionnalité
  */
 export const formatCards = (rawCards: ScryfallCardDTO[]): MTGCard[] => {
-  return scryfallAdapter.transformCards(rawCards)
+  const adapter = getScryfallAdapter()
+  return adapter.transformCards(rawCards)
 }
 
 /**
@@ -31,7 +36,8 @@ export const formatCards = (rawCards: ScryfallCardDTO[]): MTGCard[] => {
  * Nouvelle fonctionnalité
  */
 export const validateCardData = (rawCard: any): boolean => {
-  return scryfallAdapter.validateRawData(rawCard)
+  const adapter = getScryfallAdapter()
+  return adapter.validateRawData(rawCard)
 }
 
 /**
@@ -39,7 +45,8 @@ export const validateCardData = (rawCard: any): boolean => {
  * Nouvelle fonctionnalité
  */
 export const extractCardId = (rawCard: ScryfallCardDTO): string => {
-  return scryfallAdapter.extractCardId(rawCard)
+  const adapter = getScryfallAdapter()
+  return adapter.extractCardId(rawCard)
 }
 
 /**
@@ -47,7 +54,8 @@ export const extractCardId = (rawCard: ScryfallCardDTO): string => {
  * Nouvelle fonctionnalité
  */
 export const extractCardName = (rawCard: ScryfallCardDTO): string => {
-  return scryfallAdapter.extractCardName(rawCard)
+  const adapter = getScryfallAdapter()
+  return adapter.extractCardName(rawCard)
 }
 
 // Export des types pour compatibilité

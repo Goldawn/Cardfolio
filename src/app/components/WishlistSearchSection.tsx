@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { CardServiceFactory } from '@/card-api-service'
+import { cardApiManager } from '@/app/services/CardApiManager'
 import type { GameCard } from '@/types'
 
 // Hook useDebounce simple
@@ -48,7 +48,7 @@ export default function WishlistSearchSection({
   const debouncedQuery = useDebounce(searchInput, 300)
 
   // Instance du service Card API
-  const cardService = CardServiceFactory.create()
+  const cardService = cardApiManager.getCardService()
 
   // Suggestions (autocomplete) - NOUVEAU: Utilise le CardService
   useEffect(() => {

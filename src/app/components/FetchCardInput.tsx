@@ -1,37 +1,71 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import Card from './Card'
 import styles from './FetchCardInput.module.css'
-import { useCardSearch } from '@/app/hooks/useCardApi'
+import { cardApiManager } from '@/app/services/CardApiManager'
 import type { JSX } from 'react'
+import type { GameCard } from '@/types'
 
 export default function FetchCardInput(): JSX.Element {
   const [hoveredCardImageByList, setHoveredCardImageByList] = useState<Record<string, string>>({})
   
-  // Utilisation du hook personnalisé pour la recherche
-  const {
-    query,
-    results: searchResults,
-    suggestions,
-    loading,
-    error,
-    search,
-    updateSuggestions,
-    setQuery
-  } = useCardSearch()
+  // États locaux pour la recherche
+  const [query, setQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<GameCard[]>([])
+  const [suggestions, setSuggestions] = useState<string[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   // Rechercher des cartes complètes (résultats)
-  const handleSearch = async (searchQuery: string): Promise<void> => {
-    await search(searchQuery, {
-      unique: 'prints' // Pour afficher toutes les variations d'une carte
-    })
-  }
+  const handleSearch = useCallback(async (searchQuery: string): Promise<void> => {
+    if (!searchQuery.trim()) {
+      setSearchResults([])
+      return
+    }
+
+    setLoading(true)
+    setError(null)
+    
+    try {
+      const results = await cardApiManager.searchCards(searchQuery, {
+        unique: 'prints' // Pour afficher toutes les variations d'une carte
+      })
+      setSearchResults(results)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erreur lors de la recherche')
+      console.error('Erreur lors de la recherche:', err)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
   // Mise à jour des suggestions
+  const updateSuggestions = useCallback(async (searchQuery: string) => {
+    if (searchQuery.length < 3) {
+      setSuggestions([])
+      return
+    }
+
+    try {
+      const newSuggestions = await cardApiManager.getAutocompleteSuggestions(searchQuery)
+      setSuggestions(newSuggestions)
+    } catch (err) {
+      console.error('Erreur lors de la récupération des suggestions:', err)
+    }
+  }, [])
+
+  // Mise à jour des suggestions avec debounce
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      updateSuggestions(query)
+    }, 300)
+
+    return () => clearTimeout(timeoutId)
+  }, [query, updateSuggestions])
+
   const handleInputChange = (value: string) => {
     setQuery(value)
-    updateSuggestions(value)
   }
 
   const handleHoverCard = (listId: string, imageUrl: string): void => {
@@ -84,6 +118,13 @@ export default function FetchCardInput(): JSX.Element {
                 {suggestion}
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Affichage des erreurs */}
+        {error && (
+          <div className={styles.error}>
+            Erreur: {error}
           </div>
         )}
 

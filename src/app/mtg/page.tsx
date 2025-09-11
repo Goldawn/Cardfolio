@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react'
 import { useSession } from 'next-auth/react'
-import { CardServiceFactory } from '@/card-api-service'
+import { cardApiManager } from '@/app/services/CardApiManager'
 import type { JSX } from 'react'
 import type { GameCard } from '@/types'
 
@@ -106,7 +106,7 @@ export default function Collection(): JSX.Element {
   const userId = session?.user?.id
 
   // Instance du service Card API
-  const cardService = CardServiceFactory.create()
+  const cardService = cardApiManager.getCardService()
 
   // Filtres et tri des cartes
   const cardsToFilter = useMemo(() => collection, [collection])

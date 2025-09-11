@@ -1,15 +1,13 @@
 /**
  * Service Manager centralisé pour l'application Cardfolio
- * Utilise le nouveau Card API Service avec monitoring et cache
+ * Utilise le nouveau Card API Service avec cache et rate limiting
  */
 
 import { 
   CardServiceFactory,
   CacheService,
   RateLimitService,
-  MonitoringService,
-  DEFAULT_RATE_LIMIT_CONFIG,
-  DEFAULT_MONITORING_CONFIG
+  DEFAULT_RATE_LIMIT_CONFIG
 } from '@/card-api-service'
 
 // Configuration pour l'application
@@ -19,18 +17,6 @@ const APP_CONFIG = {
     ttl: 3600, // 1 heure
     provider: 'memory' as const,
     maxSize: 1000
-  },
-  monitoring: {
-    ...DEFAULT_MONITORING_CONFIG,
-    enabled: true,
-    logLevel: 'info' as const,
-    metricsEnabled: true,
-    metrics: {
-      collectApiCalls: true,
-      collectResponseTimes: true,
-      collectErrorRates: true,
-      collectCacheHitRates: true
-    }
   }
 }
 
@@ -43,13 +29,11 @@ class CardApiManager {
   private pricingService: any
   private cacheService: CacheService
   private rateLimitService: RateLimitService
-  private monitoringService: MonitoringService
 
   private constructor() {
     // Initialiser les services d'infrastructure
     this.cacheService = new CacheService(APP_CONFIG.cache)
     this.rateLimitService = new RateLimitService(DEFAULT_RATE_LIMIT_CONFIG)
-    this.monitoringService = new MonitoringService(APP_CONFIG.monitoring)
     
     // Créer les services principaux
     this.cardService = CardServiceFactory.create(APP_CONFIG)
@@ -68,19 +52,15 @@ class CardApiManager {
   getPricingService() { return this.pricingService }
   getCacheService() { return this.cacheService }
   getRateLimitService() { return this.rateLimitService }
-  getMonitoringService() { return this.monitoringService }
 
   /**
-   * Récupère une carte avec monitoring et cache
+   * Récupère une carte avec cache et rate limiting
    */
   async fetchCard(cardId: string) {
-    const startTime = Date.now()
-    
     try {
       // Vérifier le cache
       const cachedCard = await this.cacheService.getCard(cardId)
       if (cachedCard) {
-        this.monitoringService.recordCacheHit('scryfall', 'card')
         return cachedCard
       }
 
@@ -92,46 +72,21 @@ class CardApiManager {
       
       // Mettre en cache
       await this.cacheService.setCard(cardId, card)
-      this.monitoringService.recordCacheMiss('scryfall', 'card')
-
-      // Enregistrer les métriques
-      const responseTime = Date.now() - startTime
-      this.monitoringService.recordApiCall(
-        'scryfall',
-        '/cards',
-        'GET',
-        responseTime,
-        200,
-        true
-      )
 
       return card
     } catch (error) {
-      // Enregistrer l'erreur
-      const responseTime = Date.now() - startTime
-      this.monitoringService.recordApiCall(
-        'scryfall',
-        '/cards',
-        'GET',
-        responseTime,
-        500,
-        false
-      )
       throw error
     }
   }
 
   /**
-   * Recherche des cartes avec monitoring et cache
+   * Recherche des cartes avec cache et rate limiting
    */
   async searchCards(query: string, options?: any) {
-    const startTime = Date.now()
-    
     try {
       // Vérifier le cache de recherche
       const cachedResults = await this.cacheService.getSearchResults(query, options)
       if (cachedResults) {
-        this.monitoringService.recordCacheHit('scryfall', 'search')
         return cachedResults
       }
 
@@ -143,46 +98,21 @@ class CardApiManager {
       
       // Mettre en cache
       await this.cacheService.setSearchResults(query, results, undefined, options)
-      this.monitoringService.recordCacheMiss('scryfall', 'search')
-
-      // Enregistrer les métriques
-      const responseTime = Date.now() - startTime
-      this.monitoringService.recordApiCall(
-        'scryfall',
-        '/cards/search',
-        'GET',
-        responseTime,
-        200,
-        true
-      )
 
       return results
     } catch (error) {
-      // Enregistrer l'erreur
-      const responseTime = Date.now() - startTime
-      this.monitoringService.recordApiCall(
-        'scryfall',
-        '/cards/search',
-        'GET',
-        responseTime,
-        500,
-        false
-      )
       throw error
     }
   }
 
   /**
-   * Récupère les sets avec monitoring et cache
+   * Récupère les sets avec cache et rate limiting
    */
   async fetchSets() {
-    const startTime = Date.now()
-    
     try {
       // Vérifier le cache
       const cachedSets = await this.cacheService.getSets()
       if (cachedSets) {
-        this.monitoringService.recordCacheHit('scryfall', 'sets')
         return cachedSets
       }
 
@@ -194,46 +124,21 @@ class CardApiManager {
       
       // Mettre en cache
       await this.cacheService.setSets(sets)
-      this.monitoringService.recordCacheMiss('scryfall', 'sets')
-
-      // Enregistrer les métriques
-      const responseTime = Date.now() - startTime
-      this.monitoringService.recordApiCall(
-        'scryfall',
-        '/sets',
-        'GET',
-        responseTime,
-        200,
-        true
-      )
 
       return sets
     } catch (error) {
-      // Enregistrer l'erreur
-      const responseTime = Date.now() - startTime
-      this.monitoringService.recordApiCall(
-        'scryfall',
-        '/sets',
-        'GET',
-        responseTime,
-        500,
-        false
-      )
       throw error
     }
   }
 
   /**
-   * Récupère le prix d'une carte avec monitoring
+   * Récupère le prix d'une carte avec cache et rate limiting
    */
   async fetchCardPrice(cardName: string) {
-    const startTime = Date.now()
-    
     try {
       // Vérifier le cache de prix
       const cachedPrice = await this.cacheService.getPrice(cardName)
       if (cachedPrice) {
-        this.monitoringService.recordCacheHit('scryfall', 'price')
         return cachedPrice
       }
 
@@ -245,31 +150,9 @@ class CardApiManager {
       
       // Mettre en cache
       await this.cacheService.setPrice(cardName, price)
-      this.monitoringService.recordCacheMiss('scryfall', 'price')
-
-      // Enregistrer les métriques
-      const responseTime = Date.now() - startTime
-      this.monitoringService.recordApiCall(
-        'scryfall',
-        '/cards/named',
-        'GET',
-        responseTime,
-        200,
-        true
-      )
 
       return price
     } catch (error) {
-      // Enregistrer l'erreur
-      const responseTime = Date.now() - startTime
-      this.monitoringService.recordApiCall(
-        'scryfall',
-        '/cards/named',
-        'GET',
-        responseTime,
-        500,
-        false
-      )
       throw error
     }
   }
@@ -278,8 +161,6 @@ class CardApiManager {
    * Récupère les suggestions d'autocomplete
    */
   async getAutocompleteSuggestions(query: string) {
-    const startTime = Date.now()
-    
     try {
       // Attendre la disponibilité du rate limit
       await this.rateLimitService.waitForScryfallAvailability()
@@ -287,45 +168,10 @@ class CardApiManager {
       // Récupérer les suggestions
       const suggestions = await this.cardService.getAutocompleteSuggestions(query)
 
-      // Enregistrer les métriques
-      const responseTime = Date.now() - startTime
-      this.monitoringService.recordApiCall(
-        'scryfall',
-        '/cards/autocomplete',
-        'GET',
-        responseTime,
-        200,
-        true
-      )
-
       return suggestions
     } catch (error) {
-      // Enregistrer l'erreur
-      const responseTime = Date.now() - startTime
-      this.monitoringService.recordApiCall(
-        'scryfall',
-        '/cards/autocomplete',
-        'GET',
-        responseTime,
-        500,
-        false
-      )
       throw error
     }
-  }
-
-  /**
-   * Obtient les métriques de monitoring
-   */
-  getMonitoringStats() {
-    return this.monitoringService.getStats()
-  }
-
-  /**
-   * Obtient l'état de santé
-   */
-  async getHealthStatus() {
-    return await this.monitoringService.getHealthStatus()
   }
 
   /**

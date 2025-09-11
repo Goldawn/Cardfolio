@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
-import { CardServiceFactory } from '@/card-api-service'
+import { cardApiManager } from '@/app/services/CardApiManager'
 import type { MTGCard } from '@/types/games/magic'
 import styles from './AddFromCollection.module.css'
 
@@ -44,7 +44,7 @@ export default function ManualAdd({
   const debouncedQuery = useDebounce(query, 350)
 
   // Instance du service Card API
-  const cardService = CardServiceFactory.create()
+  const cardService = cardApiManager.getCardService()
 
   useEffect(() => {
     if (!debouncedQuery || debouncedQuery.trim().length < 2) {

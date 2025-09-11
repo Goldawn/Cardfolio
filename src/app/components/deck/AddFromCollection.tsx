@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState, useTransition } from 'react'
-import { CardServiceFactory } from '@/card-api-service'
+import { cardApiManager } from '@/app/services/CardApiManager'
 import styles from './AddFromCollection.module.css'
 import type { GameCard } from '@/types'
 import type { JSX } from 'react'
@@ -30,7 +30,7 @@ export default function AddFromCollection({
   onAdd,
 }: AddFromCollectionProps): JSX.Element {
   console.log(collectionItems)
-  const cardService = CardServiceFactory.create()
+  const cardService = cardApiManager.getCardService()
   const [isPending, startTransition] = useTransition()
   const [enriched, setEnriched] = useState<(GameCard & { ownedQuantity: number })[]>([])
   const [query, setQuery] = useState('')

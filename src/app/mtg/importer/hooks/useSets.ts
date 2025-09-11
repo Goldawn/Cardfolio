@@ -1,14 +1,27 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useSets as useSetsHook } from '@/app/hooks/useCardApi'
+import { cardApiManager } from '@/app/services/CardApiManager'
 import type { GameSet } from '@/card-api-service/dto'
 
 export function useSets() {
-  const { sets, loading, error, refetch } = useSetsHook()
+  const [sets, setSets] = useState<GameSet[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   // Charger tous les sets
   const loadSets = useCallback(async () => {
-    await refetch()
-  }, [refetch])
+    setLoading(true)
+    setError(null)
+    
+    try {
+      const setsData = await cardApiManager.fetchSets()
+      setSets(setsData)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erreur lors du chargement des sets')
+      console.error('Erreur lors du chargement des sets:', err)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
   // Charger les sets au montage du composant
   useEffect(() => {
