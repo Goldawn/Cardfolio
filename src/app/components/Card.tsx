@@ -4,42 +4,10 @@ import { useState } from 'react'
 import styles from './Card.module.css'
 import CardModal from './CardModal'
 import SplitButton from './SplitButton'
-import type { GameCard, Currency } from '@/types'
+import type { GameCard, Currency, CardProps } from '@/types'
 import type { WishlistList } from '@/types/collections'
+import { isMTGCard } from '@/types/utils/guards'
 import type { JSX } from 'react'
-
-interface CardProps {
-  card: GameCard
-  wishlistLists?: WishlistList[]
-  currency?: Currency
-  className?: string
-  cardList?: GameCard[]
-  currentIndex?: number
-
-  // Features (flags)
-  showName?: boolean
-  showSet?: boolean
-  showQuantity?: boolean
-  showWishlistQuantity?: boolean
-  showDecklistQuantity?: boolean
-  showPrice?: boolean
-  showAddToCollectionButton?: boolean
-  showAddToWishlistButton?: boolean
-  showAddToDeckButton?: boolean
-  showDeleteButton?: boolean
-  compareWithCollection?: boolean
-  modal?: boolean
-  disabled?: boolean
-
-  // Actions (callbacks)
-  onAddToCollection?: (card: GameCard) => void
-  onCreateWishlist?: (name: string) => Promise<string | null>
-  onAddToWishlist?: (listId: string, card: GameCard) => Promise<void>
-  onAddToDeck?: (card: GameCard) => void
-  onRemove?: (cardId: string) => void
-  updateQuantity?: (cardId: string, delta: number) => void
-  undoAddToCollection?: (card: GameCard) => void
-}
 
 export default function Card({
   card,
@@ -137,8 +105,8 @@ export default function Card({
           <SplitButton
             lists={wishlistLists || []}
             defaultListId={defaultListId}
-            onQuickAdd={listId => onAddToWishlist(listId, card)}
-            onCreateWishlist={onCreateWishlist}
+            onQuickAdd={async (listId, card) => await onAddToWishlist?.(listId, card)}
+            onCreateWishlist={async (name) => await onCreateWishlist?.(name) || null}
             card={card}
           />
         )}
@@ -175,6 +143,12 @@ export default function Card({
           <p>
             Valeur totale : {totalValue} {currency === 'eur' ? '€' : '$'}
           </p>
+          {/* Affichage spécifique pour les cartes MTG */}
+          {isMTGCard(card) && card.gameData.manaCost && (
+            <p className={styles.manaCost}>
+              Coût de mana : {card.gameData.manaCost}
+            </p>
+          )}
         </>
       )}
 

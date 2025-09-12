@@ -8,6 +8,15 @@ export * from './base';
 export * from './collections';
 export * from './decks';
 
+// Types de sets
+export * from './sets';
+
+// Types de composants
+export * from './components';
+
+// Types de services
+export * from './services';
+
 // Types spécifiques aux jeux
 export * from './games';
 

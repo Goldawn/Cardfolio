@@ -1,40 +1,52 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import type { GameCard } from '@/types'
+import type { GameCard, FilterState, CardRarity } from '@/types'
 
 export default function useCardFilters(cards: GameCard[] = []) {
-  const [sortOption, setSortOption] = useState('name')
-  const [sortOrderAsc, setSortOrderAsc] = useState(true)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [selectedColors, setSelectedColors] = useState<string[]>([])
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([])
-  const [selectedRarities, setSelectedRarities] = useState<string[]>([])
+  const [filterState, setFilterState] = useState<FilterState>({
+    sortOption: 'name',
+    sortOrderAsc: true,
+    searchQuery: '',
+    selectedColors: [],
+    selectedTypes: [],
+    selectedRarities: [],
+    selectedSets: []
+  })
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('')
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery)
+      setDebouncedSearchQuery(filterState.searchQuery)
     }, 300)
     return () => clearTimeout(timer)
-  }, [searchQuery])
+  }, [filterState.searchQuery])
 
   const toggleColorFilter = (color: string): void => {
-    setSelectedColors(prev =>
-      prev.includes(color) ? prev.filter(c => c !== color) : [...prev, color]
-    )
+    setFilterState(prev => ({
+      ...prev,
+      selectedColors: prev.selectedColors.includes(color) 
+        ? prev.selectedColors.filter(c => c !== color) 
+        : [...prev.selectedColors, color]
+    }))
   }
 
   const toggleTypeFilter = (type: string): void => {
-    setSelectedTypes(prev =>
-      prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
-    )
+    setFilterState(prev => ({
+      ...prev,
+      selectedTypes: prev.selectedTypes.includes(type) 
+        ? prev.selectedTypes.filter(t => t !== type) 
+        : [...prev.selectedTypes, type]
+    }))
   }
 
-  const toggleRarityFilter = (rarity: string): void => {
-    setSelectedRarities(prev =>
-      prev.includes(rarity) ? prev.filter(r => r !== rarity) : [...prev, rarity]
-    )
+  const toggleRarityFilter = (rarity: CardRarity): void => {
+    setFilterState(prev => ({
+      ...prev,
+      selectedRarities: prev.selectedRarities.includes(rarity) 
+        ? prev.selectedRarities.filter(r => r !== rarity) 
+        : [...prev.selectedRarities, rarity]
+    }))
   }
 
   const filterCards = (cardList: GameCard[]): GameCard[] => {
@@ -53,18 +65,18 @@ export default function useCardFilters(cards: GameCard[] = []) {
       )
 
       const matchesColor =
-        selectedColors.length === 0 ||
-        card.colors?.some(color => selectedColors.includes(color)) ||
-        (selectedColors.includes('C') && (card.colors?.length === 0)) ||
-        (selectedColors.includes('M') && (card.colors?.length ?? 0) > 1)
+        filterState.selectedColors.length === 0 ||
+        card.colors?.some(color => filterState.selectedColors.includes(color)) ||
+        (filterState.selectedColors.includes('C') && (card.colors?.length === 0)) ||
+        (filterState.selectedColors.includes('M') && (card.colors?.length ?? 0) > 1)
       const matchesType =
-        selectedTypes.length === 0 ||
-        selectedTypes.some(type => 
+        filterState.selectedTypes.length === 0 ||
+        filterState.selectedTypes.some(type => 
           'type' in card.gameData ? card.gameData.type?.includes(type) : false
         )
       const matchesRarity =
-        selectedRarities.length === 0 ||
-        (card.rarity ? selectedRarities.includes(card.rarity.toLowerCase()) : false)
+        filterState.selectedRarities.length === 0 ||
+        (card.rarity ? filterState.selectedRarities.includes(card.rarity) : false)
       return matchesSearch && matchesColor && matchesType && matchesRarity
     })
   }
@@ -72,7 +84,7 @@ export default function useCardFilters(cards: GameCard[] = []) {
   const sortCards = (cardsToSort: GameCard[]): GameCard[] => {
     return [...cardsToSort].sort((a, b) => {
       let result = 0
-      switch (sortOption) {
+      switch (filterState.sortOption) {
         case 'price':
           result =
             parseFloat(String(a.priceHistory?.at(-1)?.eur || 0)) -
@@ -105,7 +117,7 @@ export default function useCardFilters(cards: GameCard[] = []) {
         default:
           break
       }
-      return sortOrderAsc ? result : -result
+      return filterState.sortOrderAsc ? result : -result
     })
   }
 
@@ -115,25 +127,25 @@ export default function useCardFilters(cards: GameCard[] = []) {
   }, [
     cards,
     debouncedSearchQuery,
-    selectedColors,
-    selectedTypes,
-    selectedRarities,
-    sortOption,
-    sortOrderAsc,
+    filterState.selectedColors,
+    filterState.selectedTypes,
+    filterState.selectedRarities,
+    filterState.sortOption,
+    filterState.sortOrderAsc,
   ])
 
   return {
-    sortOption,
-    setSortOption,
-    sortOrderAsc,
-    setSortOrderAsc,
-    searchQuery,
-    setSearchQuery,
-    selectedColors,
+    sortOption: filterState.sortOption,
+    setSortOption: (option: string) => setFilterState(prev => ({ ...prev, sortOption: option })),
+    sortOrderAsc: filterState.sortOrderAsc,
+    setSortOrderAsc: (asc: boolean) => setFilterState(prev => ({ ...prev, sortOrderAsc: asc })),
+    searchQuery: filterState.searchQuery,
+    setSearchQuery: (query: string) => setFilterState(prev => ({ ...prev, searchQuery: query })),
+    selectedColors: filterState.selectedColors,
     toggleColorFilter,
-    selectedTypes,
+    selectedTypes: filterState.selectedTypes,
     toggleTypeFilter,
-    selectedRarities,
+    selectedRarities: filterState.selectedRarities,
     toggleRarityFilter,
     sortedAndFilteredCards,
   }

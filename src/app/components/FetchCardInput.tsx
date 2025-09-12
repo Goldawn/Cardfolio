@@ -5,38 +5,38 @@ import Card from './Card'
 import styles from './FetchCardInput.module.css'
 import { cardApiManager } from '@/app/services/CardApiManager'
 import type { JSX } from 'react'
-import type { GameCard } from '@/types'
+import type { GameCard, ApiResponse } from '@/types'
 
 export default function FetchCardInput(): JSX.Element {
   const [hoveredCardImageByList, setHoveredCardImageByList] = useState<Record<string, string>>({})
   
   // États locaux pour la recherche
   const [query, setQuery] = useState('')
-  const [searchResults, setSearchResults] = useState<GameCard[]>([])
+  const [searchResponse, setSearchResponse] = useState<ApiResponse<GameCard[]>>({
+    data: [],
+    error: undefined,
+    loading: false
+  })
   const [suggestions, setSuggestions] = useState<string[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
   // Rechercher des cartes complètes (résultats)
   const handleSearch = useCallback(async (searchQuery: string): Promise<void> => {
     if (!searchQuery.trim()) {
-      setSearchResults([])
+      setSearchResponse({ data: [], error: undefined, loading: false })
       return
     }
 
-    setLoading(true)
-    setError(null)
+    setSearchResponse(prev => ({ ...prev, loading: true, error: undefined }))
     
     try {
       const results = await cardApiManager.searchCards(searchQuery, {
         unique: 'prints' // Pour afficher toutes les variations d'une carte
       })
-      setSearchResults(results)
+      setSearchResponse({ data: results, error: undefined, loading: false })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors de la recherche')
+      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la recherche'
+      setSearchResponse({ data: [], error: errorMessage, loading: false })
       console.error('Erreur lors de la recherche:', err)
-    } finally {
-      setLoading(false)
     }
   }, [])
 
@@ -96,10 +96,10 @@ export default function FetchCardInput(): JSX.Element {
           />
           <button
             onClick={() => handleSearch(query)}
-            disabled={loading}
+            disabled={searchResponse.loading}
             className={styles.searchButton}
           >
-            {loading ? 'Recherche...' : 'Rechercher'}
+            {searchResponse.loading ? 'Recherche...' : 'Rechercher'}
           </button>
         </div>
 
@@ -122,18 +122,18 @@ export default function FetchCardInput(): JSX.Element {
         )}
 
         {/* Affichage des erreurs */}
-        {error && (
+        {searchResponse.error && (
           <div className={styles.error}>
-            Erreur: {error}
+            Erreur: {searchResponse.error}
           </div>
         )}
 
         {/* Résultats de recherche */}
-        {searchResults.length > 0 && (
+        {searchResponse.data && searchResponse.data.length > 0 && (
           <div className={styles.resultsContainer}>
-            <h3>Résultats ({searchResults.length})</h3>
+            <h3>Résultats ({searchResponse.data.length})</h3>
             <div className={styles.cardsGrid}>
-              {searchResults.map((card) => (
+              {searchResponse.data.map((card) => (
                 <div
                   key={card.id}
                   className={styles.cardWrapper}

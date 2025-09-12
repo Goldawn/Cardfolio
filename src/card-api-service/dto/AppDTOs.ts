@@ -1,23 +1,13 @@
 import type { CardRarity, Currency } from '@/types/base'
 import type { MTGCard } from '@/types/games/magic'
+import type { GameSet } from '@/types/sets'
 
 /**
  * DTOs pour les données de l'application (format unifié)
  */
 
-export interface GameSet {
-  id: string
-  code: string
-  name: string
-  releaseDate: string
-  setType: string
-  cardCount: number
-  digital: boolean
-  iconUri?: string
-  parentSetCode?: string
-  block?: string
-  blockCode?: string
-}
+// Réexporter GameSet depuis @types/ pour cohérence
+export type { GameSet }
 
 export interface PriceData {
   cardId: string
