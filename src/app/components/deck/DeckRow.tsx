@@ -1,15 +1,28 @@
 'use client'
-import { Fragment } from 'react'
-import Image from 'next/image'
-import styles from './DeckCardsTabs.module.css'
 import {
-  getMV,
-  getArtSmall,
-  getArtLarge,
-  getShowcasePayload,
-  rarityKeyOf,
   formatAndParseText,
+  getArtLarge,
+  getArtSmall,
+  getMV,
+  rarityKeyOf,
 } from '@/lib/mtgCards'
+import type { MTGCard } from '@/types'
+import { Fragment } from 'react'
+import styles from './DeckCardsTabs.module.css'
+
+interface DeckRowProps {
+  card: MTGCard & { deckCardId: string; decklistQuantity: number }
+  deckState: any
+  editMode: boolean
+  isPending: boolean
+  showLegality: boolean
+  updateDeckCardQty: (deckCardId: string, qty: number) => void
+  removeCardFromDeck: (deckCardId: string) => void
+  setShowcased: (deckCardId: string, artUrl: string) => void
+  getRowHoverHandlers: any
+  problems?: any[]
+  variant?: string
+}
 
 export default function DeckRow({
   card,
@@ -23,7 +36,7 @@ export default function DeckRow({
   getRowHoverHandlers,
   problems = [],
   variant = 'list',
-}) {
+}: DeckRowProps) {
   const hasThumb = variant === 'list'
   const hasQty = true
   const hasActions = true
@@ -56,7 +69,7 @@ export default function DeckRow({
   const hoverHandlers = getRowHoverHandlers
     ? getRowHoverHandlers({
         url: getArtLarge(card),
-        name: card.name || card.printedName,
+        name: card.name,
       })
     : {}
 
@@ -65,12 +78,12 @@ export default function DeckRow({
   const onInc = () => updateDeckCardQty(card.deckCardId, qty + 1)
   const onDelete = () => removeCardFromDeck(card.deckCardId)
   const onToggleShowcase = () =>
-    setShowcased(card.deckCardId, getShowcasePayload(card))
+    setShowcased(card.deckCardId, card?.image?.artCrop || '')
 
   // Champs partagés
-  const name = card.name || card.printedName || ''
-  const typeLine = card.type || card.typeLine || ''
-  const manaCostNode = formatAndParseText(card.manaCost)
+  const name = card.name || ''
+  const typeLine = card.gameData?.type || card.gameData?.typeLine || ''
+  const manaCostNode = formatAndParseText(card.gameData?.manaCost)
   const mv = getMV(card) // numérique (pour tooltip CMC côté compact)
   const artSmall = getArtSmall(card)
 

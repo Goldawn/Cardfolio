@@ -2,7 +2,7 @@
 // ==================================
 
 import { BaseCard } from '../base'
-import { Collection, Decklist } from '../collections'
+import { Collection } from '../collections'
 
 export type FleshAndBloodClass =
   | 'Guardian'
@@ -75,8 +75,16 @@ export type FleshAndBloodCard = BaseCard<
 }
 
 export type FleshAndBloodCollection = Collection<'flesh-and-blood'>
-export type FleshAndBloodDecklist = Decklist<
-  'flesh-and-blood',
-  FleshAndBloodClass,
-  FleshAndBloodFormat
->
+
+export type FleshAndBloodDecklist = {
+  id: string
+  name: string
+  gameType: 'flesh-and-blood'
+  format?: FleshAndBloodFormat
+  colors?: FleshAndBloodClass[]
+  userId: string
+  createdAt: Date
+  updatedAt: Date
+  isLocked?: boolean
+  notes?: string
+}

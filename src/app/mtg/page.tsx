@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState, useMemo } from 'react'
-import { useSession } from 'next-auth/react'
 import { cardApiManager } from '@/app/services/CardApiManager'
-import type { JSX } from 'react'
 import type { GameCard } from '@/types'
+import { useSession } from 'next-auth/react'
+import type { JSX } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 // Hook useCardFilters simplifié
 function useCardFilters(cards: GameCard[]) {
@@ -17,7 +17,10 @@ function useCardFilters(cards: GameCard[]) {
 
   const sortedAndFilteredCards = useMemo(() => {
     let filtered = cards.filter(card => {
-      if (searchQuery && !card.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+      if (
+        searchQuery &&
+        !card.name.toLowerCase().includes(searchQuery.toLowerCase())
+      ) {
         return false
       }
       // Ajouter d'autres filtres si nécessaire
@@ -27,7 +30,7 @@ function useCardFilters(cards: GameCard[]) {
     // Tri
     filtered.sort((a, b) => {
       let aValue: any, bValue: any
-      
+
       switch (sortOption) {
         case 'name':
           aValue = a.name
@@ -56,7 +59,15 @@ function useCardFilters(cards: GameCard[]) {
     })
 
     return filtered
-  }, [cards, searchQuery, sortOption, sortOrderAsc, selectedColors, selectedTypes, selectedRarities])
+  }, [
+    cards,
+    searchQuery,
+    sortOption,
+    sortOrderAsc,
+    selectedColors,
+    selectedTypes,
+    selectedRarities,
+  ])
 
   return {
     sortOption,
@@ -67,24 +78,20 @@ function useCardFilters(cards: GameCard[]) {
     setSearchQuery,
     selectedColors,
     toggleColorFilter: (color: string) => {
-      setSelectedColors(prev => 
-        prev.includes(color) 
-          ? prev.filter(c => c !== color)
-          : [...prev, color]
+      setSelectedColors(prev =>
+        prev.includes(color) ? prev.filter(c => c !== color) : [...prev, color]
       )
     },
     selectedTypes,
     toggleTypeFilter: (type: string) => {
-      setSelectedTypes(prev => 
-        prev.includes(type) 
-          ? prev.filter(t => t !== type)
-          : [...prev, type]
+      setSelectedTypes(prev =>
+        prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
       )
     },
     selectedRarities,
     toggleRarityFilter: (rarity: string) => {
-      setSelectedRarities(prev => 
-        prev.includes(rarity) 
+      setSelectedRarities(prev =>
+        prev.includes(rarity)
           ? prev.filter(r => r !== rarity)
           : [...prev, rarity]
       )
@@ -117,12 +124,6 @@ export default function Collection(): JSX.Element {
     setSortOrderAsc,
     searchQuery,
     setSearchQuery,
-    selectedColors,
-    toggleColorFilter,
-    selectedTypes,
-    toggleTypeFilter,
-    selectedRarities,
-    toggleRarityFilter,
     sortedAndFilteredCards,
   } = useCardFilters(cardsToFilter)
 
@@ -136,7 +137,7 @@ export default function Collection(): JSX.Element {
 
     collection.forEach(card => {
       totalCards += card.quantity || 1
-      
+
       // Calcul de la valeur
       const latestPrice = card.priceHistory?.[0]
       if (latestPrice) {
@@ -147,8 +148,9 @@ export default function Collection(): JSX.Element {
       // Statistiques par set
       if (card.setCode) {
         uniqueSets.add(card.setCode)
-        cardsPerSet[card.setCode] = (cardsPerSet[card.setCode] || 0) + (card.quantity || 1)
-        
+        cardsPerSet[card.setCode] =
+          (cardsPerSet[card.setCode] || 0) + (card.quantity || 1)
+
         // Comptage des cartes uniques par set
         if (!uniqueCardsPerSetCounts[card.setCode]) {
           uniqueCardsPerSetCounts[card.setCode] = 0
@@ -178,12 +180,14 @@ export default function Collection(): JSX.Element {
 
         const data = await res.json()
         console.log('Collection DATA :', data)
-        
+
         // Utilisation du nouveau service pour enrichir les cartes
         const enrichedCards = await Promise.all(
           data.map(async (item: any) => {
             try {
-              const card = await cardService.fetchCard({ cardId: item.scryfallId })
+              const card = await cardService.fetchCard({
+                cardId: item.scryfallId,
+              })
               return {
                 ...card,
                 quantity: item.quantity,
@@ -193,7 +197,10 @@ export default function Collection(): JSX.Element {
                 dbId: item.id,
               }
             } catch (error) {
-              console.error(`Erreur enrichissement carte ${item.scryfallId}:`, error)
+              console.error(
+                `Erreur enrichissement carte ${item.scryfallId}:`,
+                error
+              )
               // Retourner une carte basique en cas d'erreur
               return {
                 id: item.scryfallId,
@@ -202,7 +209,7 @@ export default function Collection(): JSX.Element {
                 quantity: item.quantity,
                 priceHistory: [],
                 dbId: item.id,
-                gameData: {}
+                gameData: {},
               }
             }
           })
@@ -238,11 +245,11 @@ export default function Collection(): JSX.Element {
           setCode: selectedSet,
           language: 'en',
           options: {
-            fetchAllPages: false // Récupère seulement la première page
-          }
+            fetchAllPages: false, // Récupère seulement la première page
+          },
         })
         setSelectedSetCards(cards)
-        
+
         // TODO: Implémenter la pagination si nécessaire
         setNextPage(undefined)
       } catch (error) {
@@ -275,17 +282,17 @@ export default function Collection(): JSX.Element {
   // Fonctions utilitaires
   const getSetName = (code: string): string =>
     sets.find(s => s.code === code)?.name || 'Nom inconnu'
-  
-  const getSetIcon = (code: string): string => 
+
+  const _getSetIcon = (code: string): string =>
     sets.find(s => s.code === code)?.iconUri || ''
-  
-  const getSetTotalCards = (code: string): number | null =>
+
+  const _getSetTotalCards = (code: string): number | null =>
     sets.find(s => s.code === code)?.cardCount || null
 
   return (
     <div className="collection-page">
       <h1>Ma Collection</h1>
-      
+
       {/* Statistiques */}
       <div className="collection-stats">
         <div className="stat-item">
@@ -298,7 +305,9 @@ export default function Collection(): JSX.Element {
         </div>
         <div className="stat-item">
           <h3>Valeur Totale</h3>
-          <p>{collectionStats.totalValue} {currency.toUpperCase()}</p>
+          <p>
+            {collectionStats.totalValue} {currency.toUpperCase()}
+          </p>
         </div>
       </div>
 
@@ -308,7 +317,7 @@ export default function Collection(): JSX.Element {
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={e => setSearchQuery(e.target.value)}
             placeholder="Rechercher une carte..."
             className="search-input"
           />
@@ -317,7 +326,7 @@ export default function Collection(): JSX.Element {
         <div className="filter-controls">
           <select
             value={sortOption}
-            onChange={(e) => setSortOption(e.target.value)}
+            onChange={e => setSortOption(e.target.value)}
             className="sort-select"
           >
             <option value="name">Nom</option>
@@ -335,7 +344,7 @@ export default function Collection(): JSX.Element {
 
           <select
             value={currency}
-            onChange={(e) => setCurrency(e.target.value as 'eur' | 'usd')}
+            onChange={e => setCurrency(e.target.value as 'eur' | 'usd')}
             className="currency-select"
           >
             <option value="eur">EUR</option>
@@ -349,7 +358,7 @@ export default function Collection(): JSX.Element {
         <h3>Voir les cartes d'un set</h3>
         <select
           value={selectedSet}
-          onChange={(e) => setSelectedSet(e.target.value)}
+          onChange={e => setSelectedSet(e.target.value)}
           className="set-select"
         >
           <option value="">Sélectionner un set</option>
@@ -369,14 +378,16 @@ export default function Collection(): JSX.Element {
           <div className="set-cards-grid">
             {selectedSetCards.map(card => (
               <div key={card.id} className="set-card-item">
-                <img 
-                  src={card.image?.small} 
+                <img
+                  src={card.image?.small}
                   alt={card.name}
                   className="set-card-image"
                 />
                 <div className="set-card-info">
                   <h4>{card.name}</h4>
-                  <p>{card.collectorNumber} - {card.rarity}</p>
+                  <p>
+                    {card.collectorNumber} - {card.rarity}
+                  </p>
                 </div>
               </div>
             ))}
@@ -390,16 +401,21 @@ export default function Collection(): JSX.Element {
         <div className="cards-grid">
           {sortedAndFilteredCards.map((card: GameCard) => (
             <div key={card.id} className="collection-card-item">
-              <img 
-                src={card.image?.small} 
+              <img
+                src={card.image?.small}
                 alt={card.name}
                 className="card-image"
               />
               <div className="card-info">
                 <h4>{card.name}</h4>
-                <p>{card.setCode} - {card.rarity}</p>
+                <p>
+                  {card.setCode} - {card.rarity}
+                </p>
                 <p>Quantité: {card.quantity}</p>
-                <p>Prix: {card.priceHistory?.[0]?.[currency] || 'N/A'} {currency.toUpperCase()}</p>
+                <p>
+                  Prix: {card.priceHistory?.[0]?.[currency] || 'N/A'}{' '}
+                  {currency.toUpperCase()}
+                </p>
               </div>
             </div>
           ))}

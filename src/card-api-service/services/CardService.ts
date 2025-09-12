@@ -1,16 +1,14 @@
-import type { ICardProvider, ICardAdapter } from '../interfaces'
-import type { 
-  CardFetchRequestDTO, 
-  SetFetchRequestDTO,
-  SearchRequestDTO,
-  BulkFetchRequestDTO,
-  CardServiceResponseDTO,
-  SetServiceResponseDTO,
-  BulkCardResponseDTO,
-  GameSet
-} from '../dto'
 import type { MTGCard } from '@/types/games/magic'
 import type { ServiceConfig } from '../config'
+import type {
+  BulkCardResponseDTO,
+  BulkFetchRequestDTO,
+  CardFetchRequestDTO,
+  GameSet,
+  SearchRequestDTO,
+  SetFetchRequestDTO,
+} from '../dto'
+import type { ICardAdapter, ICardProvider } from '../interfaces'
 
 /**
  * Service principal pour la gestion des cartes
@@ -22,7 +20,11 @@ export class CardService {
   private config: ServiceConfig
   private defaultProvider: string
 
-  constructor(providers: Map<string, ICardProvider>, adapters: Map<string, ICardAdapter>, config: ServiceConfig) {
+  constructor(
+    providers: Map<string, ICardProvider>,
+    adapters: Map<string, ICardAdapter>,
+    config: ServiceConfig
+  ) {
     this.providers = providers
     this.adapters = adapters
     this.config = config
@@ -43,7 +45,7 @@ export class CardService {
 
     try {
       const response = await provider.fetchCard(request)
-      
+
       if (response.error) {
         // Tentative de fallback si configuré
         if (this.config.fallbackProviders.length > 0) {
@@ -82,8 +84,11 @@ export class CardService {
     }
 
     try {
-      const responses = await provider.searchCards(request.query, request.options)
-      
+      const responses = await provider.searchCards(
+        request.query,
+        request.options
+      )
+
       return responses
         .filter(response => !response.error)
         .map(response => adapter.transformCard(response.data))
@@ -110,22 +115,22 @@ export class CardService {
 
     const allCards: MTGCard[] = []
     let hasMore = true
-    let nextPage: string | undefined
+    let _nextPage: string | undefined
 
     try {
       while (hasMore) {
         const result = await provider.fetchSetCards(request)
-        
+
         if (result.error) {
           throw new Error(result.error.message)
         }
 
         const cards = adapter.transformCards(result.data as any)
         allCards.push(...cards)
-        
+
         // Vérifier s'il y a plus de pages
         hasMore = (result.data as any).has_more || false
-        nextPage = (result.data as any).next_page
+        _nextPage = (result.data as any).next_page
 
         // Délai entre les requêtes si configuré
         if (hasMore && request.options?.delayBetweenPages) {
@@ -147,17 +152,22 @@ export class CardService {
   /**
    * Récupère la suite des cartes (pagination)
    */
-  async fetchMoreCards(nextPageUrl: string, providerName?: string): Promise<MTGCard[]> {
+  async fetchMoreCards(
+    nextPageUrl: string,
+    providerName?: string
+  ): Promise<MTGCard[]> {
     const provider = this.providers.get(providerName || this.defaultProvider)
     const adapter = this.adapters.get(providerName || this.defaultProvider)
 
     if (!provider || !adapter) {
-      throw new Error(`Provider or adapter not found: ${providerName || this.defaultProvider}`)
+      throw new Error(
+        `Provider or adapter not found: ${providerName || this.defaultProvider}`
+      )
     }
 
     try {
       const result = await provider.fetchMoreCards(nextPageUrl)
-      
+
       if (result.error) {
         throw new Error(result.error.message)
       }
@@ -176,12 +186,14 @@ export class CardService {
     const adapter = this.adapters.get(providerName || this.defaultProvider)
 
     if (!provider || !adapter) {
-      throw new Error(`Provider or adapter not found: ${providerName || this.defaultProvider}`)
+      throw new Error(
+        `Provider or adapter not found: ${providerName || this.defaultProvider}`
+      )
     }
 
     try {
       const response = await provider.fetchSets()
-      
+
       if (response.error) {
         // Tentative de fallback si configuré
         if (this.config.fallbackProviders.length > 0) {
@@ -203,7 +215,9 @@ export class CardService {
   /**
    * Récupère plusieurs cartes en lot
    */
-  async fetchBulkCards(request: BulkFetchRequestDTO): Promise<BulkCardResponseDTO> {
+  async fetchBulkCards(
+    request: BulkFetchRequestDTO
+  ): Promise<BulkCardResponseDTO> {
     const providerName = request.provider || this.defaultProvider
     const provider = this.providers.get(providerName)
     const adapter = this.adapters.get(providerName)
@@ -220,8 +234,8 @@ export class CardService {
     // Traitement par lots
     for (let i = 0; i < request.cardIds.length; i += batchSize) {
       const batch = request.cardIds.slice(i, i + batchSize)
-      
-      const batchPromises = batch.map(async (cardId) => {
+
+      const batchPromises = batch.map(async cardId => {
         try {
           const card = await this.fetchCard({ cardId, provider: providerName })
           return { success: true, card, cardId }
@@ -231,7 +245,7 @@ export class CardService {
       })
 
       const batchResults = await Promise.all(batchPromises)
-      
+
       batchResults.forEach(result => {
         if (result.success && result.card) {
           cards.push(result.card)
@@ -257,13 +271,15 @@ export class CardService {
         totalRequested: request.cardIds.length,
         totalSuccessful: cards.length,
         totalFailed: errors.length,
-        providers: [providerName]
-      }
+        providers: [providerName],
+      },
     }
   }
 
   // Méthodes de fallback privées
-  private async fetchCardWithFallback(request: CardFetchRequestDTO): Promise<MTGCard> {
+  private async fetchCardWithFallback(
+    request: CardFetchRequestDTO
+  ): Promise<MTGCard> {
     for (const fallbackProvider of this.config.fallbackProviders) {
       try {
         return await this.fetchCard({ ...request, provider: fallbackProvider })
@@ -275,10 +291,15 @@ export class CardService {
     throw new Error('All providers failed')
   }
 
-  private async searchCardsWithFallback(request: SearchRequestDTO): Promise<MTGCard[]> {
+  private async searchCardsWithFallback(
+    request: SearchRequestDTO
+  ): Promise<MTGCard[]> {
     for (const fallbackProvider of this.config.fallbackProviders) {
       try {
-        return await this.searchCards({ ...request, provider: fallbackProvider })
+        return await this.searchCards({
+          ...request,
+          provider: fallbackProvider,
+        })
       } catch (error) {
         console.warn(`Fallback provider ${fallbackProvider} failed:`, error)
         continue
@@ -287,10 +308,15 @@ export class CardService {
     throw new Error('All providers failed')
   }
 
-  private async fetchSetCardsWithFallback(request: SetFetchRequestDTO): Promise<MTGCard[]> {
+  private async fetchSetCardsWithFallback(
+    request: SetFetchRequestDTO
+  ): Promise<MTGCard[]> {
     for (const fallbackProvider of this.config.fallbackProviders) {
       try {
-        return await this.fetchSetCards({ ...request, provider: fallbackProvider })
+        return await this.fetchSetCards({
+          ...request,
+          provider: fallbackProvider,
+        })
       } catch (error) {
         console.warn(`Fallback provider ${fallbackProvider} failed:`, error)
         continue
@@ -299,7 +325,9 @@ export class CardService {
     throw new Error('All providers failed')
   }
 
-  private async fetchSetsWithFallback(providerName?: string): Promise<GameSet[]> {
+  private async fetchSetsWithFallback(
+    _providerName?: string
+  ): Promise<GameSet[]> {
     for (const fallbackProvider of this.config.fallbackProviders) {
       try {
         return await this.fetchSets(fallbackProvider)
@@ -314,7 +342,10 @@ export class CardService {
   /**
    * Récupère les suggestions d'autocomplete pour une requête
    */
-  async getAutocompleteSuggestions(query: string, providerName?: string): Promise<string[]> {
+  async getAutocompleteSuggestions(
+    query: string,
+    providerName?: string
+  ): Promise<string[]> {
     const provider = providerName || this.defaultProvider
     const providerInstance = this.providers.get(provider)
 
@@ -325,15 +356,21 @@ export class CardService {
 
     try {
       const response = await providerInstance.fetchAutocomplete(query)
-      
+
       if (response.error) {
-        console.error('Erreur lors de la récupération des suggestions:', response.error)
+        console.error(
+          'Erreur lors de la récupération des suggestions:',
+          response.error
+        )
         return []
       }
 
       return response.data
     } catch (error) {
-      console.error('Erreur dans CardService.getAutocompleteSuggestions:', error)
+      console.error(
+        'Erreur dans CardService.getAutocompleteSuggestions:',
+        error
+      )
       return []
     }
   }

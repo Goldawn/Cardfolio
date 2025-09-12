@@ -2,7 +2,7 @@
 // ==========================
 
 import { BaseCard } from '../base'
-import { Collection, Decklist } from '../collections'
+import { Collection } from '../collections'
 
 export type PokemonType =
   | 'Grass'
@@ -76,4 +76,16 @@ export type PokemonCard = BaseCard<
 }
 
 export type PokemonCollection = Collection<'pokemon'>
-export type PokemonDecklist = Decklist<'pokemon', PokemonType, PokemonFormat>
+
+export type PokemonDecklist = {
+  id: string
+  name: string
+  gameType: 'pokemon'
+  format?: PokemonFormat
+  colors?: PokemonType[]
+  userId: string
+  createdAt: Date
+  updatedAt: Date
+  isLocked?: boolean
+  notes?: string
+}

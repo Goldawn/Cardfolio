@@ -19,14 +19,18 @@ interface DeleteWishlistItemRequest {
 }
 
 // GET – Liste tous les items de wishlist de l'utilisateur (avec la liste associée)
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(_request: NextRequest, { params }: RouteParams) {
   const { userId } = await params
 
   try {
     const items = await prisma.wishlistItem.findMany({
-      where: { userId },
+      where: {
+        wishlist: {
+          userId: userId,
+        },
+      },
       include: {
-        list: true,
+        wishlist: true,
       },
       orderBy: {
         dateAdded: 'desc',
@@ -107,7 +111,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 // PATCH – Met à jour la quantité ou déplace une carte vers une autre liste
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   const { userId } = await params
-  const { itemId, quantityDelta = 0, newListId }: UpdateWishlistItemRequest = await request.json()
+  const {
+    itemId,
+    quantityDelta = 0,
+    newListId,
+  }: UpdateWishlistItemRequest = await request.json()
 
   if (!itemId) {
     return new Response(JSON.stringify({ error: 'ID item manquant' }), {
@@ -117,7 +125,12 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
   try {
     const item = await prisma.wishlistItem.findFirst({
-      where: { id: itemId, userId },
+      where: {
+        id: itemId,
+        wishlist: {
+          userId: userId,
+        },
+      },
     })
     if (!item) {
       return new Response(JSON.stringify({ error: 'Item introuvable' }), {
@@ -135,7 +148,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       where: { id: itemId },
       data: {
         quantity: newQuantity,
-        listId: newListId || item.listId,
+        wishlistId: newListId || item.wishlistId,
       },
     })
 
@@ -151,7 +164,8 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 // DELETE – Supprime un item OU tous les items d'une wishlist
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   const { userId } = await params
-  const { scryfallId, wishlistId }: DeleteWishlistItemRequest = await request.json()
+  const { scryfallId, wishlistId }: DeleteWishlistItemRequest =
+    await request.json()
   console.log('UserId de la route DELETE', userId)
   console.log('entrée dans la route de delete', scryfallId)
 
@@ -180,36 +194,6 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       where: { id: existing.id },
     })
     return new Response(null, { status: 204 })
-
-    if (wishlistId) {
-      // Vérifie que la liste appartient bien à l'utilisateur
-      const list = await prisma.wishlistList.findUnique({
-        where: { id: wishlistId },
-      })
-
-      if (!list || list.userId !== userId) {
-        return new Response(
-          JSON.stringify({ error: 'Liste non trouvée ou non autorisée' }),
-          {
-            status: 403,
-          }
-        )
-      }
-
-      // Supprime tous les items liés à cette wishlist
-      await prisma.wishlistItem.deleteMany({
-        where: {
-          wishlistId,
-        },
-      })
-
-      return new Response(null, { status: 204 })
-    }
-
-    return new Response(
-      JSON.stringify({ error: 'itemId ou wishlistId requis' }),
-      { status: 400 }
-    )
   } catch (error) {
     console.error('❌ Erreur DELETE wishlist item(s):', error)
     return new Response(JSON.stringify({ error: 'Erreur serveur' }), {

@@ -1,11 +1,6 @@
 import axios, { type AxiosResponse } from 'axios'
+import type { PriceServiceResponseDTO, ScryfallCardDTO } from '../dto'
 import type { IPricingProvider } from '../interfaces'
-import type { 
-  PriceServiceResponseDTO,
-  ServiceErrorDTO,
-  ServiceMetadataDTO,
-  ScryfallCardDTO
-} from '../dto'
 
 /**
  * Provider Scryfall pour les prix des cartes Magic: The Gathering
@@ -17,13 +12,16 @@ export class ScryfallPricingProvider implements IPricingProvider {
 
   private async makeRequest<T>(endpoint: string): Promise<T> {
     try {
-      const response: AxiosResponse<T> = await axios.get(`${this.baseUrl}${endpoint}`, {
-        timeout: 10000,
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
+      const response: AxiosResponse<T> = await axios.get(
+        `${this.baseUrl}${endpoint}`,
+        {
+          timeout: 10000,
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
         }
-      })
+      )
       return response.data
     } catch (error: any) {
       throw new Error(`Scryfall Pricing API error: ${error.message}`)
@@ -35,18 +33,20 @@ export class ScryfallPricingProvider implements IPricingProvider {
    */
   async fetchCardPrice(cardId: string): Promise<PriceServiceResponseDTO> {
     const startTime = Date.now()
-    
+
     try {
-      const rawCard = await this.makeRequest<ScryfallCardDTO>(`/cards/${cardId}`)
-      
+      const rawCard = await this.makeRequest<ScryfallCardDTO>(
+        `/cards/${cardId}`
+      )
+
       return {
         data: this.transformPriceData(rawCard),
         metadata: {
           provider: this.name,
           cached: false,
           fetchTime: Date.now() - startTime,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       }
     } catch (error: any) {
       return {
@@ -55,15 +55,15 @@ export class ScryfallPricingProvider implements IPricingProvider {
           provider: this.name,
           cached: false,
           fetchTime: Date.now() - startTime,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         },
         error: {
           code: 'SCRYFALL_PRICE_FETCH_ERROR',
           message: error.message,
           provider: this.name,
           retryable: true,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       }
     }
   }
@@ -71,12 +71,15 @@ export class ScryfallPricingProvider implements IPricingProvider {
   /**
    * Récupère le prix d'une carte par son nom
    */
-  async fetchCardPriceByName(cardName: string, setCode?: string): Promise<PriceServiceResponseDTO> {
+  async fetchCardPriceByName(
+    cardName: string,
+    setCode?: string
+  ): Promise<PriceServiceResponseDTO> {
     const startTime = Date.now()
-    
+
     try {
       let endpoint: string
-      
+
       if (setCode) {
         // Recherche par nom exact dans un set spécifique
         endpoint = `/cards/named?exact=${encodeURIComponent(cardName)}&set=${setCode}`
@@ -85,39 +88,47 @@ export class ScryfallPricingProvider implements IPricingProvider {
         endpoint = `/cards/named?exact=${encodeURIComponent(cardName)}`
       }
 
-      console.log(`[ScryfallPricingProvider] Making request to: ${this.baseUrl}${endpoint}`)
+      console.log(
+        `[ScryfallPricingProvider] Making request to: ${this.baseUrl}${endpoint}`
+      )
       const rawCard = await this.makeRequest<ScryfallCardDTO>(endpoint)
       console.log(`[ScryfallPricingProvider] Raw card data:`, rawCard)
-      
+
       const transformedData = this.transformPriceData(rawCard)
-      console.log(`[ScryfallPricingProvider] Transformed price data:`, transformedData)
-      
+      console.log(
+        `[ScryfallPricingProvider] Transformed price data:`,
+        transformedData
+      )
+
       return {
         data: transformedData,
         metadata: {
           provider: this.name,
           cached: false,
           fetchTime: Date.now() - startTime,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       }
     } catch (error: any) {
-      console.error(`[ScryfallPricingProvider] Error fetching price for ${cardName}:`, error)
+      console.error(
+        `[ScryfallPricingProvider] Error fetching price for ${cardName}:`,
+        error
+      )
       return {
         data: this.getEmptyPriceData('', cardName),
         metadata: {
           provider: this.name,
           cached: false,
           fetchTime: Date.now() - startTime,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         },
         error: {
           code: 'SCRYFALL_PRICE_BY_NAME_ERROR',
           message: error.message,
           provider: this.name,
           retryable: true,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       }
     }
   }
@@ -128,12 +139,12 @@ export class ScryfallPricingProvider implements IPricingProvider {
    */
   async fetchBulkPrices(cardIds: string[]): Promise<PriceServiceResponseDTO[]> {
     const startTime = Date.now()
-    
+
     try {
       // Scryfall ne supporte pas le bulk pricing, on fait des requêtes parallèles
       const promises = cardIds.map(cardId => this.fetchCardPrice(cardId))
       const results = await Promise.allSettled(promises)
-      
+
       return results.map((result, index) => {
         if (result.status === 'fulfilled') {
           return result.value
@@ -144,15 +155,15 @@ export class ScryfallPricingProvider implements IPricingProvider {
               provider: this.name,
               cached: false,
               fetchTime: Date.now() - startTime,
-              timestamp: new Date().toISOString()
+              timestamp: new Date().toISOString(),
             },
             error: {
               code: 'SCRYFALL_BULK_PRICE_ERROR',
               message: result.reason?.message || 'Unknown error',
               provider: this.name,
               retryable: true,
-              timestamp: new Date().toISOString()
-            }
+              timestamp: new Date().toISOString(),
+            },
           }
         }
       })
@@ -163,15 +174,15 @@ export class ScryfallPricingProvider implements IPricingProvider {
           provider: this.name,
           cached: false,
           fetchTime: Date.now() - startTime,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         },
         error: {
           code: 'SCRYFALL_BULK_PRICE_ERROR',
           message: error.message,
           provider: this.name,
           retryable: true,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       }))
     }
   }
@@ -180,16 +191,21 @@ export class ScryfallPricingProvider implements IPricingProvider {
    * Récupère l'historique des prix d'une carte
    * Scryfall ne fournit pas d'historique des prix, on retourne le prix actuel
    */
-  async fetchPriceHistory(cardId: string, period?: string): Promise<PriceServiceResponseDTO> {
+  async fetchPriceHistory(
+    cardId: string,
+    _period?: string
+  ): Promise<PriceServiceResponseDTO> {
     // Scryfall ne fournit pas d'historique des prix
     // On retourne le prix actuel avec une note
     const currentPrice = await this.fetchCardPrice(cardId)
-    
+
     if (currentPrice.data) {
       // Scryfall ne fournit pas d'historique des prix, on retourne le prix actuel
-      console.warn('Scryfall does not provide price history. Current price returned.')
+      console.warn(
+        'Scryfall does not provide price history. Current price returned.'
+      )
     }
-    
+
     return currentPrice
   }
 
@@ -216,18 +232,26 @@ export class ScryfallPricingProvider implements IPricingProvider {
       prices: {
         usd: rawCard.prices?.usd ? parseFloat(rawCard.prices.usd) : undefined,
         eur: rawCard.prices?.eur ? parseFloat(rawCard.prices.eur) : undefined,
-        tix: rawCard.prices?.tix ? parseFloat(rawCard.prices.tix) : undefined
+        tix: rawCard.prices?.tix ? parseFloat(rawCard.prices.tix) : undefined,
       },
       lastUpdated: new Date().toISOString(),
       source: this.name,
       marketPrice: {
-        usd: rawCard.prices?.usd_foil ? parseFloat(rawCard.prices.usd_foil) : undefined,
-        eur: rawCard.prices?.eur_foil ? parseFloat(rawCard.prices.eur_foil) : undefined
+        usd: rawCard.prices?.usd_foil
+          ? parseFloat(rawCard.prices.usd_foil)
+          : undefined,
+        eur: rawCard.prices?.eur_foil
+          ? parseFloat(rawCard.prices.eur_foil)
+          : undefined,
       },
       foilPrice: {
-        usd: rawCard.prices?.usd_foil ? parseFloat(rawCard.prices.usd_foil) : undefined,
-        eur: rawCard.prices?.eur_foil ? parseFloat(rawCard.prices.eur_foil) : undefined
-      }
+        usd: rawCard.prices?.usd_foil
+          ? parseFloat(rawCard.prices.usd_foil)
+          : undefined,
+        eur: rawCard.prices?.eur_foil
+          ? parseFloat(rawCard.prices.eur_foil)
+          : undefined,
+      },
     }
   }
 
@@ -241,10 +265,10 @@ export class ScryfallPricingProvider implements IPricingProvider {
       prices: {
         usd: 0,
         eur: 0,
-        tix: 0
+        tix: 0,
       },
       lastUpdated: new Date().toISOString(),
-      source: this.name
+      source: this.name,
     }
   }
 }

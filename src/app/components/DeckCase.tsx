@@ -1,9 +1,20 @@
+import React from 'react'
 import styles from './DeckCase.module.css'
 
-export default function DeckCase({ deck, showcasedCard }) {
+interface DeckCaseProps {
+  deck: any
+  showcasedCard?: any
+}
+
+export default function DeckCase({
+  deck,
+  showcasedCard: _showcasedCard,
+}: DeckCaseProps) {
   const defaultCover = '/assets/images/card_art/abro-34-titania-s-command.jpg'
   const showcasedArt = deck.showcasedArt || defaultCover
-  const coverStyle = { '--cover': `url("${showcasedArt}")` }
+  const coverStyle = {
+    '--cover': `url("${showcasedArt}")`,
+  } as React.CSSProperties
 
   return (
     <article className={styles.singleDeck}>

@@ -7,7 +7,7 @@ interface RouteParams {
 }
 
 // GET - Récupération de toutes les cartes d'un deck spécifique
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(_request: NextRequest, { params }: RouteParams) {
   console.log('ENTREE DANS LE ROUTE DE DECK ID')
   const { userId, deckId } = await params
   console.log('userId:', userId, 'deckId:', deckId)
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   }
 
   try {
-    const list = await prisma.Decklist.findUnique({
+    const list = await prisma.decklist.findUnique({
       where: { id: deckId },
     })
 
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    const items = await prisma.DeckCard.findMany({
+    const items = await prisma.deckCard.findMany({
       where: {
         deckId,
       },

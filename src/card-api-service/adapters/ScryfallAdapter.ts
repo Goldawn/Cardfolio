@@ -1,7 +1,12 @@
-import type { ICardAdapter } from '../interfaces'
-import type { MTGCard, MTGGameData, MTGCardFace, MTGColor } from '@/types/games/magic'
 import type { CardImages, CardRarity } from '@/types/base'
-import type { GameSet, PriceData, ScryfallCardDTO, ScryfallSetDTO } from '../dto'
+import type { MTGCard, MTGColor, MTGGameData } from '@/types/games/magic'
+import type {
+  GameSet,
+  PriceData,
+  ScryfallCardDTO,
+  ScryfallSetDTO,
+} from '../dto'
+import type { ICardAdapter } from '../interfaces'
 
 /**
  * Adapter pour transformer les données Scryfall vers le format de l'application
@@ -17,8 +22,10 @@ export class ScryfallAdapter implements ICardAdapter {
     const layoutType = rawData.layout || 'normal'
 
     // Gestion des couleurs
-    const checkColorless = (card: ScryfallCardDTO | any): MTGColor[] => {
-      return card.colors?.length === 0 && card.mana_cost ? ['C'] : (card.colors as MTGColor[] || [])
+    const _checkColorless = (card: ScryfallCardDTO | any): MTGColor[] => {
+      return card.colors?.length === 0 && card.mana_cost
+        ? ['C']
+        : (card.colors as MTGColor[]) || []
     }
 
     const checkColorlessIdentity = (card: ScryfallCardDTO): MTGColor[] => {
@@ -27,7 +34,7 @@ export class ScryfallAdapter implements ICardAdapter {
         card.mana_cost &&
         card.mana_cost !== ''
         ? ['C']
-        : (card.color_identity as MTGColor[] || [])
+        : (card.color_identity as MTGColor[]) || []
     }
 
     // Base commune pour toutes les cartes
@@ -46,7 +53,7 @@ export class ScryfallAdapter implements ICardAdapter {
           eur: rawData.prices?.eur ? parseFloat(rawData.prices.eur) : 0,
         },
       ],
-      rarity: rawData.rarity as CardRarity || undefined,
+      rarity: (rawData.rarity as CardRarity) || undefined,
       collectorNumber: rawData.collector_number || undefined,
       artist: rawData.artist || undefined,
       legalities: rawData.legalities || {},
@@ -79,8 +86,8 @@ export class ScryfallAdapter implements ICardAdapter {
         oracle_text: face.oracle_text,
         power: face.power,
         toughness: face.toughness,
-        image_uris: face.image_uris
-      }))
+        image_uris: face.image_uris,
+      })),
     }
 
     // Cas spécial des cartes réversibles
@@ -120,7 +127,7 @@ export class ScryfallAdapter implements ICardAdapter {
       iconUri: rawData.icon_svg_uri,
       parentSetCode: rawData.parent_set_code,
       block: rawData.block,
-      blockCode: rawData.block_code
+      blockCode: rawData.block_code,
     }
   }
 
@@ -132,10 +139,10 @@ export class ScryfallAdapter implements ICardAdapter {
       prices: {
         usd: rawData.prices?.usd ? parseFloat(rawData.prices.usd) : undefined,
         eur: rawData.prices?.eur ? parseFloat(rawData.prices.eur) : undefined,
-        tix: rawData.prices?.tix ? parseFloat(rawData.prices.tix) : undefined
+        tix: rawData.prices?.tix ? parseFloat(rawData.prices.tix) : undefined,
       },
       lastUpdated: new Date().toISOString(),
-      source: this.providerName
+      source: this.providerName,
     }
   }
 

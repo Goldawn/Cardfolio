@@ -2,13 +2,13 @@
  * Exemple d'intégration réelle dans l'application Cardfolio
  */
 
-import { 
-  CardServiceFactory,
+import {
   CacheService,
-  RateLimitService,
-  MonitoringService,
+  CardServiceFactory,
+  DEFAULT_MONITORING_CONFIG,
   DEFAULT_RATE_LIMIT_CONFIG,
-  DEFAULT_MONITORING_CONFIG
+  MonitoringService,
+  RateLimitService,
 } from '../index'
 
 // ========================================
@@ -20,7 +20,7 @@ const CARD_API_CONFIG = {
     enabled: true,
     ttl: 3600, // 1 heure
     provider: 'memory' as const,
-    maxSize: 1000
+    maxSize: 1000,
   },
   monitoring: {
     ...DEFAULT_MONITORING_CONFIG,
@@ -31,9 +31,9 @@ const CARD_API_CONFIG = {
       collectApiCalls: true,
       collectResponseTimes: true,
       collectErrorRates: true,
-      collectCacheHitRates: true
-    }
-  }
+      collectCacheHitRates: true,
+    },
+  },
 }
 
 // ========================================
@@ -52,7 +52,7 @@ class CardApiServiceManager {
     this.cacheService = new CacheService(CARD_API_CONFIG.cache)
     this.rateLimitService = new RateLimitService(DEFAULT_RATE_LIMIT_CONFIG)
     this.monitoringService = new MonitoringService(CARD_API_CONFIG.monitoring)
-    
+
     // Créer le service principal avec configuration
     this.cardService = CardServiceFactory.create(CARD_API_CONFIG)
   }
@@ -65,10 +65,18 @@ class CardApiServiceManager {
   }
 
   // Méthodes publiques
-  getCardService() { return this.cardService }
-  getCacheService() { return this.cacheService }
-  getRateLimitService() { return this.rateLimitService }
-  getMonitoringService() { return this.monitoringService }
+  getCardService() {
+    return this.cardService
+  }
+  getCacheService() {
+    return this.cacheService
+  }
+  getRateLimitService() {
+    return this.rateLimitService
+  }
+  getMonitoringService() {
+    return this.monitoringService
+  }
 }
 
 // ========================================
@@ -249,33 +257,37 @@ export const EnhancedCardSearch = () => {
 // ========================================
 
 // pages/api/card-api/health.ts
-export const healthApiRoute = async (req: any, res: any) => {
+export const healthApiRoute = async (_req: any, res: any) => {
   const serviceManager = CardApiServiceManager.getInstance()
-  
+
   try {
     const health = await serviceManager.getMonitoringService().getHealthStatus()
     res.status(200).json(health)
   } catch (error) {
-    res.status(500).json({ error: 'Erreur lors de la récupération de la santé' })
+    res
+      .status(500)
+      .json({ error: 'Erreur lors de la récupération de la santé' })
   }
 }
 
 // pages/api/card-api/metrics.ts
-export const metricsApiRoute = async (req: any, res: any) => {
+export const metricsApiRoute = async (_req: any, res: any) => {
   const serviceManager = CardApiServiceManager.getInstance()
-  
+
   try {
     const stats = serviceManager.getMonitoringService().getStats()
     res.status(200).json(stats)
   } catch (error) {
-    res.status(500).json({ error: 'Erreur lors de la récupération des métriques' })
+    res
+      .status(500)
+      .json({ error: 'Erreur lors de la récupération des métriques' })
   }
 }
 
 // pages/api/card-api/cache/clear.ts
-export const clearCacheApiRoute = async (req: any, res: any) => {
+export const clearCacheApiRoute = async (_req: any, res: any) => {
   const serviceManager = CardApiServiceManager.getInstance()
-  
+
   try {
     await serviceManager.getCacheService().clear()
     res.status(200).json({ message: 'Cache vidé avec succès' })

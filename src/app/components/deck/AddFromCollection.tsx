@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useMemo, useState, useTransition } from 'react'
 import { cardApiManager } from '@/app/services/CardApiManager'
-import styles from './AddFromCollection.module.css'
-import type { GameCard, AppCollectionItem, AppDeckCard } from '@/types'
+import type { AppCollectionItem, AppDeckCard, GameCard } from '@/types'
 import type { JSX } from 'react'
+import { useEffect, useMemo, useState, useTransition } from 'react'
+import styles from './AddFromCollection.module.css'
 
 interface AddFromCollectionProps {
   deckId: string
@@ -14,7 +14,7 @@ interface AddFromCollectionProps {
 }
 
 export default function AddFromCollection({
-  deckId,
+  deckId: _deckId,
   collectionItems,
   currentDeckCards,
   onAdd,
@@ -22,7 +22,9 @@ export default function AddFromCollection({
   console.log(collectionItems)
   const cardService = cardApiManager.getCardService()
   const [isPending, startTransition] = useTransition()
-  const [enriched, setEnriched] = useState<(GameCard & { ownedQuantity: number })[]>([])
+  const [enriched, setEnriched] = useState<
+    (GameCard & { ownedQuantity: number })[]
+  >([])
   const [query, setQuery] = useState('')
   const [respectOwned, setRespectOwned] = useState(true)
   const [qtyById, setQtyById] = useState<Record<string, number>>({})
@@ -46,26 +48,34 @@ export default function AddFromCollection({
       }
       try {
         // Utilisation du CardService pour le bulk fetch
-        const cardIds = collectionItems.map((it: AppCollectionItem) => it.scryfallId)
+        const cardIds = collectionItems.map(
+          (it: AppCollectionItem) => it.scryfallId
+        )
         const result = await cardService.fetchBulkCards({
           cardIds,
           options: {
             batchSize: 75, // Scryfall limite à 75 identifiants par requête
-            delayBetweenBatches: 1000 // 1 seconde entre les lots
-          }
+            delayBetweenBatches: 1000, // 1 seconde entre les lots
+          },
         })
-        
+
         // Rattache ownedQuantity à chaque carte
         const enriched = result.cards.map((card: GameCard) => {
-          const owned = collectionItems.find((ci: AppCollectionItem) => ci.scryfallId === card.id)?.quantity || 0
+          const owned =
+            collectionItems.find(
+              (ci: AppCollectionItem) => ci.scryfallId === card.id
+            )?.quantity || 0
           return { ...card, ownedQuantity: owned }
         })
-        
+
         // Log des erreurs s'il y en a
         if (result.errors.length > 0) {
-          console.warn(`${result.errors.length} cartes n'ont pas pu être chargées:`, result.errors)
+          console.warn(
+            `${result.errors.length} cartes n'ont pas pu être chargées:`,
+            result.errors
+          )
         }
-        
+
         if (!cancelled) setEnriched(enriched)
       } catch (e) {
         console.error('Erreur enrichissement collection:', e)
@@ -96,7 +106,9 @@ export default function AddFromCollection({
   const addOne = (scryfallId: string): void => {
     const wanted = qtyById[scryfallId] ?? 1
     const owned =
-      collectionItems.find((ci: AppCollectionItem) => ci.scryfallId === scryfallId)?.quantity || 0
+      collectionItems.find(
+        (ci: AppCollectionItem) => ci.scryfallId === scryfallId
+      )?.quantity || 0
     const inDeck = inDeckMap.get(scryfallId) || 0
     let qty = wanted
 
@@ -189,7 +201,9 @@ export default function AddFromCollection({
                       min={1}
                       max={99}
                       value={qtyById[c.id] ?? 1}
-                      onChange={e => handleQtyChange(c.id, Number(e.target.value))}
+                      onChange={e =>
+                        handleQtyChange(c.id, Number(e.target.value))
+                      }
                       style={{ width: 64 }}
                     />
                     <button

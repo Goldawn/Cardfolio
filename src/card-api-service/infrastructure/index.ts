@@ -2,30 +2,28 @@
  * Export des services d'infrastructure
  */
 
-export { 
-  CacheService, 
-  MemoryCacheProvider, 
+export {
+  CacheService,
+  MemoryCacheProvider,
   RedisCacheProvider,
   type CacheConfig,
+  type CacheEntry,
   type ICacheProvider,
-  type CacheEntry
 } from './CacheService'
 
-export { 
-  RateLimitService, 
-  ProviderRateLimiter,
+export {
+  DEFAULT_RATE_LIMIT_CONFIG,
+  RateLimitService,
   type RateLimitConfig,
   type RateLimitInfo,
   type RateLimitResult,
-  DEFAULT_RATE_LIMIT_CONFIG
 } from './RateLimitService'
 
-export { 
-  MonitoringService, 
-  MetricsCollector,
-  type MonitoringConfig,
-  type MetricData,
-  type HealthStatus,
+export {
+  DEFAULT_MONITORING_CONFIG,
+  MonitoringService,
   type ApiCallMetric,
-  DEFAULT_MONITORING_CONFIG
+  type HealthStatus,
+  type MetricData,
+  type MonitoringConfig,
 } from './MonitoringService'

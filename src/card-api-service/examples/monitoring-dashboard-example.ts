@@ -2,10 +2,7 @@
  * Exemple de dashboard pour visualiser les résultats du MonitoringService
  */
 
-import { 
-  MonitoringService,
-  DEFAULT_MONITORING_CONFIG
-} from '../index'
+import { DEFAULT_MONITORING_CONFIG, MonitoringService } from '../index'
 
 // ========================================
 // 1. DASHBOARD DE MONITORING
@@ -22,12 +19,12 @@ export class MonitoringDashboard {
         collectApiCalls: true,
         collectResponseTimes: true,
         collectErrorRates: true,
-        collectCacheHitRates: true
+        collectCacheHitRates: true,
       },
       healthChecks: {
         enabled: true,
-        interval: 10000 // 10 secondes
-      }
+        interval: 10000, // 10 secondes
+      },
     })
   }
 
@@ -43,7 +40,7 @@ export class MonitoringDashboard {
       timestamp: new Date().toISOString(),
       health: healthStatus,
       statistics: stats,
-      report: healthReport
+      report: healthReport,
     }
   }
 
@@ -63,9 +60,9 @@ export class MonitoringDashboard {
         errorRate: stats.errorRate,
         averageResponseTime: stats.averageResponseTime,
         requestsByProvider: stats.requestsByProvider,
-        requestsByEndpoint: stats.requestsByEndpoint
+        requestsByEndpoint: stats.requestsByEndpoint,
       },
-      services: health.services
+      services: health.services,
     }
   }
 
@@ -74,7 +71,7 @@ export class MonitoringDashboard {
    */
   async generateHtmlReport() {
     const report = await this.generateMonitoringReport()
-    
+
     return `
       <!DOCTYPE html>
       <html>
@@ -123,7 +120,10 @@ export class MonitoringDashboard {
           <table>
             <tr><th>Provider</th><th>Requêtes</th></tr>
             ${Object.entries(report.statistics.requestsByProvider)
-              .map(([provider, count]) => `<tr><td>${provider}</td><td>${count}</td></tr>`)
+              .map(
+                ([provider, count]) =>
+                  `<tr><td>${provider}</td><td>${count}</td></tr>`
+              )
               .join('')}
           </table>
         </div>
@@ -133,7 +133,10 @@ export class MonitoringDashboard {
           <table>
             <tr><th>Endpoint</th><th>Requêtes</th></tr>
             ${Object.entries(report.statistics.requestsByEndpoint)
-              .map(([endpoint, count]) => `<tr><td>${endpoint}</td><td>${count}</td></tr>`)
+              .map(
+                ([endpoint, count]) =>
+                  `<tr><td>${endpoint}</td><td>${count}</td></tr>`
+              )
               .join('')}
           </table>
         </div>
@@ -143,13 +146,15 @@ export class MonitoringDashboard {
           <table>
             <tr><th>Service</th><th>Statut</th><th>Dernière Vérification</th></tr>
             ${Object.entries(report.health.services)
-              .map(([service, info]) => `
+              .map(
+                ([service, info]) => `
                 <tr>
                   <td>${service}</td>
                   <td class="status-${info.status}">${info.status.toUpperCase()}</td>
                   <td>${new Date(info.lastCheck).toLocaleString()}</td>
                 </tr>
-              `)
+              `
+              )
               .join('')}
           </table>
         </div>
@@ -169,7 +174,7 @@ export class MonitoringDashboard {
   async generateAlerts() {
     const health = await this.monitoringService.getHealthStatus()
     const stats = this.monitoringService.getStats()
-    
+
     const alerts = []
 
     // Alerte sur le taux d'erreur
@@ -177,7 +182,7 @@ export class MonitoringDashboard {
       alerts.push({
         level: 'warning',
         message: `Taux d'erreur élevé: ${stats.errorRate.toFixed(2)}%`,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       })
     }
 
@@ -186,7 +191,7 @@ export class MonitoringDashboard {
       alerts.push({
         level: 'warning',
         message: `Temps de réponse élevé: ${stats.averageResponseTime.toFixed(2)}ms`,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       })
     }
 
@@ -196,7 +201,7 @@ export class MonitoringDashboard {
         alerts.push({
           level: 'error',
           message: `Service ${service} est en panne`,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         })
       }
     })
@@ -234,9 +239,9 @@ export const createMonitoringApiRoutes = () => {
       return {
         status: health.status,
         timestamp: health.timestamp,
-        services: health.services
+        services: health.services,
       }
-    }
+    },
   }
 }
 
@@ -294,33 +299,37 @@ export const MonitoringWidget = () => {
 // ========================================
 
 // pages/api/monitoring/health.ts
-export const healthApiHandler = async (req: any, res: any) => {
+export const healthApiHandler = async (_req: any, res: any) => {
   const dashboard = new MonitoringDashboard()
-  
+
   try {
     const health = await dashboard.monitoringService.getHealthStatus()
     res.status(200).json(health)
   } catch (error) {
-    res.status(500).json({ error: 'Erreur lors de la récupération de la santé' })
+    res
+      .status(500)
+      .json({ error: 'Erreur lors de la récupération de la santé' })
   }
 }
 
 // pages/api/monitoring/metrics.ts
-export const metricsApiHandler = async (req: any, res: any) => {
+export const metricsApiHandler = async (_req: any, res: any) => {
   const dashboard = new MonitoringDashboard()
-  
+
   try {
     const metrics = await dashboard.getApiReport()
     res.status(200).json(metrics)
   } catch (error) {
-    res.status(500).json({ error: 'Erreur lors de la récupération des métriques' })
+    res
+      .status(500)
+      .json({ error: 'Erreur lors de la récupération des métriques' })
   }
 }
 
 // pages/api/monitoring/report.ts
-export const reportApiHandler = async (req: any, res: any) => {
+export const reportApiHandler = async (_req: any, res: any) => {
   const dashboard = new MonitoringDashboard()
-  
+
   try {
     const htmlReport = await dashboard.generateHtmlReport()
     res.setHeader('Content-Type', 'text/html')

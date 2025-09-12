@@ -2,7 +2,7 @@
 // ==========================
 
 import { BaseCard } from '../base'
-import { Collection, Decklist } from '../collections'
+import { Collection } from '../collections'
 
 export type LorcanaColor =
   | 'Amber'
@@ -41,4 +41,16 @@ export type LorcanaCard = BaseCard<
 }
 
 export type LorcanaCollection = Collection<'lorcana'>
-export type LorcanaDecklist = Decklist<'lorcana', LorcanaColor, LorcanaFormat>
+
+export type LorcanaDecklist = {
+  id: string
+  name: string
+  gameType: 'lorcana'
+  format?: LorcanaFormat
+  colors?: LorcanaColor[]
+  userId: string
+  createdAt: Date
+  updatedAt: Date
+  isLocked?: boolean
+  notes?: string
+}

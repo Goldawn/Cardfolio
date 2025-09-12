@@ -2,16 +2,13 @@
  * Exemple d'intégration des nouveaux services dans l'application
  */
 
-import { 
-  CardServiceFactory,
+import {
   CacheService,
-  RateLimitService,
-  MonitoringService,
-  ProviderSelectionStrategyFactory,
-  FallbackService,
-  DEFAULT_RATE_LIMIT_CONFIG,
+  CardServiceFactory,
   DEFAULT_MONITORING_CONFIG,
-  DEFAULT_FALLBACK_CONFIG
+  DEFAULT_RATE_LIMIT_CONFIG,
+  MonitoringService,
+  RateLimitService,
 } from '../index'
 
 // ========================================
@@ -23,7 +20,7 @@ const cacheConfig = {
   enabled: true,
   ttl: 3600, // 1 heure
   provider: 'memory' as const,
-  maxSize: 1000 // Ajout de la propriété manquante
+  maxSize: 1000, // Ajout de la propriété manquante
 }
 
 const monitoringConfig = {
@@ -35,8 +32,8 @@ const monitoringConfig = {
     collectApiCalls: true,
     collectResponseTimes: true,
     collectErrorRates: true,
-    collectCacheHitRates: true
-  }
+    collectCacheHitRates: true,
+  },
 }
 
 // ========================================
@@ -51,7 +48,7 @@ const monitoringService = new MonitoringService(monitoringConfig)
 // Services principaux avec infrastructure
 const cardService = CardServiceFactory.create({
   cache: cacheConfig,
-  monitoring: monitoringConfig
+  monitoring: monitoringConfig,
 })
 
 // ========================================
@@ -76,7 +73,7 @@ export class CardApiManager {
    */
   async fetchCard(cardId: string) {
     const startTime = Date.now()
-    
+
     try {
       // Vérifier le cache d'abord
       const cachedCard = await this.cacheService.getCard(cardId)
@@ -90,7 +87,7 @@ export class CardApiManager {
 
       // Récupérer la carte
       const card = await this.cardService.fetchCard({ cardId })
-      
+
       // Mettre en cache
       await this.cacheService.setCard(cardId, card)
       this.monitoringService.recordCacheMiss('scryfall', 'card')

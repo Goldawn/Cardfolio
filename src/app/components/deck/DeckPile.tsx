@@ -1,6 +1,21 @@
 'use client'
+import { getArtLarge } from '@/lib/mtgCards'
 import styles from './DeckCardsTabs.module.css'
-import { getArtLarge, getShowcasePayload } from '@/lib/mtgCards'
+
+interface DeckPileProps {
+  card: any
+  qty: number
+  deckState: any
+  editMode: boolean
+  isPending: boolean
+  setShowcased: (deckCardId: string, artUrl: string) => void
+  updateDeckCardQty: (cardId: string, qty: number) => void
+  removeCardFromDeck: (cardId: string) => void
+  showLegality: boolean
+  config: any
+  problems: any[]
+  isProblem: boolean
+}
 
 export default function DeckPile({
   card,
@@ -15,7 +30,7 @@ export default function DeckPile({
   config,
   problems,
   isProblem,
-}) {
+}: DeckPileProps) {
   const {
     CARD_W = 140,
     CARD_H = 200,
@@ -53,12 +68,11 @@ export default function DeckPile({
     >
       <button
         className={`${styles.toggleShowcased} ${isShowcased ? styles.showcased : ''}`}
-        onClick={() => setShowcased(card.deckCardId, getShowcasePayload(card))}
+        onClick={() => setShowcased(card.deckCardId, card.image.artCrop)}
         title={isShowcased ? 'Carte mise en avant' : 'Définir comme showcased'}
       >
         {isShowcased ? '★' : '☆'}
       </button>
-
       <div
         className={styles.stackThumb}
         style={{ width: CARD_W, height: stackH }}

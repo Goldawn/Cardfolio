@@ -1,7 +1,14 @@
-import React from 'react'
 import styles from './MagicCardPlaceholder.module.css'
 
-export default function MagicCardPlaceholder({ test, image }) {
+interface MagicCardPlaceholderProps {
+  test: () => void
+  image?: string
+}
+
+export default function MagicCardPlaceholder({
+  test,
+  image,
+}: MagicCardPlaceholderProps) {
   return (
     <div
       className={`${styles.cardPlaceholder} ${image ? styles.active : ''}`}

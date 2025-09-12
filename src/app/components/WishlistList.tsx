@@ -3,10 +3,20 @@
 import { useEffect, useRef, useState } from 'react'
 import styles from './WishlistList.module.css'
 
-export default function WishlistList({ list, onRename, onDelete }) {
+interface WishlistListProps {
+  list: any
+  onRename?: (name: string) => void
+  onDelete?: (id: string) => void
+}
+
+export default function WishlistList({
+  list,
+  onRename,
+  onDelete,
+}: WishlistListProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [editedName, setEditedName] = useState(list.name ?? '')
-  const inputRef = useRef(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (isEditing) {
@@ -22,7 +32,7 @@ export default function WishlistList({ list, onRename, onDelete }) {
     setIsEditing(false)
   }
 
-  const onEditKeyDown = e => {
+  const onEditKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault()
       handleRename()

@@ -5,11 +5,14 @@
 
 export interface RateLimitConfig {
   enabled: boolean
-  providers: Record<string, {
-    requests: number
-    per: 'second' | 'minute' | 'hour' | 'day'
-    burst?: number // Nombre de requêtes autorisées en rafale
-  }>
+  providers: Record<
+    string,
+    {
+      requests: number
+      per: 'second' | 'minute' | 'hour' | 'day'
+      burst?: number // Nombre de requêtes autorisées en rafale
+    }
+  >
   global?: {
     requests: number
     per: 'second' | 'minute' | 'hour' | 'day'
@@ -35,10 +38,13 @@ export interface RateLimitResult {
 class ProviderRateLimiter {
   private requests: number[] = []
   private config: RateLimitConfig['providers'][string]
-  private providerName: string
+  private _providerName: string
 
-  constructor(providerName: string, config: RateLimitConfig['providers'][string]) {
-    this.providerName = providerName
+  constructor(
+    providerName: string,
+    config: RateLimitConfig['providers'][string]
+  ) {
+    this._providerName = providerName
     this.config = config
   }
 
@@ -48,14 +54,14 @@ class ProviderRateLimiter {
   checkRequest(): RateLimitResult {
     const now = Date.now()
     const windowMs = this.getWindowMs()
-    
+
     // Nettoyer les anciennes requêtes
     this.cleanup(now, windowMs)
-    
+
     const limit = this.config.requests
     const remaining = Math.max(0, limit - this.requests.length)
     const resetTime = now + windowMs
-    
+
     if (this.requests.length < limit) {
       // Autoriser la requête
       this.requests.push(now)
@@ -64,22 +70,22 @@ class ProviderRateLimiter {
         info: {
           limit,
           remaining: remaining - 1,
-          resetTime
-        }
+          resetTime,
+        },
       }
     } else {
       // Refuser la requête
       const oldestRequest = Math.min(...this.requests)
       const retryAfter = Math.ceil((oldestRequest + windowMs - now) / 1000)
-      
+
       return {
         allowed: false,
         info: {
           limit,
           remaining: 0,
-          resetTime
+          resetTime,
         },
-        retryAfter
+        retryAfter,
       }
     }
   }
@@ -89,9 +95,11 @@ class ProviderRateLimiter {
    */
   async waitForAvailability(): Promise<void> {
     const result = this.checkRequest()
-    
+
     if (!result.allowed && result.retryAfter) {
-      await new Promise(resolve => setTimeout(resolve, result.retryAfter! * 1000))
+      await new Promise(resolve =>
+        setTimeout(resolve, result.retryAfter! * 1000)
+      )
     }
   }
 
@@ -101,17 +109,17 @@ class ProviderRateLimiter {
   getInfo(): RateLimitInfo {
     const now = Date.now()
     const windowMs = this.getWindowMs()
-    
+
     this.cleanup(now, windowMs)
-    
+
     const limit = this.config.requests
     const remaining = Math.max(0, limit - this.requests.length)
     const resetTime = now + windowMs
-    
+
     return {
       limit,
       remaining,
-      resetTime
+      resetTime,
     }
   }
 
@@ -120,11 +128,16 @@ class ProviderRateLimiter {
    */
   private getWindowMs(): number {
     switch (this.config.per) {
-      case 'second': return 1000
-      case 'minute': return 60 * 1000
-      case 'hour': return 60 * 60 * 1000
-      case 'day': return 24 * 60 * 60 * 1000
-      default: return 60 * 1000
+      case 'second':
+        return 1000
+      case 'minute':
+        return 60 * 1000
+      case 'hour':
+        return 60 * 60 * 1000
+      case 'day':
+        return 24 * 60 * 60 * 1000
+      default:
+        return 60 * 1000
     }
   }
 
@@ -147,12 +160,17 @@ export class RateLimitService {
 
   constructor(config: RateLimitConfig) {
     this.config = config
-    
+
     // Initialiser les limiteurs pour chaque provider
-    for (const [providerName, providerConfig] of Object.entries(config.providers)) {
-      this.limiters.set(providerName, new ProviderRateLimiter(providerName, providerConfig))
+    for (const [providerName, providerConfig] of Object.entries(
+      config.providers
+    )) {
+      this.limiters.set(
+        providerName,
+        new ProviderRateLimiter(providerName, providerConfig)
+      )
     }
-    
+
     // Initialiser le limiteur global si configuré
     if (config.global) {
       this.globalLimiter = new ProviderRateLimiter('global', config.global)
@@ -169,8 +187,8 @@ export class RateLimitService {
         info: {
           limit: Infinity,
           remaining: Infinity,
-          resetTime: Date.now()
-        }
+          resetTime: Date.now(),
+        },
       }
     }
 
@@ -191,8 +209,8 @@ export class RateLimitService {
         info: {
           limit: Infinity,
           remaining: Infinity,
-          resetTime: Date.now()
-        }
+          resetTime: Date.now(),
+        },
       }
     }
 
@@ -228,7 +246,7 @@ export class RateLimitService {
       return {
         limit: Infinity,
         remaining: Infinity,
-        resetTime: Date.now()
+        resetTime: Date.now(),
       }
     }
 
@@ -251,15 +269,15 @@ export class RateLimitService {
    */
   getAllInfo(): Record<string, RateLimitInfo> {
     const info: Record<string, RateLimitInfo> = {}
-    
+
     for (const [providerName, limiter] of this.limiters) {
       info[providerName] = limiter.getInfo()
     }
-    
+
     if (this.globalLimiter) {
       info.global = this.globalLimiter.getInfo()
     }
-    
+
     return info
   }
 
@@ -311,21 +329,21 @@ export const DEFAULT_RATE_LIMIT_CONFIG: RateLimitConfig = {
     scryfall: {
       requests: 30,
       per: 'minute',
-      burst: 5
+      burst: 5,
     },
     mtggoldfish: {
       requests: 100,
       per: 'minute',
-      burst: 10
+      burst: 10,
     },
     tcgplayer: {
       requests: 50,
       per: 'minute',
-      burst: 5
-    }
+      burst: 5,
+    },
   },
   global: {
     requests: 200,
-    per: 'minute'
-  }
+    per: 'minute',
+  },
 }

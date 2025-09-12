@@ -2,6 +2,13 @@
 import Image from 'next/image'
 import styles from './DeckCardsTabs.module.css'
 
+interface SectionBlockProps {
+  title: string
+  count: number
+  icon?: { src: string; alt: string; w?: number; h?: number } | null
+  children: React.ReactNode
+}
+
 /**
  * En-tête + conteneur de section (type, couleur, CMC…)
  * Props:
@@ -10,7 +17,12 @@ import styles from './DeckCardsTabs.module.css'
  * - icon?: { src, alt, w=18, h=18 } | null
  * - children: contenu (table/liste)
  */
-export default function SectionBlock({ title, count, icon = null, children }) {
+export default function SectionBlock({
+  title,
+  count,
+  icon = null,
+  children,
+}: SectionBlockProps) {
   return (
     <section className={styles.typeSection}>
       <header className={styles.sectionHeader}>

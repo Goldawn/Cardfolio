@@ -2,7 +2,13 @@
 import { createPortal } from 'react-dom'
 import styles from './DeckCardsTabs.module.css'
 
-export default function CardPreviewPopover({ preview }) {
+interface CardPreviewPopoverProps {
+  preview: any
+}
+
+export default function CardPreviewPopover({
+  preview,
+}: CardPreviewPopoverProps) {
   if (!preview?.open || !preview?.url) return null
   return createPortal(
     <div

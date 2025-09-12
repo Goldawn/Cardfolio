@@ -12,22 +12,26 @@ export type { GameSet }
 export interface PriceData {
   cardId: string
   cardName: string
-  setCode?: string
+  setCode?: string | undefined
   prices: {
-    usd?: number
-    eur?: number
-    tix?: number
+    usd?: number | undefined
+    eur?: number | undefined
+    tix?: number | undefined
   }
   lastUpdated: string
   source: string
-  marketPrice?: {
-    usd?: number
-    eur?: number
-  }
-  foilPrice?: {
-    usd?: number
-    eur?: number
-  }
+  marketPrice?:
+    | {
+        usd?: number | undefined
+        eur?: number | undefined
+      }
+    | undefined
+  foilPrice?:
+    | {
+        usd?: number | undefined
+        eur?: number | undefined
+      }
+    | undefined
 }
 
 export interface CardSearchResult {
@@ -53,8 +57,8 @@ export interface SearchFilters {
 }
 
 // Réexport des types existants pour cohérence
-export type { MTGCard } from '@/types/games/magic'
 export type { CardRarity, Currency } from '@/types/base'
+export type { MTGCard } from '@/types/games/magic'
 
 // Export direct pour éviter les problèmes d'import
 export type { MTGCard as MTGCardType } from '@/types/games/magic'

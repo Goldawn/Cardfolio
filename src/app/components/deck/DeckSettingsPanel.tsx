@@ -24,6 +24,15 @@ const FORMAT_OPTIONS = [
   'paupercommander',
 ]
 
+interface DeckSettingsPanelProps {
+  deck: any // { id, name, format, showcasedCard }
+  deckCards: any[]
+  actions: any // { renameDeck, setDeckFormat, setShowcasedCard, deleteDeck }
+  onLocalUpdate: (partial: any) => void // (partial) => void (pour rafraîchir le state local du deck)
+  collectionItems: any[]
+  wishlistLists: any[]
+}
+
 export default function DeckSettingsPanel({
   deck, // { id, name, format, showcasedCard }
   deckCards,
@@ -31,7 +40,7 @@ export default function DeckSettingsPanel({
   onLocalUpdate, // (partial) => void (pour rafraîchir le state local du deck)
   collectionItems,
   wishlistLists,
-}) {
+}: DeckSettingsPanelProps) {
   // console.log("deck", deck);
   const [isPending, startTransition] = useTransition()
   const [name, setName] = useState(deck.name || '')

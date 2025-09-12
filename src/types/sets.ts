@@ -9,14 +9,14 @@ export type GameSet = {
   setType: string
   cardCount: number
   digital: boolean
-  iconUri?: string
-  parentSetCode?: string
-  block?: string
-  blockCode?: string
+  iconUri?: string | undefined
+  parentSetCode?: string | undefined
+  block?: string | undefined
+  blockCode?: string | undefined
 }
 
 // Types spécifiques pour les sets
-export type SetType = 
+export type SetType =
   | 'core'
   | 'expansion'
   | 'masters'
@@ -48,7 +48,7 @@ export type SetSearchFilters = {
   cardCountMax?: number
 }
 
-export type SetSortOption = 
+export type SetSortOption =
   | 'name'
   | 'code'
   | 'releaseDate'

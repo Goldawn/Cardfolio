@@ -3,6 +3,20 @@
 import { useMemo, useState } from 'react'
 import styles from './AddMissingToWishlistModal.module.css'
 
+interface AddMissingToWishlistModalProps {
+  open: boolean
+  onClose: (result?: {
+    listId: string
+    count: number
+    created?: boolean
+  }) => void
+  deck: any
+  deckCards: any[]
+  collectionItems: any[]
+  wishlistLists?: any[]
+  actions: any // { createWishlist(name), addManyToWishlist(listId, items) }
+}
+
 export default function AddMissingToWishlistModal({
   open,
   onClose,
@@ -11,19 +25,19 @@ export default function AddMissingToWishlistModal({
   collectionItems,
   wishlistLists = [],
   actions, // { createWishlist(name), addManyToWishlist(listId, items) }
-}) {
+}: AddMissingToWishlistModalProps) {
   const missing = useMemo(
     () => computeMissingFromDeck(deckCards, collectionItems),
     [deckCards, collectionItems]
   )
-  const [busyId, setBusyId] = useState(null)
+  const [busyId, setBusyId] = useState<string | null>(null)
   const [newListName, setNewListName] = useState(
     `cartes manquantes ${deck?.name || ''}`.trim()
   )
 
   if (!open) return null
 
-  const addToExisting = async listId => {
+  const addToExisting = async (listId: string) => {
     try {
       setBusyId(listId)
       if (!missing.length) return
@@ -36,7 +50,7 @@ export default function AddMissingToWishlistModal({
 
   const createThenAdd = async () => {
     try {
-      setBusyId('create')
+      setBusyId('create' as string | null)
       const name = (
         newListName || `cartes manquantes ${deck?.name || ''}`
       ).trim()
@@ -69,7 +83,7 @@ export default function AddMissingToWishlistModal({
             <div className={styles.empty}>Aucune wishlist pour le moment.</div>
           ) : (
             <ul className={styles.list}>
-              {wishlistLists.map(wl => (
+              {wishlistLists.map((wl: any) => (
                 <li key={wl.id} className={styles.row}>
                   <span className={styles.name}>{wl.name}</span>
                   <button

@@ -1,6 +1,6 @@
-import 'server-only'
-import { prisma } from '@/lib/prisma'
 import { getAuthenticatedUser } from '@/lib/getAuthenticatedUser'
+import { prisma } from '@/lib/prisma'
+import 'server-only'
 
 async function getDefaultCollectionId(): Promise<string | null> {
   'use server'
@@ -14,7 +14,10 @@ async function getDefaultCollectionId(): Promise<string | null> {
   return row?.id ?? null
 }
 
-export async function addToCollectionAction(scryfallId: string, newPriceEntry: any): Promise<any> {
+export async function addToCollectionAction(
+  scryfallId: string,
+  newPriceEntry: any
+): Promise<any> {
   'use server'
   const actionUser = await getAuthenticatedUser({ throwError: true })
   const userId = actionUser.id
@@ -28,7 +31,7 @@ export async function addToCollectionAction(scryfallId: string, newPriceEntry: a
   })
 
   const mergedHistory = Array.isArray(existing?.priceHistory)
-    ? [...(existing.priceHistory || []), newPriceEntry]
+    ? [...((existing && existing.priceHistory) || []), newPriceEntry]
     : [newPriceEntry]
 
   let saved
@@ -75,7 +78,10 @@ export async function addToCollectionAction(scryfallId: string, newPriceEntry: a
   )
 }
 
-export async function updateCollectionQuantityAction(scryfallId, delta) {
+export async function updateCollectionQuantityAction(
+  scryfallId: string,
+  delta: number
+) {
   'use server'
   const actionUser = await getAuthenticatedUser({ throwError: true })
   const userId = actionUser.id
@@ -93,7 +99,12 @@ export async function updateCollectionQuantityAction(scryfallId, delta) {
   if (!existing) {
     if (delta > 0) {
       const created = await prisma.collectionItem.create({
-        data: { collectionId, scryfallId, quantity: delta },
+        data: {
+          collectionId: collectionId as string,
+          scryfallId: scryfallId as string,
+          quantity: delta as number,
+          priceHistory: [],
+        },
         select: { id: true, scryfallId: true, quantity: true },
       })
       await prisma.collectionChangeLog.create({
@@ -144,7 +155,7 @@ export async function updateCollectionQuantityAction(scryfallId, delta) {
   return JSON.parse(JSON.stringify({ kind: 'updated', item: updated }))
 }
 
-export async function removeFromCollectionAction(scryfallId) {
+export async function removeFromCollectionAction(scryfallId: string) {
   'use server'
   const actionUser = await getAuthenticatedUser({ throwError: true })
   const userId = actionUser.id

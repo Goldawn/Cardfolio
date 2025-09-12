@@ -1,9 +1,12 @@
 'use client'
-import { fetchCardPrice } from './pricing'
 import type { GameCard } from '@/types'
+import { fetchCardPrice } from './pricing'
 
 // Sauvegarder la collection dans le localStorage
-export const saveCollection = (collection: GameCard[], card: GameCard): void => {
+export const saveCollection = (
+  collection: GameCard[],
+  _card: GameCard
+): void => {
   localStorage.setItem('mtgCollection', JSON.stringify(collection))
 }
 
@@ -45,7 +48,10 @@ export const addCardToCollection = async (card: GameCard): Promise<void> => {
   saveCollection(collection, card)
 }
 
-export const getLastPrice = (card: GameCard, currency: 'usd' | 'eur'): number => {
+export const getLastPrice = (
+  card: GameCard,
+  currency: 'usd' | 'eur'
+): number => {
   if (!card.priceHistory || card.priceHistory.length === 0) {
     return 0
   }
@@ -68,12 +74,19 @@ export const removeCard = (cardId: string): void => {
   saveCollection(updatedCollection, {} as GameCard)
 }
 
-export const filterCollection = (collection: GameCard[], filters: any): GameCard[] => {
+export const filterCollection = (
+  collection: GameCard[],
+  _filters: any
+): GameCard[] => {
   // TODO: Implémenter la logique de filtrage
   return collection
 }
 
-export const sortCollection = (collection: GameCard[], sortOption: string, sortOrder: 'asc' | 'desc'): GameCard[] => {
+export const sortCollection = (
+  _collection: GameCard[],
+  _sortOption: string,
+  _sortOrder: 'asc' | 'desc'
+): GameCard[] => {
   const sortedCollection: GameCard[] = []
 
   return sortedCollection

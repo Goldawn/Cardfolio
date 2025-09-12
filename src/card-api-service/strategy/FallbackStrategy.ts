@@ -21,8 +21,8 @@ export interface FallbackContext {
 
 export interface FallbackResult<T> {
   success: boolean
-  data?: T
-  error?: Error
+  data?: T | undefined
+  error?: Error | undefined
   provider: string
   attemptCount: number
   totalTime: number
@@ -33,7 +33,10 @@ export interface FallbackResult<T> {
  */
 export interface IFallbackStrategy {
   shouldRetry(context: FallbackContext): boolean
-  getNextProvider(availableProviders: string[], context: FallbackContext): string | null
+  getNextProvider(
+    availableProviders: string[],
+    context: FallbackContext
+  ): string | null
   getRetryDelay(context: FallbackContext): number
   isRetryableError(error: Error): boolean
 }
@@ -52,11 +55,14 @@ export class SimpleFallbackStrategy implements IFallbackStrategy {
     if (!this.config.enabled) return false
     if (context.attemptCount >= this.config.maxRetries) return false
     if (!this.isRetryableError(context.lastError!)) return false
-    
+
     return true
   }
 
-  getNextProvider(availableProviders: string[], context: FallbackContext): string | null {
+  getNextProvider(
+    availableProviders: string[],
+    context: FallbackContext
+  ): string | null {
     // Exclure les providers qui ont déjà échoué
     const remainingProviders = availableProviders.filter(
       provider => !context.failedProviders.includes(provider)
@@ -72,17 +78,20 @@ export class SimpleFallbackStrategy implements IFallbackStrategy {
 
   getRetryDelay(context: FallbackContext): number {
     const baseDelay = this.config.retryDelay
-    const multiplier = Math.pow(this.config.backoffMultiplier, context.attemptCount - 1)
+    const multiplier = Math.pow(
+      this.config.backoffMultiplier,
+      context.attemptCount - 1
+    )
     const delay = baseDelay * multiplier
-    
+
     return Math.min(delay, this.config.maxRetryDelay)
   }
 
   isRetryableError(error: Error): boolean {
     if (!error) return false
-    
+
     const errorMessage = error.message.toLowerCase()
-    return this.config.retryableErrors.some(retryableError => 
+    return this.config.retryableErrors.some(retryableError =>
       errorMessage.includes(retryableError.toLowerCase())
     )
   }
@@ -102,11 +111,14 @@ export class ExponentialBackoffFallbackStrategy implements IFallbackStrategy {
     if (!this.config.enabled) return false
     if (context.attemptCount >= this.config.maxRetries) return false
     if (!this.isRetryableError(context.lastError!)) return false
-    
+
     return true
   }
 
-  getNextProvider(availableProviders: string[], context: FallbackContext): string | null {
+  getNextProvider(
+    availableProviders: string[],
+    context: FallbackContext
+  ): string | null {
     // Exclure les providers qui ont déjà échoué
     const remainingProviders = availableProviders.filter(
       provider => !context.failedProviders.includes(provider)
@@ -123,20 +135,23 @@ export class ExponentialBackoffFallbackStrategy implements IFallbackStrategy {
 
   getRetryDelay(context: FallbackContext): number {
     const baseDelay = this.config.retryDelay
-    const multiplier = Math.pow(this.config.backoffMultiplier, context.attemptCount - 1)
+    const multiplier = Math.pow(
+      this.config.backoffMultiplier,
+      context.attemptCount - 1
+    )
     const delay = baseDelay * multiplier
-    
+
     // Ajouter un jitter aléatoire pour éviter le thundering herd
     const jitter = Math.random() * 0.1 * delay
-    
+
     return Math.min(delay + jitter, this.config.maxRetryDelay)
   }
 
   isRetryableError(error: Error): boolean {
     if (!error) return false
-    
+
     const errorMessage = error.message.toLowerCase()
-    return this.config.retryableErrors.some(retryableError => 
+    return this.config.retryableErrors.some(retryableError =>
       errorMessage.includes(retryableError.toLowerCase())
     )
   }
@@ -147,11 +162,14 @@ export class ExponentialBackoffFallbackStrategy implements IFallbackStrategy {
  */
 export class IntelligentFallbackStrategy implements IFallbackStrategy {
   private config: FallbackConfig
-  private providerHealth: Map<string, {
-    lastFailure: number
-    failureCount: number
-    successRate: number
-  }> = new Map()
+  private providerHealth: Map<
+    string,
+    {
+      lastFailure: number
+      failureCount: number
+      successRate: number
+    }
+  > = new Map()
 
   constructor(config: FallbackConfig) {
     this.config = config
@@ -161,11 +179,14 @@ export class IntelligentFallbackStrategy implements IFallbackStrategy {
     if (!this.config.enabled) return false
     if (context.attemptCount >= this.config.maxRetries) return false
     if (!this.isRetryableError(context.lastError!)) return false
-    
+
     return true
   }
 
-  getNextProvider(availableProviders: string[], context: FallbackContext): string | null {
+  getNextProvider(
+    availableProviders: string[],
+    context: FallbackContext
+  ): string | null {
     // Exclure les providers qui ont déjà échoué
     const remainingProviders = availableProviders.filter(
       provider => !context.failedProviders.includes(provider)
@@ -180,14 +201,15 @@ export class IntelligentFallbackStrategy implements IFallbackStrategy {
       const health = this.providerHealth.get(provider) || {
         lastFailure: 0,
         failureCount: 0,
-        successRate: 100
+        successRate: 100,
       }
 
       let score = health.successRate
 
       // Pénaliser les providers qui ont échoué récemment
       const timeSinceLastFailure = Date.now() - health.lastFailure
-      if (timeSinceLastFailure < 5 * 60 * 1000) { // 5 minutes
+      if (timeSinceLastFailure < 5 * 60 * 1000) {
+        // 5 minutes
         score *= 0.5
       }
 
@@ -207,26 +229,30 @@ export class IntelligentFallbackStrategy implements IFallbackStrategy {
 
   getRetryDelay(context: FallbackContext): number {
     const baseDelay = this.config.retryDelay
-    const multiplier = Math.pow(this.config.backoffMultiplier, context.attemptCount - 1)
+    const multiplier = Math.pow(
+      this.config.backoffMultiplier,
+      context.attemptCount - 1
+    )
     const delay = baseDelay * multiplier
-    
+
     // Ajuster le délai basé sur l'historique du provider
-    const lastProvider = context.failedProviders[context.failedProviders.length - 1]
+    const lastProvider =
+      context.failedProviders[context.failedProviders.length - 1]
     const health = this.providerHealth.get(lastProvider)
-    
+
     if (health && health.failureCount > 3) {
       // Augmenter le délai pour les providers problématiques
       return Math.min(delay * 2, this.config.maxRetryDelay)
     }
-    
+
     return Math.min(delay, this.config.maxRetryDelay)
   }
 
   isRetryableError(error: Error): boolean {
     if (!error) return false
-    
+
     const errorMessage = error.message.toLowerCase()
-    return this.config.retryableErrors.some(retryableError => 
+    return this.config.retryableErrors.some(retryableError =>
       errorMessage.includes(retryableError.toLowerCase())
     )
   }
@@ -238,7 +264,7 @@ export class IntelligentFallbackStrategy implements IFallbackStrategy {
     const health = this.providerHealth.get(provider) || {
       lastFailure: 0,
       failureCount: 0,
-      successRate: 100
+      successRate: 100,
     }
 
     health.lastFailure = Date.now()
@@ -255,7 +281,7 @@ export class IntelligentFallbackStrategy implements IFallbackStrategy {
     const health = this.providerHealth.get(provider) || {
       lastFailure: 0,
       failureCount: 0,
-      successRate: 100
+      successRate: 100,
     }
 
     health.failureCount = Math.max(0, health.failureCount - 1)
@@ -270,11 +296,11 @@ export class IntelligentFallbackStrategy implements IFallbackStrategy {
  */
 export class FallbackService {
   private strategy: IFallbackStrategy
-  private config: FallbackConfig
+  private _config: FallbackConfig
 
   constructor(strategy: IFallbackStrategy, config: FallbackConfig) {
     this.strategy = strategy
-    this.config = config
+    this._config = config
   }
 
   /**
@@ -291,17 +317,17 @@ export class FallbackService {
       originalProvider: originalProvider || availableProviders[0],
       failedProviders: [],
       attemptCount: 0,
-      requestType
+      requestType,
     }
 
     let currentProvider = originalProvider || availableProviders[0]
 
     while (this.strategy.shouldRetry(context)) {
       context.attemptCount++
-      
+
       try {
         const data = await operation(currentProvider)
-        
+
         // Enregistrer le succès si c'est une stratégie intelligente
         if (this.strategy instanceof IntelligentFallbackStrategy) {
           this.strategy.recordSuccess(currentProvider)
@@ -312,7 +338,7 @@ export class FallbackService {
           data,
           provider: currentProvider,
           attemptCount: context.attemptCount,
-          totalTime: Date.now() - startTime
+          totalTime: Date.now() - startTime,
         }
       } catch (error) {
         context.lastError = error as Error
@@ -324,8 +350,11 @@ export class FallbackService {
         }
 
         // Obtenir le prochain provider
-        const nextProvider = this.strategy.getNextProvider(availableProviders, context)
-        
+        const nextProvider = this.strategy.getNextProvider(
+          availableProviders,
+          context
+        )
+
         if (!nextProvider) {
           // Plus de providers disponibles
           break
@@ -346,7 +375,7 @@ export class FallbackService {
       error: context.lastError,
       provider: currentProvider,
       attemptCount: context.attemptCount,
-      totalTime: Date.now() - startTime
+      totalTime: Date.now() - startTime,
     }
   }
 }
@@ -367,6 +396,6 @@ export const DEFAULT_FALLBACK_CONFIG: FallbackConfig = {
     'rate limit',
     'temporary',
     'server error',
-    'service unavailable'
-  ]
+    'service unavailable',
+  ],
 }

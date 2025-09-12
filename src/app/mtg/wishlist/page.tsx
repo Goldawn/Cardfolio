@@ -1,26 +1,27 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { cardApiManager } from '@/app/services/CardApiManager'
+import type { GameCard, WishlistList as WishlistListType } from '@/types'
 import { useSession } from 'next-auth/react'
-import WishlistSearchSection from '../../components/WishlistSearchSection'
+import type { JSX } from 'react'
+import { useEffect, useState } from 'react'
+import Card from '../../components/Card'
 import MagicCardPlaceholder from '../../components/MagicCardPlaceholder'
 import WishlistList from '../../components/WishlistList'
-import Card from '../../components/Card'
-import { formatCard } from '@/app/services/FormatCard'
-import { cardApiManager } from '@/app/services/CardApiManager'
+import WishlistSearchSection from '../../components/WishlistSearchSection'
 import styles from './page.module.css'
-import type { GameCard, WishlistList } from '@/types'
-import type { JSX } from 'react'
 
 export default function WishlistPage(): JSX.Element {
   const { data: session, status } = useSession()
   const cardService = cardApiManager.getCardService()
-  const [lists, setLists] = useState<WishlistList[]>([])
+  const [lists, setLists] = useState<WishlistListType[]>([])
   const [cardsByList, setCardsByList] = useState<Record<string, GameCard[]>>({})
   const [loading, setLoading] = useState<boolean>(true)
   const [newListName, setNewListName] = useState<string>('')
   const [activeListId, setActiveListId] = useState<string | null>(null)
-  const [hoveredCardImageByList, setHoveredCardImageByList] = useState<Record<string, string>>({})
+  const [hoveredCardImageByList, setHoveredCardImageByList] = useState<
+    Record<string, string>
+  >({})
 
   const userId: string | undefined = session?.user?.id
 
@@ -59,7 +60,9 @@ export default function WishlistPage(): JSX.Element {
 
             const enriched = await Promise.all(
               items.map(async (item: any) => {
-                const formatted = await cardService.fetchCard({ cardId: item.scryfallId })
+                const formatted = await cardService.fetchCard({
+                  cardId: item.scryfallId,
+                })
                 return {
                   ...formatted,
                   wishlistQuantity: item.quantity,
@@ -101,7 +104,10 @@ export default function WishlistPage(): JSX.Element {
     }
   }
 
-  const handleRenameList = async (listId: string, newName: string): Promise<void> => {
+  const handleRenameList = async (
+    listId: string,
+    newName: string
+  ): Promise<void> => {
     try {
       const res = await fetch(`/api/users/${userId}/wishlist/lists`, {
         method: 'PATCH',
@@ -144,7 +150,10 @@ export default function WishlistPage(): JSX.Element {
     setHoveredCardImageByList(prev => ({ ...prev, [listId]: imageUrl }))
   }
 
-  const removeCard = async (wishlistId: string, cardId: string): Promise<void> => {
+  const removeCard = async (
+    wishlistId: string,
+    cardId: string
+  ): Promise<void> => {
     if (!cardId || !wishlistId) return
     try {
       const res = await fetch(
@@ -162,7 +171,11 @@ export default function WishlistPage(): JSX.Element {
     }
   }
 
-  const updateQuantity = async (wishlistId: string, cardId: string, delta: number): Promise<void> => {
+  const updateQuantity = async (
+    wishlistId: string,
+    cardId: string,
+    delta: number
+  ): Promise<void> => {
     if (!cardId || !wishlistId) return
     try {
       const res = await fetch(
@@ -193,7 +206,9 @@ export default function WishlistPage(): JSX.Element {
             type="text"
             placeholder="Nom de la nouvelle liste"
             value={newListName}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewListName(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setNewListName(e.target.value)
+            }
           />
           <button onClick={handleCreateList}>➕ Créer la liste</button>
         </div>
@@ -204,33 +219,37 @@ export default function WishlistPage(): JSX.Element {
 
       {!loading && lists.length > 0 && (
         <div className={styles.listsContainer}>
-          {lists.map((list: WishlistList) => (
+          {lists.map((list: WishlistListType) => (
             <section key={list.id} className={styles.wishlistSection}>
               <WishlistList
                 list={list}
-                onRename={(newName: string) => handleRenameList(list.id, newName)}
+                onRename={(newName: string) =>
+                  handleRenameList(list.id, newName)
+                }
                 onDelete={() => handleDeleteList(list.id)}
               />
 
               <div className={styles.cardGrid}>
-                {(cardsByList[list.id] || []).map((card: GameCard, index: number) => (
-                  <Card
-                    key={card.id}
-                    // listId={list.id}
-                    card={card}
-                    currentIndex={index}
-                    cardList={cardsByList[list.id]}
-                    showName
-                    modal
-                    showWishlistQuantity
-                    showDeleteButton
-                    onRemove={cardId => removeCard(list.id, cardId)}
-                    // editableQuantity
-                    updateQuantity={(cardId, delta) =>
-                      updateQuantity(list.id, cardId, delta)
-                    }
-                  />
-                ))}
+                {(cardsByList[list.id] || []).map(
+                  (card: GameCard, index: number) => (
+                    <Card
+                      key={card.id}
+                      // listId={list.id}
+                      card={card}
+                      currentIndex={index}
+                      cardList={cardsByList[list.id]}
+                      showName
+                      modal
+                      showWishlistQuantity
+                      showDeleteButton
+                      onRemove={cardId => removeCard(list.id, cardId)}
+                      // editableQuantity
+                      updateQuantity={(cardId, delta) =>
+                        updateQuantity(list.id, cardId, delta)
+                      }
+                    />
+                  )
+                )}
 
                 <div
                   className={`${styles.addCardTile} ${

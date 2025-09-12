@@ -1,13 +1,21 @@
 // /components/ColsControl.jsx
 import styles from './ColsControl.module.css' // ou réutilise DeckCardsTabs.module.css si tu préfères
 
+interface ColsControlProps {
+  viewId: any
+  sortKey: any
+  value: any
+  onChange: any
+  disabled?: boolean
+}
+
 export default function ColsControl({
-  viewId,
-  sortKey,
+  viewId: _viewId,
+  sortKey: _sortKey,
   value,
   onChange,
   disabled = false,
-}) {
+}: ColsControlProps) {
   return (
     <label className={styles.sortWrapper} title="Nombre de colonnes">
       <span className={styles.sortLabel}>Colonnes</span>

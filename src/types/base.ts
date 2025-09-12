@@ -31,25 +31,25 @@ export type BaseCard<
   id: string
   name: string
   gameType: GameType
-  setCode?: string
-  setName?: string
-  lang?: string
-  quantity?: number
-  addedAt?: string
-  priceHistory?: PriceHistory[]
-  rarity?: CardRarity
-  collectorNumber?: string
-  artist?: string
-  legalities?: Record<string, string>
-  image?: CardImages
+  setCode?: string | undefined
+  setName?: string | undefined
+  lang?: string | undefined
+  quantity?: number | undefined
+  addedAt?: string | undefined
+  priceHistory?: PriceHistory[] | undefined
+  rarity?: CardRarity | undefined
+  collectorNumber?: string | undefined
+  artist?: string | undefined
+  legalities?: Record<string, string> | undefined
+  image?: CardImages | undefined
   // Données spécifiques au jeu
   gameData: TGameData
   // Couleurs/éléments du jeu
-  colors?: TColor[]
+  colors?: TColor[] | undefined
   // Types de cartes du jeu
-  cardType?: TCardType
+  cardType?: TCardType | undefined
   // Format du jeu
-  format?: TFormat
+  format?: TFormat | undefined
 }
 
 export type CardImages = {

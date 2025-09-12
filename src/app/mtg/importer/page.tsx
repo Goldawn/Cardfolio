@@ -1,7 +1,7 @@
 import { getAuthenticatedUser } from '@/lib/getAuthenticatedUser'
 import { prisma } from '@/lib/prisma'
-import ImportClient from './ImportClient'
 import type { JSX } from 'react'
+import ImportClient from './ImportClient'
 
 export default async function MTGImportPage(): Promise<JSX.Element> {
   const user = await getAuthenticatedUser()
@@ -49,7 +49,10 @@ export default async function MTGImportPage(): Promise<JSX.Element> {
   // ------------------- Server Actions -------------------
 
   /** Ajoute/incrémente une carte dans la collection par défaut (CollectionItem) */
-  async function addToCollectionAction(scryfallId: string, newPriceEntry: any): Promise<any> {
+  async function addToCollectionAction(
+    scryfallId: string,
+    newPriceEntry: any
+  ): Promise<any> {
     'use server'
 
     // Cherche l’item pour (collectionId, scryfallId)
@@ -111,7 +114,7 @@ export default async function MTGImportPage(): Promise<JSX.Element> {
   }
 
   /** Décrémente ou supprime la carte dans la collection par défaut */
-  async function undoAddToCollectionAction(scryfallId: string): Promise<any> {
+  async function _undoAddToCollectionAction(scryfallId: string): Promise<any> {
     'use server'
 
     const existing = await prisma.collectionItem.findFirst({
@@ -159,7 +162,10 @@ export default async function MTGImportPage(): Promise<JSX.Element> {
   }
 
   /** Met à jour la quantité d'une carte dans la collection */
-  async function updateCollectionQuantityAction(scryfallId: string, delta: number): Promise<any> {
+  async function updateCollectionQuantityAction(
+    scryfallId: string,
+    delta: number
+  ): Promise<any> {
     'use server'
 
     if (!delta || typeof delta !== 'number') {
@@ -252,7 +258,11 @@ export default async function MTGImportPage(): Promise<JSX.Element> {
   }
 
   /** Ajoute à une wishlist */
-  async function addToWishlistAction(listId: string, scryfallId: string, quantity: number = 1): Promise<any> {
+  async function addToWishlistAction(
+    listId: string,
+    scryfallId: string,
+    quantity: number = 1
+  ): Promise<any> {
     'use server'
 
     // sécurise la liste pour ce user

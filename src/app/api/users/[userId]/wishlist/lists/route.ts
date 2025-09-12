@@ -22,7 +22,7 @@ interface DeleteWishlistRequest {
 }
 
 // GET - Récupérer toutes les listes de wishlist d'un utilisateur
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(_request: NextRequest, { params }: RouteParams) {
   const { userId } = await params
 
   try {
@@ -89,7 +89,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 // PATCH - Renommer ou dupliquer une liste de souhaits
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   const { userId } = await params
-  const { listId, name, duplicate }: UpdateWishlistRequest = await request.json() // 👈 name au lieu de newName
+  const { listId, name, duplicate }: UpdateWishlistRequest =
+    await request.json() // 👈 name au lieu de newName
 
   if (!listId || !name) {
     return new Response(JSON.stringify({ error: 'Données manquantes' }), {

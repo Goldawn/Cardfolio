@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { cardApiManager } from '@/app/services/CardApiManager'
 import type { MTGCard } from '@/types/games/magic'
+import { useEffect, useRef, useState, useTransition } from 'react'
 import styles from './AddFromCollection.module.css'
 
 // Hook useDebounce simple
@@ -29,7 +29,7 @@ interface ManualAddProps {
 }
 
 export default function ManualAdd({
-  deckId,
+  deckId: _deckId,
   onAdd,
   defaultQty = 1,
 }: ManualAddProps) {
@@ -65,12 +65,12 @@ export default function ManualAdd({
 
       try {
         // Utilisation du nouveau service Card API
-        const searchResults = await cardService.searchCards({ 
+        const searchResults = await cardService.searchCards({
           query: debouncedQuery,
           options: {
             // Tu peux enrichir la requête avec des opérateurs (t:creature, set:woe…)
             // Ces options seront passées au provider Scryfall
-          }
+          },
         })
 
         if (cancelled) return
@@ -111,7 +111,7 @@ export default function ManualAdd({
   const updateQty = (scryfallId: string, newQty: number) => {
     setQtyById(prev => ({
       ...prev,
-      [scryfallId]: Math.max(1, newQty)
+      [scryfallId]: Math.max(1, newQty),
     }))
   }
 
@@ -120,13 +120,13 @@ export default function ManualAdd({
   return (
     <div className={styles.manualAddContainer}>
       <h3>Ajouter manuellement</h3>
-      
+
       {/* Input de recherche */}
       <div className={styles.searchInputContainer}>
         <input
           type="text"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={e => setQuery(e.target.value)}
           placeholder="Nom de la carte (ex: Lightning Bolt, t:creature, set:woe...)"
           className={styles.searchInput}
         />
@@ -134,24 +134,20 @@ export default function ManualAdd({
       </div>
 
       {/* Message d'erreur */}
-      {error && (
-        <div className={styles.errorMessage}>
-          {error}
-        </div>
-      )}
+      {error && <div className={styles.errorMessage}>{error}</div>}
 
       {/* Résultats de recherche */}
       {results.length > 0 && (
         <div className={styles.resultsContainer}>
           <h4>Résultats ({results.length})</h4>
           <div className={styles.resultsList}>
-            {results.map((card) => (
+            {results.map(card => (
               <div key={card.id} className={styles.resultItem}>
                 <div className={styles.cardInfo}>
                   <div className={styles.cardImage}>
                     {card.image?.small && (
-                      <img 
-                        src={card.image.small} 
+                      <img
+                        src={card.image.small}
                         alt={card.name}
                         className={styles.cardImageSmall}
                       />
@@ -159,14 +155,18 @@ export default function ManualAdd({
                   </div>
                   <div className={styles.cardDetails}>
                     <h5 className={styles.cardName}>{card.name}</h5>
-                    <p className={styles.cardSet}>{card.setCode} - {card.rarity}</p>
+                    <p className={styles.cardSet}>
+                      {card.setCode} - {card.rarity}
+                    </p>
                     <p className={styles.cardType}>{card.gameData?.typeLine}</p>
                     {card.gameData?.manaCost && (
-                      <p className={styles.manaCost}>{card.gameData.manaCost}</p>
+                      <p className={styles.manaCost}>
+                        {card.gameData.manaCost}
+                      </p>
                     )}
                   </div>
                 </div>
-                
+
                 <div className={styles.cardActions}>
                   <div className={styles.quantityControls}>
                     <button
@@ -184,7 +184,7 @@ export default function ManualAdd({
                       +
                     </button>
                   </div>
-                  
+
                   <button
                     onClick={() => handleAdd(card.id, getQty(card.id))}
                     disabled={isPending}

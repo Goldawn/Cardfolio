@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
 import { cardApiManager } from '@/app/services/CardApiManager'
 import type { GameCard } from '@/types'
+import { useCallback, useEffect, useState } from 'react'
 
 // Hook useDebounce simple
 function useDebounce<T>(value: T, delay: number): T {
@@ -31,11 +31,11 @@ interface WishlistSearchSectionProps {
 }
 
 export default function WishlistSearchSection({
-  userId,
-  wishlistLists,
-  StopAddingToWishlist,
-  wishlistId,
-  onHoverCard,
+  userId: _userId,
+  wishlistLists: _wishlistLists,
+  StopAddingToWishlist: _StopAddingToWishlist,
+  wishlistId: _wishlistId,
+  onHoverCard: _onHoverCard,
   onCardAdded,
 }: WishlistSearchSectionProps) {
   const [searchInput, setSearchInput] = useState('')
@@ -53,10 +53,12 @@ export default function WishlistSearchSection({
   // Suggestions (autocomplete) - NOUVEAU: Utilise le CardService
   useEffect(() => {
     const fetchSuggestions = async () => {
-      if (debouncedQuery.length < 3 || freezeAutocomplete) return setSuggestions([])
+      if (debouncedQuery.length < 3 || freezeAutocomplete)
+        return setSuggestions([])
       try {
         // Utilisation du nouveau service d'autocomplete
-        const suggestions = await cardService.getAutocompleteSuggestions(debouncedQuery)
+        const suggestions =
+          await cardService.getAutocompleteSuggestions(debouncedQuery)
         setSuggestions(suggestions)
       } catch (error) {
         console.error('Erreur chargement suggestions:', error)
@@ -77,11 +79,11 @@ export default function WishlistSearchSection({
 
     try {
       // Utilisation du nouveau service
-      const results = await cardService.searchCards({ 
+      const results = await cardService.searchCards({
         query: q,
         options: {
-          unique: 'prints' // Pour afficher toutes les variations d'une carte
-        }
+          unique: 'prints', // Pour afficher toutes les variations d'une carte
+        },
       })
       setSearchResults(results as GameCard[])
     } catch (error) {
@@ -103,17 +105,17 @@ export default function WishlistSearchSection({
     setLoading(true)
     try {
       // Utilisation du nouveau service pour récupérer la carte exacte
-      const exactCard = await cardService.fetchCardByName(exactName)
-      
+      const _exactCard = await cardService.fetchCardByName(exactName)
+
       // Puis recherche de tous les prints de cette carte
-      const allPrints = await cardService.searchCards({ 
+      const allPrints = await cardService.searchCards({
         query: `!"${exactName}"`,
         options: {
           order: 'released',
-          unique: 'prints'
-        }
+          unique: 'prints',
+        },
       })
-      
+
       setSearchResults(allPrints as GameCard[])
     } catch (error) {
       console.error('Erreur chargement prints exacts:', error)
@@ -125,41 +127,44 @@ export default function WishlistSearchSection({
   }
 
   // Gestion des touches clavier
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (suggestions.length === 0) return
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (suggestions.length === 0) return
 
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault()
-        setHighlightIndex(prev => 
-          prev < suggestions.length - 1 ? prev + 1 : prev
-        )
-        break
-      case 'ArrowUp':
-        e.preventDefault()
-        setHighlightIndex(prev => prev > 0 ? prev - 1 : -1)
-        break
-      case 'Enter':
-        e.preventDefault()
-        if (highlightIndex >= 0 && highlightIndex < suggestions.length) {
-          handleSearchExactPrints(suggestions[highlightIndex])
-        } else {
-          handleSearch(searchInput)
-        }
-        break
-      case 'Escape':
-        setSuggestions([])
-        setHighlightIndex(-1)
-        break
-    }
-  }, [suggestions, highlightIndex, searchInput])
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault()
+          setHighlightIndex(prev =>
+            prev < suggestions.length - 1 ? prev + 1 : prev
+          )
+          break
+        case 'ArrowUp':
+          e.preventDefault()
+          setHighlightIndex(prev => (prev > 0 ? prev - 1 : -1))
+          break
+        case 'Enter':
+          e.preventDefault()
+          if (highlightIndex >= 0 && highlightIndex < suggestions.length) {
+            handleSearchExactPrints(suggestions[highlightIndex])
+          } else {
+            handleSearch(searchInput)
+          }
+          break
+        case 'Escape':
+          setSuggestions([])
+          setHighlightIndex(-1)
+          break
+      }
+    },
+    [suggestions, highlightIndex, searchInput]
+  )
 
   // Ajout à la wishlist
   const handleAddToWishlist = async (card: GameCard, quantity: number = 1) => {
     try {
       // Logique d'ajout à la wishlist (inchangée)
       // ... votre logique existante ...
-      
+
       if (onCardAdded) {
         onCardAdded(card, quantity)
       }
@@ -171,13 +176,13 @@ export default function WishlistSearchSection({
   return (
     <div className="wishlist-search-section">
       <h3>Rechercher des cartes</h3>
-      
+
       {/* Input de recherche */}
       <div className="search-container">
         <input
           type="text"
           value={searchInput}
-          onChange={(e) => {
+          onChange={e => {
             setSearchInput(e.target.value)
             setFreezeAutocomplete(false)
           }}
@@ -185,7 +190,7 @@ export default function WishlistSearchSection({
           placeholder="Nom de la carte..."
           className="search-input"
         />
-        
+
         {/* Suggestions */}
         {suggestions.length > 0 && (
           <div className="suggestions-dropdown">
@@ -217,11 +222,13 @@ export default function WishlistSearchSection({
         <div className="search-results">
           <h4>Résultats ({searchResults.length})</h4>
           <div className="cards-grid">
-            {searchResults.map((card) => (
+            {searchResults.map(card => (
               <div key={card.id} className="card-item">
                 <div className="card-info">
                   <h5>{card.name}</h5>
-                  <p>{card.setCode} - {card.rarity}</p>
+                  <p>
+                    {card.setCode} - {card.rarity}
+                  </p>
                   <p>Prix: ${card.priceHistory?.[0]?.usd || 'N/A'}</p>
                 </div>
                 <div className="card-actions">

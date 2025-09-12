@@ -2,7 +2,7 @@
 // ============================
 
 import { BaseCard } from '../base'
-import { Collection, Decklist } from '../collections'
+import { Collection } from '../collections'
 
 export type YugiohAttribute =
   | 'DARK'
@@ -87,4 +87,16 @@ export type YugiohCard = BaseCard<
 }
 
 export type YugiohCollection = Collection<'yugioh'>
-export type YugiohDecklist = Decklist<'yugioh', YugiohAttribute, YugiohFormat>
+
+export type YugiohDecklist = {
+  id: string
+  name: string
+  gameType: 'yugioh'
+  format?: YugiohFormat
+  colors?: YugiohAttribute[]
+  userId: string
+  createdAt: Date
+  updatedAt: Date
+  isLocked?: boolean
+  notes?: string
+}

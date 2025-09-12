@@ -1,9 +1,9 @@
-import 'server-only'
-import { prisma } from '@/lib/prisma'
 import {
-  getAuthenticatedUser,
   assertWishlistOwnership,
+  getAuthenticatedUser,
 } from '@/lib/getAuthenticatedUser'
+import { prisma } from '@/lib/prisma'
+import 'server-only'
 
 export async function createWishlistAction(name = 'wishlist') {
   'use server'
@@ -19,8 +19,11 @@ export async function createWishlistAction(name = 'wishlist') {
 }
 
 export async function addManyToWishlistAction(
-  listId,
-  items /* [{scryfallId, quantity}] */
+  listId: string,
+  items: Array<{
+    scryfallId: string
+    quantity: number
+  }> /* [{scryfallId, quantity}] */
 ) {
   'use server'
   await assertWishlistOwnership(listId)

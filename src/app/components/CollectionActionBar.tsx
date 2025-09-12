@@ -1,14 +1,14 @@
-import styles from './CollectionActionBar.module.css'
 import Image from 'next/image'
+import styles from './CollectionActionBar.module.css'
 
-import HautBas from '../assets/images/icons/haut-bas.png'
+import type { CardRarity } from '@/types'
 import type { JSX } from 'react'
-
+import HautBas from '../assets/images/icons/haut-bas.png'
 
 import {
   colorFilterElements,
-  typeFilterElements,
   rarityFilterElements,
+  typeFilterElements,
 } from '@/lib/mtgIcons'
 
 interface CollectionActionBarProps {
@@ -17,7 +17,7 @@ interface CollectionActionBarProps {
   selectedTypes: string[]
   toggleTypeFilter: (type: string) => void
   selectedRarities: string[]
-  toggleRarityFilter: (rarity: string) => void
+  toggleRarityFilter: (rarity: CardRarity) => void
   sortOption: string
   setSortOption: (option: string) => void
   sortOrderAsc: boolean
@@ -33,7 +33,7 @@ export default function CollectionActionBar({
   toggleRarityFilter,
   sortOption,
   setSortOption,
-  sortOrderAsc,
+  sortOrderAsc: _sortOrderAsc,
   toggleSortOrder,
 }: CollectionActionBarProps): JSX.Element {
   return (
@@ -74,7 +74,7 @@ export default function CollectionActionBar({
             title={rarity.name}
             key={rarity.name}
             className={`${styles.rarityIcon} ${styles[rarity.name]} ${selectedRarities.includes(rarity.name) ? styles.active : ''}`}
-            onClick={() => toggleRarityFilter(rarity.name)}
+            onClick={() => toggleRarityFilter(rarity.name as any)}
           ></div>
         ))}
       </div>

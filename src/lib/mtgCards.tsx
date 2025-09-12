@@ -1,17 +1,16 @@
 // Normalized MTG card helpers — single source of truth
 // ----------------------------------------------------
-import React, { ReactNode } from 'react'
-import manaSymbols from '../app/assets/mock/mana.json'
-import { 
-  MTGCard, 
-  MTGColor, 
-  MTGCardType, 
-  CardRarity, 
+import {
   CMCBucket,
+  CardRarity,
+  MTGCardType,
+  MTGColor,
+  MTG_BUCKETS,
   MTG_COLOR_ORDER,
   MTG_TYPE_ORDER,
-  MTG_BUCKETS
 } from '@/types'
+import { ReactNode } from 'react'
+import manaSymbols from '../app/assets/mock/mana.json'
 
 /** ------- Mana helpers ------- **/
 
@@ -118,7 +117,7 @@ export const BUCKETS = MTG_BUCKETS
  * Label de bucket pour un MV.
  */
 export function bucketLabel(mv: number): CMCBucket {
-  return mv <= 1 ? '1-' : mv >= 7 ? '7+' : String(mv) as CMCBucket
+  return mv <= 1 ? '1-' : mv >= 7 ? '7+' : (String(mv) as CMCBucket)
 }
 
 /** ------- Type helpers ------- **/
@@ -233,25 +232,12 @@ export function getArtLarge(card: any): string | null {
   )
 }
 
-/**
- * Payload pour setShowcased (resté proche de l'existant).
- */
-export function getShowcasePayload(card: any): string | null {
-  return (
-    card?.image?.artCrop ||
-    card?.cardBack?.image?.artCrop ||
-    card?.image?.normal ||
-    null
-  )
-}
-
 /** ------- Tiny utils ------- **/
 
 export const getName = (card: any): string =>
   String(card?.name || card?.printedName || '')
 
-export const getQty = (card: any): number =>
-  Number(card?.decklistQuantity || 0)
+export const getQty = (card: any): number => Number(card?.decklistQuantity || 0)
 
 /** ------- Default export (optionnel) ------- **/
 export default {
@@ -274,7 +260,6 @@ export default {
   // images
   getArtSmall,
   getArtLarge,
-  getShowcasePayload,
   // tiny utils
   getName,
   getQty,

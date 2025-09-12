@@ -1,19 +1,17 @@
 import axios, { type AxiosResponse } from 'axios'
-import type { ICardProvider, RateLimitInfo } from '../interfaces'
-import type { 
-  CardFetchRequestDTO, 
-  SetFetchRequestDTO,
+import type {
+  AutocompleteResponseDTO,
+  CardFetchRequestDTO,
   CardServiceResponseDTO,
+  ScryfallAutocompleteDTO,
+  ScryfallCardDTO,
+  ScryfallSearchResultDTO,
+  ScryfallSetDTO,
+  SetFetchRequestDTO,
   SetServiceResponseDTO,
   SetsServiceResponseDTO,
-  AutocompleteResponseDTO,
-  ServiceErrorDTO,
-  ServiceMetadataDTO,
-  ScryfallCardDTO, 
-  ScryfallSetDTO, 
-  ScryfallSearchResultDTO,
-  ScryfallAutocompleteDTO
 } from '../dto'
+import type { ICardProvider, RateLimitInfo } from '../interfaces'
 
 /**
  * Provider Scryfall pour les cartes Magic: The Gathering
@@ -24,25 +22,30 @@ export class ScryfallProvider implements ICardProvider {
 
   private async makeRequest<T>(endpoint: string): Promise<T> {
     try {
-      const response: AxiosResponse<T> = await axios.get(`${this.baseUrl}${endpoint}`, {
-        timeout: 10000,
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
+      const response: AxiosResponse<T> = await axios.get(
+        `${this.baseUrl}${endpoint}`,
+        {
+          timeout: 10000,
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
         }
-      })
+      )
       return response.data
     } catch (error: any) {
       throw new Error(`Scryfall API error: ${error.message}`)
     }
   }
 
-  async fetchCard(request: CardFetchRequestDTO): Promise<CardServiceResponseDTO> {
+  async fetchCard(
+    request: CardFetchRequestDTO
+  ): Promise<CardServiceResponseDTO> {
     const startTime = Date.now()
-    
+
     try {
       let endpoint: string
-      
+
       if (request.cardId) {
         endpoint = `/cards/${request.cardId}`
       } else if (request.cardName) {
@@ -52,15 +55,15 @@ export class ScryfallProvider implements ICardProvider {
       }
 
       const rawCard = await this.makeRequest<ScryfallCardDTO>(endpoint)
-      
+
       return {
         data: rawCard as any, // Will be transformed by adapter
         metadata: {
           provider: this.name,
           cached: false,
           fetchTime: Date.now() - startTime,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       }
     } catch (error: any) {
       return {
@@ -69,86 +72,100 @@ export class ScryfallProvider implements ICardProvider {
           provider: this.name,
           cached: false,
           fetchTime: Date.now() - startTime,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         },
         error: {
           code: 'SCRYFALL_FETCH_ERROR',
           message: error.message,
           provider: this.name,
           retryable: true,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       }
     }
   }
 
-  async fetchCardByName(cardName: string, options?: any): Promise<CardServiceResponseDTO> {
+  async fetchCardByName(
+    cardName: string,
+    options?: any
+  ): Promise<CardServiceResponseDTO> {
     return this.fetchCard({ cardName, options })
   }
 
-  async searchCards(query: string, options?: any): Promise<CardServiceResponseDTO[]> {
+  async searchCards(
+    query: string,
+    options?: any
+  ): Promise<CardServiceResponseDTO[]> {
     const startTime = Date.now()
-    
+
     try {
       const searchParams = new URLSearchParams({
         q: query,
-        ...options
+        ...options,
       })
-      
-      const result = await this.makeRequest<ScryfallSearchResultDTO>(`/cards/search?${searchParams}`)
-      
+
+      const result = await this.makeRequest<ScryfallSearchResultDTO>(
+        `/cards/search?${searchParams}`
+      )
+
       return result.data.map(card => ({
         data: card as any,
         metadata: {
           provider: this.name,
           cached: false,
           fetchTime: Date.now() - startTime,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       }))
     } catch (error: any) {
-      return [{
-        data: {} as any,
-        metadata: {
-          provider: this.name,
-          cached: false,
-          fetchTime: Date.now() - startTime,
-          timestamp: new Date().toISOString()
+      return [
+        {
+          data: {} as any,
+          metadata: {
+            provider: this.name,
+            cached: false,
+            fetchTime: Date.now() - startTime,
+            timestamp: new Date().toISOString(),
+          },
+          error: {
+            code: 'SCRYFALL_SEARCH_ERROR',
+            message: error.message,
+            provider: this.name,
+            retryable: true,
+            timestamp: new Date().toISOString(),
+          },
         },
-        error: {
-          code: 'SCRYFALL_SEARCH_ERROR',
-          message: error.message,
-          provider: this.name,
-          retryable: true,
-          timestamp: new Date().toISOString()
-        }
-      }]
+      ]
     }
   }
 
-  async fetchSetCards(request: SetFetchRequestDTO): Promise<SetServiceResponseDTO> {
+  async fetchSetCards(
+    request: SetFetchRequestDTO
+  ): Promise<SetServiceResponseDTO> {
     const startTime = Date.now()
-    
+
     try {
       const searchParams = new URLSearchParams({
         q: `set:${request.setCode}`,
-        unique: 'prints'
+        unique: 'prints',
       })
-      
+
       if (request.language) {
         searchParams.append('lang', request.language)
       }
-      
-      const result = await this.makeRequest<ScryfallSearchResultDTO>(`/cards/search?${searchParams}`)
-      
+
+      const result = await this.makeRequest<ScryfallSearchResultDTO>(
+        `/cards/search?${searchParams}`
+      )
+
       return {
         data: result.data as any, // Will be transformed by adapter
         metadata: {
           provider: this.name,
           cached: false,
           fetchTime: Date.now() - startTime,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       }
     } catch (error: any) {
       return {
@@ -157,33 +174,34 @@ export class ScryfallProvider implements ICardProvider {
           provider: this.name,
           cached: false,
           fetchTime: Date.now() - startTime,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         },
         error: {
           code: 'SCRYFALL_SET_FETCH_ERROR',
           message: error.message,
           provider: this.name,
           retryable: true,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       }
     }
   }
 
   async fetchMoreCards(nextPageUrl: string): Promise<SetServiceResponseDTO> {
     const startTime = Date.now()
-    
+
     try {
-      const result = await this.makeRequest<ScryfallSearchResultDTO>(nextPageUrl)
-      
+      const result =
+        await this.makeRequest<ScryfallSearchResultDTO>(nextPageUrl)
+
       return {
         data: result.data as any,
         metadata: {
           provider: this.name,
           cached: false,
           fetchTime: Date.now() - startTime,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       }
     } catch (error: any) {
       return {
@@ -192,33 +210,33 @@ export class ScryfallProvider implements ICardProvider {
           provider: this.name,
           cached: false,
           fetchTime: Date.now() - startTime,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         },
         error: {
           code: 'SCRYFALL_MORE_CARDS_ERROR',
           message: error.message,
           provider: this.name,
           retryable: true,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       }
     }
   }
 
   async fetchSets(): Promise<SetsServiceResponseDTO> {
     const startTime = Date.now()
-    
+
     try {
       const result = await this.makeRequest<{ data: ScryfallSetDTO[] }>('/sets')
-      
+
       return {
         data: result.data as any,
         metadata: {
           provider: this.name,
           cached: false,
           fetchTime: Date.now() - startTime,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       }
     } catch (error: any) {
       return {
@@ -227,15 +245,15 @@ export class ScryfallProvider implements ICardProvider {
           provider: this.name,
           cached: false,
           fetchTime: Date.now() - startTime,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         },
         error: {
           code: 'SCRYFALL_SETS_ERROR',
           message: error.message,
           provider: this.name,
           retryable: true,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       }
     }
   }
@@ -255,7 +273,7 @@ export class ScryfallProvider implements ICardProvider {
     return {
       remaining: 50,
       resetTime: Date.now() + 60000, // 1 minute
-      limit: 50
+      limit: 50,
     }
   }
 
@@ -264,19 +282,19 @@ export class ScryfallProvider implements ICardProvider {
    */
   async fetchAutocomplete(query: string): Promise<AutocompleteResponseDTO> {
     const startTime = Date.now()
-    
+
     try {
       const endpoint = `/cards/autocomplete?q=${encodeURIComponent(query)}`
       const rawData = await this.makeRequest<ScryfallAutocompleteDTO>(endpoint)
-      
+
       return {
         data: rawData.data || [],
         metadata: {
           provider: this.name,
           cached: false,
           fetchTime: Date.now() - startTime,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       }
     } catch (error: any) {
       return {
@@ -285,15 +303,15 @@ export class ScryfallProvider implements ICardProvider {
           provider: this.name,
           cached: false,
           fetchTime: Date.now() - startTime,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         },
         error: {
           code: 'SCRYFALL_AUTOCOMPLETE_ERROR',
           message: error.message,
           provider: this.name,
           retryable: true,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       }
     }
   }

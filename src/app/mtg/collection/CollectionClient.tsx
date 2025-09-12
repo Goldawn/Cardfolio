@@ -1,32 +1,35 @@
 'use client'
 
-import { useEffect, useMemo, useState, Fragment, useTransition } from 'react'
-import Link from 'next/link'
-import { useCurrencyContext } from '@/context/'
-import {
-  fetchSets,
-  fetchSetCards,
-  fetchMoreCards,
-} from '../../services/Scryfall'
 import { cardApiManager } from '@/app/services/CardApiManager'
-import useCardFilters from '../../hooks/useCardFilters'
+import { useCurrencyContext } from '@/context/'
+import type { AppCollectionItem, CollectionActions, GameCard } from '@/types'
+import type { MTGCard } from '@/types/games/magic'
+import Link from 'next/link'
+import type { JSX } from 'react'
+import { useEffect, useMemo, useState, useTransition } from 'react'
 import Card from '../../components/Card'
 import CollectionActionBar from '../../components/CollectionActionBar'
 import Loader from '../../components/Loader'
-import { fetchCardPrice } from '../../services/pricing'
 import SetBar from '../../components/SetBar' // ✅ intégré
-import styles from './page.module.css'
-import type { GameCard, Currency, AppCollectionItem, CollectionActions } from '@/types'
+import useCardFilters from '../../hooks/useCardFilters'
 import type { GameSet } from '../../services/Scryfall'
-import type { MTGCard } from '@/types/games/magic'
-import type { JSX } from 'react'
+import {
+  fetchMoreCards,
+  fetchSetCards,
+  fetchSets,
+} from '../../services/Scryfall'
+import { fetchCardPrice } from '../../services/pricing'
+import styles from './page.module.css'
 
 interface CollectionClientProps {
   initialItems: any[]
   actions: CollectionActions
 }
 
-export default function CollectionClient({ initialItems, actions }: CollectionClientProps): JSX.Element {
+export default function CollectionClient({
+  initialItems,
+  actions,
+}: CollectionClientProps): JSX.Element {
   const { currency } = useCurrencyContext()
   const cardService = cardApiManager.getCardService()
 
@@ -67,7 +70,9 @@ export default function CollectionClient({ initialItems, actions }: CollectionCl
       try {
         const cards = await Promise.all(
           collection.map(async it => {
-            const formatted = await cardService.fetchCard({ cardId: it.scryfallId })
+            const formatted = await cardService.fetchCard({
+              cardId: it.scryfallId,
+            })
             return {
               ...formatted,
               quantity: it.quantity,
@@ -119,7 +124,8 @@ export default function CollectionClient({ initialItems, actions }: CollectionCl
 
   const getSetName = (code: string): string =>
     sets.find(s => s.code === code)?.name || 'Nom inconnu'
-  const getSetIcon = (code: string): string => sets.find(s => s.code === code)?.iconUri || ''
+  const getSetIcon = (code: string): string =>
+    sets.find(s => s.code === code)?.iconUri || ''
   const getSetTotalCards = (code: string): number | null =>
     sets.find(s => s.code === code)?.cardCount || null
 
@@ -221,7 +227,7 @@ export default function CollectionClient({ initialItems, actions }: CollectionCl
     })
     const uniqueCounts = {}
     uniqueBySet.forEach((set, sc) => {
-      (uniqueCounts as any)[sc] = (set as Set<string>).size
+      ;(uniqueCounts as any)[sc] = (set as Set<string>).size
     })
     return {
       codes: Array.from(setCodes),
@@ -232,10 +238,10 @@ export default function CollectionClient({ initialItems, actions }: CollectionCl
   // items pour SetBar
   const setBarItems = useMemo(() => {
     return (globalSetStats.codes || []).map((code: any) => ({
-      code,
+      code: code as string,
       name: getSetName(code),
       icon: getSetIcon(code),
-      total: getSetTotalCards(code),
+      total: getSetTotalCards(code) || 0,
       ownedUnique: (globalSetStats.uniqueCounts as any)[code] || 0,
     }))
   }, [globalSetStats, sets])
@@ -348,7 +354,9 @@ export default function CollectionClient({ initialItems, actions }: CollectionCl
           type="text"
           placeholder="Rechercher une carte..."
           value={searchQuery}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value.toLowerCase())}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setSearchQuery(e.target.value.toLowerCase())
+          }
         />
       </div>
 
@@ -377,7 +385,7 @@ export default function CollectionClient({ initialItems, actions }: CollectionCl
 
         <SetBar
           items={setBarItems}
-          selectedCode={selectedSet}
+          selectedCode={selectedSet || ''}
           onSelect={handleSelectedSet}
           classes={{
             container: styles.setsContainer,
@@ -396,7 +404,7 @@ export default function CollectionClient({ initialItems, actions }: CollectionCl
           sortOption={sortOption}
           setSortOption={setSortOption}
           sortOrderAsc={sortOrderAsc}
-          toggleSortOrder={() => setSortOrderAsc(prev => !prev)}
+          toggleSortOrder={() => setSortOrderAsc(!sortOrderAsc)}
         />
 
         {loading && <Loader />}

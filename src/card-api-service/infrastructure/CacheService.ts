@@ -41,14 +41,17 @@ export class MemoryCacheProvider implements ICacheProvider {
 
   constructor() {
     // Nettoyage automatique toutes les 5 minutes
-    this.cleanupInterval = setInterval(() => {
-      this.cleanup()
-    }, 5 * 60 * 1000)
+    this.cleanupInterval = setInterval(
+      () => {
+        this.cleanup()
+      },
+      5 * 60 * 1000
+    )
   }
 
   async get<T>(key: string): Promise<T | null> {
     const entry = this.cache.get(key)
-    
+
     if (!entry) {
       return null
     }
@@ -67,9 +70,9 @@ export class MemoryCacheProvider implements ICacheProvider {
     const entry: CacheEntry<T> = {
       data: value,
       timestamp: Date.now(),
-      ttl
+      ttl,
     }
-    
+
     this.cache.set(key, entry)
   }
 
@@ -105,19 +108,19 @@ export class MemoryCacheProvider implements ICacheProvider {
  * Implémentation de cache Redis (placeholder)
  */
 export class RedisCacheProvider implements ICacheProvider {
-  private redis: any // Redis client
-  private config: CacheConfig['redis']
+  private _redis: any // Redis client
+  private _config: CacheConfig['redis']
 
   constructor(config: CacheConfig['redis']) {
-    this.config = config
+    this._config = config
     // TODO: Initialiser le client Redis
-    // this.redis = new Redis(config)
+    // this._redis = new Redis(config)
   }
 
-  async get<T>(key: string): Promise<T | null> {
+  async get<T>(_key: string): Promise<T | null> {
     try {
       // TODO: Implémenter la récupération Redis
-      // const data = await this.redis.get(key)
+      // const data = await this._redis.get(key)
       // return data ? JSON.parse(data) : null
       return null
     } catch (error) {
@@ -126,19 +129,19 @@ export class RedisCacheProvider implements ICacheProvider {
     }
   }
 
-  async set<T>(key: string, value: T, ttl: number = 3600): Promise<void> {
+  async set<T>(_key: string, _value: T, _ttl: number = 3600): Promise<void> {
     try {
       // TODO: Implémenter la sauvegarde Redis
-      // await this.redis.setex(key, ttl, JSON.stringify(value))
+      // await this._redis.setex(key, ttl, JSON.stringify(value))
     } catch (error) {
       console.error('Erreur Redis set:', error)
     }
   }
 
-  async delete(key: string): Promise<void> {
+  async delete(_key: string): Promise<void> {
     try {
       // TODO: Implémenter la suppression Redis
-      // await this.redis.del(key)
+      // await this._redis.del(key)
     } catch (error) {
       console.error('Erreur Redis delete:', error)
     }
@@ -175,7 +178,7 @@ export class CacheService {
   constructor(config: CacheConfig) {
     this.config = config
     this.keyPrefix = 'card-api:'
-    
+
     // Initialiser le provider
     if (config.provider === 'redis' && config.redis) {
       this.provider = new RedisCacheProvider(config.redis)
@@ -206,7 +209,12 @@ export class CacheService {
   /**
    * Stocke une valeur dans le cache
    */
-  async set<T>(prefix: string, value: T, ttl?: number, ...keyParts: string[]): Promise<void> {
+  async set<T>(
+    prefix: string,
+    value: T,
+    ttl?: number,
+    ...keyParts: string[]
+  ): Promise<void> {
     if (!this.config.enabled) {
       return
     }
@@ -279,7 +287,12 @@ export class CacheService {
     return await this.get('search', query, filterKey)
   }
 
-  async setSearchResults(query: string, results: any[], ttl?: number, filters?: any): Promise<void> {
+  async setSearchResults(
+    query: string,
+    results: any[],
+    ttl?: number,
+    filters?: any
+  ): Promise<void> {
     const filterKey = filters ? JSON.stringify(filters) : 'no-filters'
     await this.set('search', results, ttl, query, filterKey)
   }

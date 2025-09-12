@@ -1,13 +1,12 @@
 'use client'
 
+import type { CardProps, Currency, GameCard } from '@/types'
+import { isMTGCard } from '@/types/utils/guards'
+import type { JSX } from 'react'
 import { useState } from 'react'
 import styles from './Card.module.css'
 import CardModal from './CardModal'
 import SplitButton from './SplitButton'
-import type { GameCard, Currency, CardProps } from '@/types'
-import type { WishlistList } from '@/types/collections'
-import { isMTGCard } from '@/types/utils/guards'
-import type { JSX } from 'react'
 
 export default function Card({
   card,
@@ -52,7 +51,7 @@ export default function Card({
   const lastPrice = getLastPrice(card, currency)
   const totalValue = (lastPrice * (card.quantity || 1)).toFixed(2)
 
-  const handleOpenModal = (e: React.MouseEvent) => {
+  const handleOpenModal = (_e: React.MouseEvent) => {
     // e.stopPropagation();                 // <-- évite de déclencher undoAdd
     if (!modal || disabled) return
     setIsModalOpen(true)
@@ -105,8 +104,12 @@ export default function Card({
           <SplitButton
             lists={wishlistLists || []}
             defaultListId={defaultListId}
-            onQuickAdd={async (listId, card) => await onAddToWishlist?.(listId, card)}
-            onCreateWishlist={async (name) => await onCreateWishlist?.(name) || null}
+            onQuickAdd={async (listId, card) =>
+              await onAddToWishlist?.(listId, card)
+            }
+            onCreateWishlist={async name =>
+              (await onCreateWishlist?.(name)) || null
+            }
             card={card}
           />
         )}

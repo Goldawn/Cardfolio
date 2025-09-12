@@ -1,17 +1,17 @@
 'use client'
 
-import { useEffect, useState, useTransition, useMemo } from 'react'
 import { cardApiManager } from '@/app/services/CardApiManager'
-import DeckSettingsPanel from '../../../components/deck/DeckSettingsPanel'
-import AddFromCollection from '../../../components/deck/AddFromCollection'
-import DeckHeader from '../../../components/deck/DeckHeader'
-import ManualAdd from '../../../components/deck/ManualAdd'
-import DeckCardsTabs from '../../../components/deck/DeckCardsTabs'
+import type { GameCard } from '@/types'
+import type { JSX } from 'react'
+import { useEffect, useMemo, useState, useTransition } from 'react'
 import Card from '../../../components/Card'
+import AddFromCollection from '../../../components/deck/AddFromCollection'
+import DeckCardsTabs from '../../../components/deck/DeckCardsTabs'
+import DeckHeader from '../../../components/deck/DeckHeader'
+import DeckSettingsPanel from '../../../components/deck/DeckSettingsPanel'
+import ManualAdd from '../../../components/deck/ManualAdd'
 import { evaluateDeckLegality } from '../../../services/Legalities'
 import styles from './page.module.css'
-import type { JSX } from 'react'
-import type { GameCard } from '@/types'
 
 interface DeckClientProps {
   deck: any
@@ -48,7 +48,9 @@ export default function DeckClient({
       try {
         const out = await Promise.all(
           deckCards.map(async dc => {
-            const formatted = await cardService.fetchCard({ cardId: dc.scryfallId })
+            const formatted = await cardService.fetchCard({
+              cardId: dc.scryfallId,
+            })
             return {
               ...formatted,
               decklistQuantity: dc.quantity,
@@ -98,7 +100,7 @@ export default function DeckClient({
     return evaluateDeckLegality(
       { format: deckState.format },
       deckCards,
-      enriched,
+      enriched as any,
       {
         // Optionnel : si un jour tu as l’ID scryfall du commandant pour Pauper Commander
         // commanderScryfallId: deckState.commanderScryfallId ?? null
@@ -238,14 +240,18 @@ export default function DeckClient({
             deckId={deckState.id}
             collectionItems={initialUserCollectionItems}
             currentDeckCards={deckCards}
-            onAdd={async (scryfallId: string, qty: number) => { await addCardToDeck(scryfallId, qty) }}
+            onAdd={async (scryfallId: string, qty: number) => {
+              await addCardToDeck(scryfallId, qty)
+            }}
           />
         )}
 
         {tab === 'manual' && (
           <ManualAdd
             deckId={deckState.id}
-            onAdd={async (scryfallId: string, qty: number) => { await addCardToDeck(scryfallId, qty) }}
+            onAdd={async (scryfallId: string, qty: number) => {
+              await addCardToDeck(scryfallId, qty)
+            }}
           />
         )}
 

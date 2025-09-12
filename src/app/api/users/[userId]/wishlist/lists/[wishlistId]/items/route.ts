@@ -22,7 +22,7 @@ interface DeleteWishlistItemRequest {
 }
 
 // GET - Récupération de tous les items d'une liste spécifique
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(_request: NextRequest, { params }: RouteParams) {
   const { userId, wishlistId } = await params
 
   if (!userId || !wishlistId) {
@@ -66,7 +66,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 // POST – Ajoute une carte à une liste de souhaits spécifique
 export async function POST(request: NextRequest, { params }: RouteParams) {
   const { userId, wishlistId } = await params
-  const { scryfallId, quantity = 1 }: AddWishlistItemRequest = await request.json()
+  const { scryfallId, quantity = 1 }: AddWishlistItemRequest =
+    await request.json()
 
   if (!userId || !scryfallId || !wishlistId) {
     return new Response(
@@ -135,11 +136,15 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   console.log('ENTREE dans le PATCH')
   const { userId, wishlistId } = await params
-  const { scryfallId, quantityDelta }: UpdateWishlistItemRequest = await request.json()
+  const { scryfallId, quantityDelta }: UpdateWishlistItemRequest =
+    await request.json()
   console.log('scryfallId', scryfallId, 'delta', quantityDelta)
 
   if (
-    !userId || !wishlistId || !scryfallId || typeof quantityDelta !== 'number'
+    !userId ||
+    !wishlistId ||
+    !scryfallId ||
+    typeof quantityDelta !== 'number'
   ) {
     return new Response(
       JSON.stringify({ error: 'Données manquantes ou invalides' }),

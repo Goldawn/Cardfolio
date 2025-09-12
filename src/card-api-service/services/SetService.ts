@@ -1,10 +1,6 @@
-import type { ISetProvider, ICardAdapter } from '../interfaces'
-import type { 
-  SetFetchRequestDTO,
-  SetServiceResponseDTO,
-  GameSet
-} from '../dto'
 import type { ServiceConfig } from '../config'
+import type { GameSet } from '../dto'
+import type { ICardAdapter, ISetProvider } from '../interfaces'
 
 /**
  * Service principal pour la gestion des sets de cartes
@@ -16,7 +12,11 @@ export class SetService {
   private config: ServiceConfig
   private defaultProvider: string
 
-  constructor(providers: Map<string, ISetProvider>, adapters: Map<string, ICardAdapter>, config: ServiceConfig) {
+  constructor(
+    providers: Map<string, ISetProvider>,
+    adapters: Map<string, ICardAdapter>,
+    config: ServiceConfig
+  ) {
     this.providers = providers
     this.adapters = adapters
     this.config = config
@@ -31,12 +31,14 @@ export class SetService {
     const adapter = this.adapters.get(providerName || this.defaultProvider)
 
     if (!provider || !adapter) {
-      throw new Error(`Provider or adapter not found: ${providerName || this.defaultProvider}`)
+      throw new Error(
+        `Provider or adapter not found: ${providerName || this.defaultProvider}`
+      )
     }
 
     try {
       const response = await provider.fetchSets()
-      
+
       if (response.error) {
         // Tentative de fallback si configuré
         if (this.config.fallbackProviders.length > 0) {
@@ -46,7 +48,9 @@ export class SetService {
       }
 
       // S'assurer que response.data est un tableau
-      const dataArray = Array.isArray(response.data) ? response.data : [response.data]
+      const dataArray = Array.isArray(response.data)
+        ? response.data
+        : [response.data]
       return adapter.transformSets(dataArray)
     } catch (error) {
       // Fallback automatique
@@ -60,17 +64,22 @@ export class SetService {
   /**
    * Récupère un set spécifique par son code
    */
-  async fetchSet(setCode: string, providerName?: string): Promise<GameSet | null> {
+  async fetchSet(
+    setCode: string,
+    providerName?: string
+  ): Promise<GameSet | null> {
     const provider = this.providers.get(providerName || this.defaultProvider)
     const adapter = this.adapters.get(providerName || this.defaultProvider)
 
     if (!provider || !adapter) {
-      throw new Error(`Provider or adapter not found: ${providerName || this.defaultProvider}`)
+      throw new Error(
+        `Provider or adapter not found: ${providerName || this.defaultProvider}`
+      )
     }
 
     try {
       const response = await provider.fetchSet(setCode)
-      
+
       if (response.error) {
         // Tentative de fallback si configuré
         if (this.config.fallbackProviders.length > 0) {
@@ -80,7 +89,9 @@ export class SetService {
       }
 
       // S'assurer que response.data est un tableau
-      const dataArray = Array.isArray(response.data) ? response.data : [response.data]
+      const dataArray = Array.isArray(response.data)
+        ? response.data
+        : [response.data]
       const sets = adapter.transformSets(dataArray)
       return sets.length > 0 ? sets[0] : null
     } catch (error) {
@@ -95,17 +106,22 @@ export class SetService {
   /**
    * Récupère les sets par type
    */
-  async fetchSetsByType(setType: string, providerName?: string): Promise<GameSet[]> {
+  async fetchSetsByType(
+    setType: string,
+    providerName?: string
+  ): Promise<GameSet[]> {
     const provider = this.providers.get(providerName || this.defaultProvider)
     const adapter = this.adapters.get(providerName || this.defaultProvider)
 
     if (!provider || !adapter) {
-      throw new Error(`Provider or adapter not found: ${providerName || this.defaultProvider}`)
+      throw new Error(
+        `Provider or adapter not found: ${providerName || this.defaultProvider}`
+      )
     }
 
     try {
       const response = await provider.fetchSetsByType(setType)
-      
+
       if (response.error) {
         // Tentative de fallback si configuré
         if (this.config.fallbackProviders.length > 0) {
@@ -115,7 +131,9 @@ export class SetService {
       }
 
       // S'assurer que response.data est un tableau
-      const dataArray = Array.isArray(response.data) ? response.data : [response.data]
+      const dataArray = Array.isArray(response.data)
+        ? response.data
+        : [response.data]
       return adapter.transformSets(dataArray)
     } catch (error) {
       // Fallback automatique
@@ -132,11 +150,12 @@ export class SetService {
   async searchSets(query: string, providerName?: string): Promise<GameSet[]> {
     try {
       const allSets = await this.fetchSets(providerName)
-      
+
       // Filtrage local par nom ou code
-      const filteredSets = allSets.filter(set => 
-        set.name.toLowerCase().includes(query.toLowerCase()) ||
-        set.code.toLowerCase().includes(query.toLowerCase())
+      const filteredSets = allSets.filter(
+        set =>
+          set.name.toLowerCase().includes(query.toLowerCase()) ||
+          set.code.toLowerCase().includes(query.toLowerCase())
       )
 
       return filteredSets
@@ -164,8 +183,9 @@ export class SetService {
       })
 
       // Trier par date de sortie (plus récent en premier)
-      return recentSets.sort((a, b) => 
-        new Date(b.releaseDate).getTime() - new Date(a.releaseDate).getTime()
+      return recentSets.sort(
+        (a, b) =>
+          new Date(b.releaseDate).getTime() - new Date(a.releaseDate).getTime()
       )
     } catch (error) {
       // Fallback vers un autre provider
@@ -179,26 +199,29 @@ export class SetService {
   /**
    * Récupère les sets par format (Standard, Modern, etc.)
    */
-  async fetchSetsByFormat(format: string, providerName?: string): Promise<GameSet[]> {
+  async fetchSetsByFormat(
+    format: string,
+    providerName?: string
+  ): Promise<GameSet[]> {
     try {
       const allSets = await this.fetchSets(providerName)
-      
+
       // Mapping des formats vers les types de sets
       const formatToSetTypes: Record<string, string[]> = {
-        'standard': ['core', 'expansion', 'draft_innovation'],
-        'modern': ['core', 'expansion', 'masters'],
-        'legacy': ['core', 'expansion', 'masters', 'commander'],
-        'commander': ['commander', 'core', 'expansion'],
-        'pioneer': ['core', 'expansion', 'draft_innovation']
+        standard: ['core', 'expansion', 'draft_innovation'],
+        modern: ['core', 'expansion', 'masters'],
+        legacy: ['core', 'expansion', 'masters', 'commander'],
+        commander: ['commander', 'core', 'expansion'],
+        pioneer: ['core', 'expansion', 'draft_innovation'],
       }
 
       const allowedSetTypes = formatToSetTypes[format.toLowerCase()] || []
-      
+
       if (allowedSetTypes.length === 0) {
         return allSets // Retourner tous les sets si format non reconnu
       }
 
-      return allSets.filter(set => 
+      return allSets.filter(set =>
         allowedSetTypes.some(type => set.setType.toLowerCase().includes(type))
       )
     } catch (error) {
@@ -215,7 +238,7 @@ export class SetService {
    */
   async checkProvidersHealth(): Promise<Record<string, boolean>> {
     const healthStatus: Record<string, boolean> = {}
-    
+
     for (const [name, provider] of this.providers) {
       try {
         healthStatus[name] = await provider.isHealthy()
@@ -223,7 +246,7 @@ export class SetService {
         healthStatus[name] = false
       }
     }
-    
+
     return healthStatus
   }
 
@@ -242,7 +265,9 @@ export class SetService {
   }
 
   // Méthodes de fallback privées
-  private async fetchSetsWithFallback(providerName?: string): Promise<GameSet[]> {
+  private async fetchSetsWithFallback(
+    _providerName?: string
+  ): Promise<GameSet[]> {
     for (const fallbackProvider of this.config.fallbackProviders) {
       try {
         return await this.fetchSets(fallbackProvider)
@@ -254,7 +279,10 @@ export class SetService {
     throw new Error('All providers failed')
   }
 
-  private async fetchSetWithFallback(setCode: string, providerName?: string): Promise<GameSet | null> {
+  private async fetchSetWithFallback(
+    setCode: string,
+    _providerName?: string
+  ): Promise<GameSet | null> {
     for (const fallbackProvider of this.config.fallbackProviders) {
       try {
         return await this.fetchSet(setCode, fallbackProvider)
@@ -266,7 +294,10 @@ export class SetService {
     throw new Error('All providers failed')
   }
 
-  private async fetchSetsByTypeWithFallback(setType: string, providerName?: string): Promise<GameSet[]> {
+  private async fetchSetsByTypeWithFallback(
+    setType: string,
+    _providerName?: string
+  ): Promise<GameSet[]> {
     for (const fallbackProvider of this.config.fallbackProviders) {
       try {
         return await this.fetchSetsByType(setType, fallbackProvider)
@@ -278,7 +309,10 @@ export class SetService {
     throw new Error('All providers failed')
   }
 
-  private async searchSetsWithFallback(query: string, providerName?: string): Promise<GameSet[]> {
+  private async searchSetsWithFallback(
+    query: string,
+    _providerName?: string
+  ): Promise<GameSet[]> {
     for (const fallbackProvider of this.config.fallbackProviders) {
       try {
         return await this.searchSets(query, fallbackProvider)
@@ -290,7 +324,9 @@ export class SetService {
     throw new Error('All providers failed')
   }
 
-  private async fetchRecentSetsWithFallback(providerName?: string): Promise<GameSet[]> {
+  private async fetchRecentSetsWithFallback(
+    _providerName?: string
+  ): Promise<GameSet[]> {
     for (const fallbackProvider of this.config.fallbackProviders) {
       try {
         return await this.fetchRecentSets(fallbackProvider)
@@ -302,7 +338,10 @@ export class SetService {
     throw new Error('All providers failed')
   }
 
-  private async fetchSetsByFormatWithFallback(format: string, providerName?: string): Promise<GameSet[]> {
+  private async fetchSetsByFormatWithFallback(
+    format: string,
+    _providerName?: string
+  ): Promise<GameSet[]> {
     for (const fallbackProvider of this.config.fallbackProviders) {
       try {
         return await this.fetchSetsByFormat(format, fallbackProvider)

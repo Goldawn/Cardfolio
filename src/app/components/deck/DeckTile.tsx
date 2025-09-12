@@ -1,6 +1,20 @@
 'use client'
+import { getArtLarge } from '@/lib/mtgCards'
 import styles from './DeckCardsTabs.module.css'
-import { getArtLarge, getShowcasePayload } from '@/lib/mtgCards'
+
+interface DeckTileProps {
+  card: any
+  qty: number
+  deckState: any
+  editMode: boolean
+  isPending: boolean
+  setShowcased: (deckCardId: string, artUrl: string) => void
+  updateDeckCardQty: (cardId: string, qty: number) => void
+  removeCardFromDeck: (cardId: string) => void
+  showLegality: boolean
+  isProblem: boolean
+  onClickShowcase: () => void
+}
 
 export default function DeckTile({
   card,
@@ -11,10 +25,10 @@ export default function DeckTile({
   setShowcased,
   updateDeckCardQty,
   removeCardFromDeck,
-  showLegality,
+  showLegality: _showLegality,
   isProblem,
-  onClickShowcase,
-}) {
+  onClickShowcase: _onClickShowcase,
+}: DeckTileProps) {
   const art = getArtLarge(card)
   const isShowcased =
     String(deckState?.showcasedDeckCardId ?? '') ===
@@ -33,7 +47,9 @@ export default function DeckTile({
       <button
         className={`${styles.toggleShowcased} ${isShowcased ? styles.showcased : ''}`}
         title={isShowcased ? 'Carte mise en avant' : 'Définir comme showcased'}
-        onClick={() => setShowcased(card.deckCardId, getShowcasePayload(card))}
+        onClick={() =>
+          setShowcased(card.deckCardId, card?.image?.artCrop || '')
+        }
       >
         {isShowcased ? '★' : '☆'}
       </button>

@@ -12,13 +12,13 @@ interface CreateDeckRequest {
 }
 
 // Récupération de tous les decks d'un utilisateur
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(_request: NextRequest, { params }: RouteParams) {
   const { userId } = await params
   console.log('ENTRE DE LA ROUTE GET ALL DECKS')
   console.log('userID :', userId)
 
   try {
-    const allItems = await prisma.Decklist.findMany({
+    const allItems = await prisma.decklist.findMany({
       where: { userId },
       select: {
         name: true,

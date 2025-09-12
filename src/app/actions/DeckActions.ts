@@ -1,11 +1,8 @@
-import 'server-only'
+import { assertDeckOwnership } from '@/lib/getAuthenticatedUser'
 import { prisma } from '@/lib/prisma'
-import {
-  getAuthenticatedUser,
-  assertDeckOwnership,
-} from '@/lib/getAuthenticatedUser'
+import 'server-only'
 
-async function getDeckIdFromDeckCard(deckCardId) {
+async function getDeckIdFromDeckCard(deckCardId: string) {
   'use server'
   const dc = await prisma.deckCard.findUnique({
     where: { id: deckCardId },
@@ -14,7 +11,11 @@ async function getDeckIdFromDeckCard(deckCardId) {
   return dc?.deckId ?? null
 }
 
-export async function addCardToDeckAction(deckId, scryfallId, qty = 1) {
+export async function addCardToDeckAction(
+  deckId: string,
+  scryfallId: string,
+  qty: number = 1
+) {
   'use server'
   await assertDeckOwnership(deckId)
 
@@ -46,7 +47,10 @@ export async function addCardToDeckAction(deckId, scryfallId, qty = 1) {
   )
 }
 
-export async function updateDeckCardQtyAction(deckCardId, nextQty) {
+export async function updateDeckCardQtyAction(
+  deckCardId: string,
+  nextQty: number
+) {
   'use server'
   if (!deckCardId || typeof nextQty !== 'number') {
     throw new Error('Paramètres invalides.')
@@ -71,7 +75,7 @@ export async function updateDeckCardQtyAction(deckCardId, nextQty) {
   return JSON.parse(JSON.stringify({ kind: 'updated', item: updated }))
 }
 
-export async function removeCardFromDeckAction(deckCardId) {
+export async function removeCardFromDeckAction(deckCardId: string) {
   'use server'
   if (!deckCardId) throw new Error('deckCardId requis.')
 
@@ -87,8 +91,8 @@ export async function removeCardFromDeckAction(deckCardId) {
 }
 
 export async function bulkUpsertDeckCardsAction(
-  deckId,
-  entries /* [{scryfallId, qty}] */
+  deckId: string,
+  entries: Array<{ scryfallId: string; qty: number }> /* [{scryfallId, qty}] */
 ) {
   'use server'
   await assertDeckOwnership(deckId)
@@ -131,7 +135,7 @@ export async function bulkUpsertDeckCardsAction(
   return JSON.parse(JSON.stringify({ kind: 'bulk', items: result }))
 }
 
-export async function renameDeckAction(deckId, newName) {
+export async function renameDeckAction(deckId: string, newName: string) {
   'use server'
   if (!newName || !newName.trim()) throw new Error('Nom invalide.')
   await assertDeckOwnership(deckId)
@@ -144,7 +148,7 @@ export async function renameDeckAction(deckId, newName) {
   return JSON.parse(JSON.stringify(updated))
 }
 
-export async function setDeckFormatAction(deckId, format) {
+export async function setDeckFormatAction(deckId: string, format: string) {
   'use server'
   await assertDeckOwnership(deckId)
 
@@ -156,7 +160,7 @@ export async function setDeckFormatAction(deckId, format) {
   return JSON.parse(JSON.stringify(updated))
 }
 
-export async function toggleDeckLockAction(deckId, force) {
+export async function toggleDeckLockAction(deckId: string, force?: boolean) {
   'use server'
   await assertDeckOwnership(deckId)
   const deck = await prisma.decklist.findUnique({
@@ -172,7 +176,7 @@ export async function toggleDeckLockAction(deckId, force) {
   return JSON.parse(JSON.stringify(updated))
 }
 
-export async function updateDeckNotesAction(deckId, notes) {
+export async function updateDeckNotesAction(deckId: string, notes: string) {
   'use server'
   await assertDeckOwnership(deckId)
   const updated = await prisma.decklist.update({
@@ -183,7 +187,7 @@ export async function updateDeckNotesAction(deckId, notes) {
   return JSON.parse(JSON.stringify(updated))
 }
 
-export async function duplicateDeckAction(deckId) {
+export async function duplicateDeckAction(deckId: string) {
   'use server'
   await assertDeckOwnership(deckId)
 
@@ -199,7 +203,7 @@ export async function duplicateDeckAction(deckId) {
       name: deck.name + ' (copie)',
       userId: deck.userId,
       format: deck.format,
-      colors: deck.colors,
+      colors: deck.colors as any,
       notes: deck.notes ?? null,
       showcasedDeckCardId: null,
       showcasedArt: null,
@@ -216,7 +220,10 @@ export async function duplicateDeckAction(deckId) {
   return JSON.parse(JSON.stringify(copy))
 }
 
-export async function setShowcasedCardAction(deckId, payload) {
+export async function setShowcasedCardAction(
+  deckId: string,
+  payload: { deckCardId?: string; artUrl?: string }
+) {
   'use server'
   await assertDeckOwnership(deckId)
 
@@ -242,7 +249,7 @@ export async function setShowcasedCardAction(deckId, payload) {
   return JSON.parse(JSON.stringify(updated))
 }
 
-export async function deleteDeckAction(deckId) {
+export async function deleteDeckAction(deckId: string) {
   'use server'
   await assertDeckOwnership(deckId)
 

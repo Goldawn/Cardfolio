@@ -1,29 +1,31 @@
-import { useMemo, Fragment } from 'react'
-import Image from 'next/image'
-import { COLOR_META, TYPE_META, RARITY_META } from '@/lib/mtgIcons'
 import {
-  getFormatLabel,
-  getFormatDescription,
-  getFormatMeta,
-} from '@/lib/mtgFormats'
-import {
-  computeManaCurveSplit,
   computeColorDistribution,
+  computeManaCurveSplit,
 } from '@/lib/deckStats'
+import { getFormatDescription, getFormatLabel } from '@/lib/mtgFormats'
+import { COLOR_META, RARITY_META, TYPE_META } from '@/lib/mtgIcons'
+import type { MTGColor } from '@/types/games/magic'
+import Image from 'next/image'
+import { useMemo } from 'react'
 import {
-  BarChart,
   Bar,
+  BarChart,
+  Cell,
+  Pie,
+  PieChart,
+  Tooltip as RTooltip,
   ResponsiveContainer,
   XAxis,
-  PieChart,
-  Pie,
-  Cell,
-  Legend,
-  Tooltip as RTooltip,
 } from 'recharts'
 import styles from './DeckHeader.module.css'
 
-export default function DeckHeader({ deck, colors, cards }) {
+interface DeckHeaderProps {
+  deck: any
+  colors: any
+  cards: any
+}
+
+export default function DeckHeader({ deck, colors, cards }: DeckHeaderProps) {
   const manaCurve = useMemo(
     () => computeManaCurveSplit(cards, { excludeLands: true, cap: 7 }),
     [cards]
@@ -50,7 +52,7 @@ export default function DeckHeader({ deck, colors, cards }) {
   const artUrl = useMemo(() => {
     if (deck?.showcasedArt) return deck.showcasedArt
 
-    const pickImage = c =>
+    const pickImage = (c: any) =>
       c?.image?.artCrop ||
       c?.cardBack?.image?.artCrop ||
       c?.image?.large ||
@@ -58,7 +60,7 @@ export default function DeckHeader({ deck, colors, cards }) {
       null
 
     const showcased = cards?.find(
-      c => c.deckCardId === deck?.showcasedDeckCardId
+      (c: any) => c.deckCardId === deck?.showcasedDeckCardId
     )
     return pickImage(showcased) || pickImage(cards?.[0]) || null
   }, [deck?.showcasedArt, deck?.showcasedDeckCardId, cards])
@@ -75,7 +77,7 @@ export default function DeckHeader({ deck, colors, cards }) {
       battle: 0,
       other: 0,
     }
-    ;(cards || []).forEach(card => {
+    ;(cards || []).forEach((card: any) => {
       const qty = Number(card?.decklistQuantity || 0)
       if (!qty) return
       const t = (card?.type || card?.typeLine || '').toLowerCase()
@@ -102,18 +104,18 @@ export default function DeckHeader({ deck, colors, cards }) {
       special: 0,
       other: 0,
     }
-    ;(cards || []).forEach(card => {
+    ;(cards || []).forEach((card: any) => {
       const qty = Number(card?.decklistQuantity || 0)
       if (!qty) return
       const r = (card?.rarity || '').toLowerCase()
-      if (r in out) out[r] += qty
+      if (r in out) (out as any)[r] += qty
       else out.other += qty
     })
     return out
   }, [cards])
 
-  const ColorPip = ({ c }) => {
-    const meta = COLOR_META[c]
+  const ColorPip = ({ c }: { c: string }) => {
+    const meta = COLOR_META[c as MTGColor]
     if (!meta?.icon) return <span className={styles.colorPip}>{c}</span>
     return (
       <Image
@@ -145,15 +147,15 @@ export default function DeckHeader({ deck, colors, cards }) {
         <div className={styles.bannerSubRow}>
           <FormatBadge format={deck?.format} />
           {(colors || []).length > 0 ? (
-            colors.map(c => <ColorPip key={c} c={c} />)
+            colors.map((c: MTGColor) => <ColorPip key={c} c={c} />)
           ) : (
             <span className={styles.noColors}>—</span>
           )}
         </div>
 
         <ul className={styles.typeCounts}>
-          {Object.entries(TYPE_META).map(([key, meta]) => {
-            const count = typeCounts[key] || 0
+          {Object.entries(TYPE_META).map(([key, meta]: [string, any]) => {
+            const count = (typeCounts as any)[key] || 0
             if (count <= 0) return null
             return (
               <li key={key} className={styles.typeCountItem} title={meta.label}>
@@ -176,8 +178,8 @@ export default function DeckHeader({ deck, colors, cards }) {
         </ul>
 
         <ul className={styles.rarityCounts}>
-          {Object.entries(RARITY_META).map(([key, meta]) => {
-            const count = rarityCounts[key] || 0
+          {Object.entries(RARITY_META).map(([key, meta]: [string, any]) => {
+            const count = (rarityCounts as any)[key] || 0
             if (count <= 0) return null
             return (
               <li key={key} className={styles.rarityItem} title={meta.label}>
@@ -216,12 +218,12 @@ export default function DeckHeader({ deck, colors, cards }) {
               tick={{ fill: '#fff' }}
             />
             <RTooltip
-              formatter={(value, key) => {
+              formatter={(value: any, key: any) => {
                 const label =
                   key === 'creatures' ? 'Créatures' : 'Non-créatures'
                 return [`${value} carte${value > 1 ? 's' : ''}`, label]
               }}
-              labelFormatter={label => `Coût converti ${label}`}
+              labelFormatter={(label: any) => `Coût converti ${label}`}
             />
 
             <Bar
@@ -253,18 +255,24 @@ export default function DeckHeader({ deck, colors, cards }) {
               innerRadius="45%"
               outerRadius="80%"
               isAnimationActive={false}
-              stroke={0}
+              stroke={''}
             >
-              {colorDist.data.map(entry => (
-                <Cell key={entry.key} fill={COLOR_FILL[entry.key] || '#999'} />
+              {colorDist.data.map((entry: any) => (
+                <Cell
+                  key={entry.key}
+                  fill={
+                    COLOR_FILL[entry.key as keyof typeof COLOR_FILL] || '#999'
+                  }
+                />
               ))}
             </Pie>
             <RTooltip
-              content={({ active, payload }) => {
-                if (!active || !payload?.length) return null
-                const p = payload[0]
+              content={(props: any) => {
+                if (!props.active || !props.payload?.length) return null
+                const p = props.payload[0]
                 const k = p?.payload?.key
-                const label = COLOR_META[k]?.label ?? k
+                const label =
+                  COLOR_META[k as keyof typeof COLOR_META]?.label ?? k
                 const val = p?.value ?? 0
                 const pct = colorDist.total
                   ? Math.round((val / colorDist.total) * 100)
@@ -296,7 +304,7 @@ export default function DeckHeader({ deck, colors, cards }) {
   )
 }
 
-function FormatBadge({ format }) {
+function FormatBadge({ format }: { format: any }) {
   if (!format) return null
 
   const label = getFormatLabel(format)

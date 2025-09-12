@@ -1,20 +1,19 @@
 'use client'
 
-import { useEffect, useState, Fragment } from 'react'
+import type { GameSet } from '@/card-api-service/dto'
+import type { CollectionActions, GameCard } from '@/types'
+import type { JSX } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import Card from '../../components/Card'
+import CollectionActionBar from '../../components/CollectionActionBar'
 import Loader from '../../components/Loader'
 import useCardFilters from '../../hooks/useCardFilters'
-import CollectionActionBar from '../../components/CollectionActionBar'
-import { useSets } from './hooks/useSets'
 import { useCards } from './hooks/useCards'
 import { useCollection } from './hooks/useCollection'
+import { useSets } from './hooks/useSets'
+import type { WishlistActions } from './hooks/useWishlists'
 import { useWishlists } from './hooks/useWishlists'
 import styles from './page.module.css'
-import type { JSX } from 'react'
-import type { GameCard } from '@/types'
-import type { GameSet } from '@/card-api-service/dto'
-import type { CollectionActions } from './hooks/useCollection'
-import type { WishlistActions } from './hooks/useWishlists'
 
 interface ImportClientProps {
   initialCollection: any[]
@@ -27,26 +26,26 @@ export default function ImportClient({
   initialCollection,
   initialWishlistLists,
   actions,
-  userId,
+  userId: _userId,
 }: ImportClientProps): JSX.Element {
   // Hooks personnalisés
-  const { sets, loading: setsLoading, filterSetsByName } = useSets()
+  const { sets: _sets, loading: setsLoading, filterSetsByName } = useSets()
   const { cards, loading: cardsLoading, loadSetCards } = useCards()
-  const { 
-    collection, 
-    recentlyAdded, 
+  const {
+    collection,
+    recentlyAdded,
     isPending: collectionPending,
     addToCollection,
     updateQuantity,
     removeFromCollection,
-    handleRecentCardClick
+    handleRecentCardClick,
   } = useCollection(initialCollection, actions as CollectionActions)
-  const { 
-    wishlistLists, 
-    wishlistTotals, 
+  const {
+    wishlistLists,
+    wishlistTotals,
     isPending: wishlistPending,
     createWishlist,
-    addToWishlist
+    addToWishlist,
   } = useWishlists(initialWishlistLists, actions as WishlistActions)
 
   // États locaux
@@ -123,10 +122,13 @@ export default function ImportClient({
     handleRecentCardClick(cardId, formattedCards)
   }
 
-  const toggleSortOrder = () => setSortOrderAsc(prev => !prev)
+  const toggleSortOrder = () => setSortOrderAsc(!sortOrderAsc)
 
   return (
-    <div id={styles.importPage} aria-busy={isPending || setsLoading || cardsLoading}>
+    <div
+      id={styles.importPage}
+      aria-busy={isPending || setsLoading || cardsLoading}
+    >
       <h1 id={styles.top}>Magic: The Gathering</h1>
 
       <div className={styles.inputContainer}>
@@ -144,9 +146,7 @@ export default function ImportClient({
                 onClick={() => handleSetSelect(set)}
               >
                 <img src={set.iconUri} alt={set.name} />
-                <strong
-                  className={!set.parentSetCode ? styles.expansion : ''}
-                >
+                <strong className={!set.parentSetCode ? styles.expansion : ''}>
                   {set.name}
                 </strong>{' '}
                 ({set.code}) ({set.cardCount} cartes) <i>{set.releaseDate}</i>
@@ -217,7 +217,9 @@ export default function ImportClient({
                   wishlistLists={wishlistLists}
                   onAddToCollection={() => addToCollection(card)}
                   onCreateWishlist={createWishlist}
-                  onAddToWishlist={async (listId: string, card: GameCard) => addToWishlist(listId, card)}
+                  onAddToWishlist={async (listId: string, card: GameCard) =>
+                    addToWishlist(listId, card)
+                  }
                   onRemove={removeFromCollection}
                   disabled={isPending}
                 />
@@ -243,26 +245,31 @@ export default function ImportClient({
             </div>
           </div>
           <div className={styles.cardContainer}>
-            {recentlyAdded.map(({ id, card, count }: { id: string; card: any; count: number }, index: number) => (
-              <div
-                key={`${id}-${index}`}
-                onClick={() => onRecentCardClick(id)} // 👈 clique = -1
-                style={{ cursor: 'pointer' }}
-              >
-                <Card
-                  card={card}
-                  cardList={recentlyAdded.map(e => e.card)}
-                  currentIndex={index}
-                  // hasOtherFace={(card as any).layout !== 'normal'}
-                  className={index === 0 ? styles.cardAppear : ''}
-                  showName={false}
-                  modal={false}
-                />
-                <p>
-                  récemment ajouté : <strong>{count}</strong>
-                </p>
-              </div>
-            ))}
+            {recentlyAdded.map(
+              (
+                { id, card, count }: { id: string; card: any; count: number },
+                index: number
+              ) => (
+                <div
+                  key={`${id}-${index}`}
+                  onClick={() => onRecentCardClick(id)} // 👈 clique = -1
+                  style={{ cursor: 'pointer' }}
+                >
+                  <Card
+                    card={card}
+                    cardList={recentlyAdded.map(e => e.card)}
+                    currentIndex={index}
+                    // hasOtherFace={(card as any).layout !== 'normal'}
+                    className={index === 0 ? styles.cardAppear : ''}
+                    showName={false}
+                    modal={false}
+                  />
+                  <p>
+                    récemment ajouté : <strong>{count}</strong>
+                  </p>
+                </div>
+              )
+            )}
           </div>
         </aside>
       )}

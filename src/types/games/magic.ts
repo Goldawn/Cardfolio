@@ -34,28 +34,28 @@ export type MTGFormat =
   | 'penny'
 
 export type MTGGameData = {
-  manaCost?: string
-  manaValue?: number
-  cmc?: number
-  convertedManaCost?: number
-  type?: string
-  typeLine?: string
-  oracleText?: string
-  flavorText?: string
-  power?: string
-  toughness?: string
-  colorIdentity?: MTGColor[]
-  card_faces?: MTGCardFace[]
+  manaCost?: string | undefined
+  manaValue?: number | undefined
+  cmc?: number | undefined
+  convertedManaCost?: number | undefined
+  type?: string | undefined
+  typeLine?: string | undefined
+  oracleText?: string | undefined
+  flavorText?: string | undefined
+  power?: string | undefined
+  toughness?: string | undefined
+  colorIdentity?: MTGColor[] | undefined
+  card_faces?: MTGCardFace[] | undefined
 }
 
 export type MTGCardFace = {
-  name?: string
-  mana_cost?: string
-  type_line?: string
-  oracle_text?: string
-  power?: string
-  toughness?: string
-  image_uris?: CardImages
+  name?: string | undefined
+  mana_cost?: string | undefined
+  type_line?: string | undefined
+  oracle_text?: string | undefined
+  power?: string | undefined
+  toughness?: string | undefined
+  image_uris?: CardImages | undefined
 }
 
 export type MTGCard = BaseCard<

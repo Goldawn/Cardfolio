@@ -1,24 +1,24 @@
 'use client'
-import { useMemo } from 'react'
-import { TYPE_META, COLOR_META } from '@/lib/mtgIcons'
+import { COLOR_META, TYPE_META } from '@/lib/mtgIcons'
 import {
-  buildNameList,
-  buildMvSections,
-  buildTypeSections,
   buildColorSections,
+  buildMvSections,
+  buildNameList,
+  buildTypeSections,
 } from '@/lib/mtgSections'
+import { useMemo } from 'react'
 import { useDeckCardsPrefs } from '../../hooks/useDeckCardsPrefs'
-import { useLegalityIndex } from '../../hooks/useLegalityIndex'
 import { useHoverPreview } from '../../hooks/useHoverPreview'
+import { useLegalityIndex } from '../../hooks/useLegalityIndex'
 
+import CardPreviewPopover from './CardPreviewPopover'
 import ColsControl from './ColsControl'
-import SectionBlock from './SectionBlock'
+import DeckPile from './DeckPile'
 import DeckRow from './DeckRow'
 import DeckTile from './DeckTile'
-import DeckPile from './DeckPile'
-import MultiCols from './layout/MultiCols'
+import SectionBlock from './SectionBlock'
 import Masonry from './layout/Masonry'
-import CardPreviewPopover from './CardPreviewPopover'
+import MultiCols from './layout/MultiCols'
 
 import Image from 'next/image'
 import styles from './DeckCardsTabs.module.css'
@@ -73,6 +73,23 @@ interface ViewProps {
 /* =========================== TABS HOST =========================== */
 
 export default function DeckCardsTabs(props: DeckCardsTabsProps) {
+  // Wrapper function to convert setShowcased signature for DeckPile/DeckTile components
+  const setShowcasedForPile = (payload: any) => {
+    if (
+      payload &&
+      typeof payload === 'object' &&
+      payload.deckCardId &&
+      payload.artUrl
+    ) {
+      // Call the original setShowcased with the correct signature
+      const originalSetShowcased = props.setShowcased as (
+        deckCardId: string,
+        artUrl: string
+      ) => void
+      originalSetShowcased(payload.deckCardId, payload.artUrl)
+    }
+  }
+
   const {
     prefs,
     setView,
@@ -83,8 +100,13 @@ export default function DeckCardsTabs(props: DeckCardsTabsProps) {
     setCols,
     isColsEnabled,
   } = useDeckCardsPrefs()
-  
-  const { view: active, edit: editMode, legality: showLegality, sortKey } = prefs
+
+  const {
+    view: active,
+    edit: editMode,
+    legality: showLegality,
+    sortKey,
+  } = prefs
 
   const { preview, getRowHoverHandlers } = useHoverPreview()
 
@@ -182,6 +204,7 @@ export default function DeckCardsTabs(props: DeckCardsTabsProps) {
       >
         <Current
           {...props}
+          setShowcased={setShowcasedForPile}
           editMode={editMode}
           showLegality={showLegality}
           sortKey={sortKey}
@@ -208,7 +231,7 @@ function DeckGridView({
   cards,
   deckState,
   isPending,
-  legality,
+  legality: _legality,
   updateDeckCardQty,
   removeCardFromDeck,
   setShowcased,
@@ -261,7 +284,10 @@ function DeckGridView({
             (s: number, c: any) => s + Number(c?.decklistQuantity || 0),
             0
           )
-          const meta = (TYPE_META as any)[sec.title] || { label: sec.title, icon: null }
+          const meta = (TYPE_META as any)[sec.title] || {
+            label: sec.title,
+            icon: null,
+          }
           return (
             <section key={sec.key} className={styles.typeSection}>
               <header className={styles.sectionHeader}>
@@ -281,7 +307,10 @@ function DeckGridView({
               </header>
               <ul
                 className={styles.overlapList}
-                style={{ ['--tile-w' as any]: '180px', ['--overlap' as any]: '200px' }}
+                style={{
+                  ['--tile-w' as any]: '180px',
+                  ['--overlap' as any]: '200px',
+                }}
               >
                 {sec.items.map(renderTile)}
               </ul>
@@ -325,7 +354,10 @@ function DeckGridView({
               </header>
               <ul
                 className={styles.overlapList}
-                style={{ ['--tile-w' as any]: '180px', ['--overlap' as any]: '200px' }}
+                style={{
+                  ['--tile-w' as any]: '180px',
+                  ['--overlap' as any]: '200px',
+                }}
               >
                 {sec.items.map(renderTile)}
               </ul>
@@ -347,7 +379,10 @@ function DeckGridView({
             </header>
             <ul
               className={styles.overlapList}
-              style={{ ['--tile-w' as any]: '180px', ['--overlap' as any]: '200px' }}
+              style={{
+                ['--tile-w' as any]: '180px',
+                ['--overlap' as any]: '200px',
+              }}
             >
               {colorLands.map(renderTile)}
             </ul>
@@ -406,7 +441,11 @@ function DeckListView({
   const typeData = useMemo(() => buildTypeSections(cards), [cards])
   const colorData = useMemo(() => buildColorSections(cards), [cards])
 
-  const renderSections = (sections: any[], lands: any[], titleForLands = 'Terrains') => {
+  const renderSections = (
+    sections: any[],
+    lands: any[],
+    titleForLands = 'Terrains'
+  ) => {
     const ordered = [
       ...sections,
       ...(lands.length
@@ -436,22 +475,29 @@ function DeckListView({
             >
               <table className={styles.listTable}>
                 <tbody>
-                  {sec.items.map((card: MTGCard) => (
-                    <DeckRow
-                      key={(card as any).deckCardId || card.id}
-                      variant="list"
-                      card={card}
-                      deckState={deckState}
-                      editMode={editMode}
-                      isPending={isPending}
-                      showLegality={showLegality}
-                      updateDeckCardQty={updateDeckCardQty}
-                      removeCardFromDeck={removeCardFromDeck}
-                      setShowcased={setShowcased}
-                      getRowHoverHandlers={getRowHoverHandlers}
-                      problems={issuesById.get(card.id) || [] as any}
-                    />
-                  ))}
+                  {sec.items.map(
+                    (
+                      card: MTGCard & {
+                        deckCardId: string
+                        decklistQuantity: number
+                      }
+                    ) => (
+                      <DeckRow
+                        key={card.deckCardId || card.id}
+                        variant="list"
+                        card={card}
+                        deckState={deckState}
+                        editMode={editMode}
+                        isPending={isPending}
+                        showLegality={showLegality}
+                        updateDeckCardQty={updateDeckCardQty}
+                        removeCardFromDeck={removeCardFromDeck}
+                        setShowcased={setShowcased}
+                        getRowHoverHandlers={getRowHoverHandlers}
+                        problems={issuesById.get(card.id) || ([] as any)}
+                      />
+                    )
+                  )}
                 </tbody>
               </table>
             </SectionBlock>
@@ -471,22 +517,29 @@ function DeckListView({
         render={(col: any) => (
           <table className={styles.listTable}>
             <tbody>
-              {col.map((card: MTGCard) => (
-                <DeckRow
-                  key={(card as any).deckCardId || card.id}
-                  variant="list"
-                  card={card}
-                  deckState={deckState}
-                  editMode={editMode}
-                  isPending={isPending}
-                  showLegality={showLegality}
-                  updateDeckCardQty={updateDeckCardQty}
-                  removeCardFromDeck={removeCardFromDeck}
-                  setShowcased={setShowcased}
-                  getRowHoverHandlers={getRowHoverHandlers}
-                  problems={issuesById.get(card.id) || [] as any}
-                />
-              ))}
+              {col.map(
+                (
+                  card: MTGCard & {
+                    deckCardId: string
+                    decklistQuantity: number
+                  }
+                ) => (
+                  <DeckRow
+                    key={card.deckCardId || card.id}
+                    variant="list"
+                    card={card}
+                    deckState={deckState}
+                    editMode={editMode}
+                    isPending={isPending}
+                    showLegality={showLegality}
+                    updateDeckCardQty={updateDeckCardQty}
+                    removeCardFromDeck={removeCardFromDeck}
+                    setShowcased={setShowcased}
+                    getRowHoverHandlers={getRowHoverHandlers}
+                    problems={issuesById.get(card.id) || ([] as any)}
+                  />
+                )
+              )}
             </tbody>
           </table>
         )}
@@ -528,7 +581,11 @@ function DeckCompactView({
   const typeData = useMemo(() => buildTypeSections(cards), [cards])
   const colorData = useMemo(() => buildColorSections(cards), [cards])
 
-  const renderSections = (sections: any[], lands: any[], titleForLands = 'Terrains') => {
+  const renderSections = (
+    sections: any[],
+    lands: any[],
+    titleForLands = 'Terrains'
+  ) => {
     const ordered = [
       ...sections,
       ...(lands.length
@@ -553,22 +610,29 @@ function DeckCompactView({
             <SectionBlock key={sec.key} title={title} count={count} icon={null}>
               <table className={styles.sectionTable}>
                 <tbody>
-                  {sec.items.map((card: MTGCard) => (
-                    <DeckRow
-                      key={(card as any).deckCardId || card.id}
-                      variant="compact"
-                      card={card}
-                      deckState={deckState}
-                      editMode={editMode}
-                      isPending={isPending}
-                      showLegality={showLegality}
-                      updateDeckCardQty={updateDeckCardQty}
-                      removeCardFromDeck={removeCardFromDeck}
-                      setShowcased={setShowcased}
-                      getRowHoverHandlers={getRowHoverHandlers}
-                      problems={issuesById.get(card.id) || [] as any}
-                    />
-                  ))}
+                  {sec.items.map(
+                    (
+                      card: MTGCard & {
+                        deckCardId: string
+                        decklistQuantity: number
+                      }
+                    ) => (
+                      <DeckRow
+                        key={card.deckCardId || card.id}
+                        variant="compact"
+                        card={card}
+                        deckState={deckState}
+                        editMode={editMode}
+                        isPending={isPending}
+                        showLegality={showLegality}
+                        updateDeckCardQty={updateDeckCardQty}
+                        removeCardFromDeck={removeCardFromDeck}
+                        setShowcased={setShowcased}
+                        getRowHoverHandlers={getRowHoverHandlers}
+                        problems={issuesById.get(card.id) || ([] as any)}
+                      />
+                    )
+                  )}
                 </tbody>
               </table>
             </SectionBlock>
@@ -588,22 +652,29 @@ function DeckCompactView({
         render={(col: any) => (
           <table className={styles.listTable}>
             <tbody>
-              {col.map((card: MTGCard) => (
-                <DeckRow
-                  key={(card as any).deckCardId || card.id}
-                  variant="compact"
-                  card={card}
-                  deckState={deckState}
-                  editMode={editMode}
-                  isPending={isPending}
-                  showLegality={showLegality}
-                  updateDeckCardQty={updateDeckCardQty}
-                  removeCardFromDeck={removeCardFromDeck}
-                  setShowcased={setShowcased}
-                  getRowHoverHandlers={getRowHoverHandlers}
-                  problems={issuesById.get(card.id) || [] as any}
-                />
-              ))}
+              {col.map(
+                (
+                  card: MTGCard & {
+                    deckCardId: string
+                    decklistQuantity: number
+                  }
+                ) => (
+                  <DeckRow
+                    key={card.deckCardId || card.id}
+                    variant="compact"
+                    card={card}
+                    deckState={deckState}
+                    editMode={editMode}
+                    isPending={isPending}
+                    showLegality={showLegality}
+                    updateDeckCardQty={updateDeckCardQty}
+                    removeCardFromDeck={removeCardFromDeck}
+                    setShowcased={setShowcased}
+                    getRowHoverHandlers={getRowHoverHandlers}
+                    problems={issuesById.get(card.id) || ([] as any)}
+                  />
+                )
+              )}
             </tbody>
           </table>
         )}
@@ -661,7 +732,7 @@ function DeckStacksView({
   )
 
   const renderPile = (card: MTGCard) => {
-    const problems = issuesById.get(card.id) || [] as any
+    const problems = issuesById.get(card.id) || ([] as any)
     const isProblem = showLegality && problems.length > 0
     return (
       <DeckPile
@@ -686,7 +757,10 @@ function DeckStacksView({
     return (
       <ul
         className={styles.pilesFlow}
-        style={{ ['--card-w' as any]: `${CARD_W}px`, ['--card-h' as any]: `${CARD_H}px` }}
+        style={{
+          ['--card-w' as any]: `${CARD_W}px`,
+          ['--card-h' as any]: `${CARD_H}px`,
+        }}
       >
         {listByName.map(renderPile)}
       </ul>
@@ -701,7 +775,10 @@ function DeckStacksView({
             (s: number, c: any) => s + Number(c?.decklistQuantity || 0),
             0
           )
-          const meta = (TYPE_META as any)[sec.title] || { label: sec.title, icon: null }
+          const meta = (TYPE_META as any)[sec.title] || {
+            label: sec.title,
+            icon: null,
+          }
           return (
             <section key={sec.key} className={styles.typeSection}>
               <header className={styles.sectionHeader}>

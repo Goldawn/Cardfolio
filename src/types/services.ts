@@ -1,8 +1,6 @@
 // Types pour les services
 // =======================
 
-import type { GameCard } from './index'
-
 // Types pour les cartes enrichies
 export type EnrichedCard = {
   id: string
@@ -61,7 +59,15 @@ export type FormatCardOptions = {
 // Types pour les services de recherche
 export type SearchServiceOptions = {
   unique?: 'prints' | 'cards' | 'art'
-  order?: 'name' | 'set' | 'released' | 'rarity' | 'color' | 'usd' | 'eur' | 'tix'
+  order?:
+    | 'name'
+    | 'set'
+    | 'released'
+    | 'rarity'
+    | 'color'
+    | 'usd'
+    | 'eur'
+    | 'tix'
   dir?: 'auto' | 'asc' | 'desc'
   page?: number
   language?: string

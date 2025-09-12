@@ -1,4 +1,4 @@
-import { useState, useMemo, useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { fetchCardPrice } from '../../../services/pricing'
 import type { AppCollectionItem, CollectionActions } from '@/types'
 
@@ -58,7 +58,7 @@ export function useCollection(
       try {
         const { usd, eur } = await fetchCardPrice(card.name)
 
-        const lastPrice = eur || usd || 0
+        const _lastPrice = eur || usd || 0
         const newPriceEntry = {
           date: new Date().toISOString().split('T')[0],
           usd: usd,

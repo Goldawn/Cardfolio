@@ -1,7 +1,7 @@
 // Fonction helper pour créer une carte typée
 // ===========================================
 
-import { GameType, BaseCard } from '../base'
+import { BaseCard, GameType } from '../base'
 
 export function createCard<
   TGameData,
@@ -10,7 +10,7 @@ export function createCard<
   TFormat,
   TGameType extends GameType,
 >(
-  gameType: TGameType,
+  _gameType: TGameType,
   data: Omit<BaseCard<TGameData, TColor, TCardType, TFormat>, 'gameType'> & {
     gameType: TGameType
   }
@@ -39,8 +39,8 @@ export type CardEvent<T extends BaseCard<any, any, any, any>> =
 
 // Types pour les réponses API
 export type ApiResponse<T> = {
-  data?: T
-  error?: string
+  data?: T | undefined
+  error?: string | undefined
   loading: boolean
 }
 

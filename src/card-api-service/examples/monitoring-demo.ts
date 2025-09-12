@@ -2,27 +2,27 @@
  * Démonstration du MonitoringService en action
  */
 
-import { 
-  CardServiceFactory,
+import {
   CacheService,
-  RateLimitService,
-  MonitoringService,
+  CardServiceFactory,
+  DEFAULT_MONITORING_CONFIG,
   DEFAULT_RATE_LIMIT_CONFIG,
-  DEFAULT_MONITORING_CONFIG
+  MonitoringService,
+  RateLimitService,
 } from '../index'
 
 async function demonstrateMonitoringService() {
   console.log('🎯 Démonstration du MonitoringService\n')
-  
+
   // Initialisation des services
-  const cacheService = new CacheService({
+  const _cacheService = new CacheService({
     enabled: true,
     ttl: 3600,
-    provider: 'memory'
+    provider: 'memory',
   })
-  
-  const rateLimitService = new RateLimitService(DEFAULT_RATE_LIMIT_CONFIG)
-  
+
+  const _rateLimitService = new RateLimitService(DEFAULT_RATE_LIMIT_CONFIG)
+
   const monitoringService = new MonitoringService({
     ...DEFAULT_MONITORING_CONFIG,
     enabled: true,
@@ -30,11 +30,11 @@ async function demonstrateMonitoringService() {
       collectApiCalls: true,
       collectResponseTimes: true,
       collectErrorRates: true,
-      collectCacheHitRates: true
-    }
+      collectCacheHitRates: true,
+    },
   })
 
-  const cardService = CardServiceFactory.create()
+  const _cardService = CardServiceFactory.create()
 
   console.log('✅ Services initialisés\n')
 
@@ -42,13 +42,13 @@ async function demonstrateMonitoringService() {
   // 1. SIMULATION D'APPELS API
   // ========================================
 
-  console.log('📊 Simulation d\'appels API...\n')
+  console.log("📊 Simulation d'appels API...\n")
 
   // Simuler des appels API réussis
   for (let i = 0; i < 5; i++) {
-    const startTime = Date.now()
+    const _startTime = Date.now()
     const responseTime = Math.random() * 1000 + 200 // 200-1200ms
-    
+
     monitoringService.recordApiCall(
       'scryfall',
       '/cards',
@@ -57,14 +57,14 @@ async function demonstrateMonitoringService() {
       200,
       true
     )
-    
+
     console.log(`✅ Appel API ${i + 1} - Temps: ${responseTime.toFixed(2)}ms`)
   }
 
   // Simuler des appels API avec erreurs
   for (let i = 0; i < 2; i++) {
     const responseTime = Math.random() * 500 + 100
-    
+
     monitoringService.recordApiCall(
       'scryfall',
       '/cards',
@@ -73,8 +73,10 @@ async function demonstrateMonitoringService() {
       500,
       false
     )
-    
-    console.log(`❌ Appel API avec erreur ${i + 1} - Temps: ${responseTime.toFixed(2)}ms`)
+
+    console.log(
+      `❌ Appel API avec erreur ${i + 1} - Temps: ${responseTime.toFixed(2)}ms`
+    )
   }
 
   // ========================================
@@ -106,8 +108,10 @@ async function demonstrateMonitoringService() {
   console.log(`   Total Requêtes: ${stats.totalRequests}`)
   console.log(`   Total Erreurs: ${stats.totalErrors}`)
   console.log(`   Taux d'Erreur: ${stats.errorRate.toFixed(2)}%`)
-  console.log(`   Temps de Réponse Moyen: ${stats.averageResponseTime.toFixed(2)}ms`)
-  
+  console.log(
+    `   Temps de Réponse Moyen: ${stats.averageResponseTime.toFixed(2)}ms`
+  )
+
   console.log('\n🏢 Requêtes par Provider:')
   Object.entries(stats.requestsByProvider).forEach(([provider, count]) => {
     console.log(`   ${provider}: ${count} requêtes`)
@@ -127,7 +131,7 @@ async function demonstrateMonitoringService() {
   const healthStatus = await monitoringService.getHealthStatus()
   console.log(`Statut Global: ${healthStatus.status.toUpperCase()}`)
   console.log(`Timestamp: ${new Date(healthStatus.timestamp).toLocaleString()}`)
-  
+
   console.log('\n🔧 Services:')
   Object.entries(healthStatus.services).forEach(([service, info]) => {
     console.log(`   ${service}: ${info.status.toUpperCase()}`)
@@ -136,8 +140,12 @@ async function demonstrateMonitoringService() {
   console.log('\n📊 Métriques de Santé:')
   console.log(`   Total Requêtes: ${healthStatus.metrics.totalRequests}`)
   console.log(`   Total Erreurs: ${healthStatus.metrics.totalErrors}`)
-  console.log(`   Temps de Réponse Moyen: ${healthStatus.metrics.averageResponseTime.toFixed(2)}ms`)
-  console.log(`   Taux de Hit de Cache: ${healthStatus.metrics.cacheHitRate.toFixed(2)}%`)
+  console.log(
+    `   Temps de Réponse Moyen: ${healthStatus.metrics.averageResponseTime.toFixed(2)}ms`
+  )
+  console.log(
+    `   Taux de Hit de Cache: ${healthStatus.metrics.cacheHitRate.toFixed(2)}%`
+  )
 
   // ========================================
   // 5. RAPPORT COMPLET
@@ -157,20 +165,24 @@ async function demonstrateMonitoringService() {
   const apiCalls = monitoringService.getApiCalls()
   console.log('📞 Appels API récents:')
   apiCalls.slice(-3).forEach((call, index) => {
-    console.log(`   ${index + 1}. ${call.provider} ${call.endpoint} - ${call.responseTime}ms - ${call.success ? '✅' : '❌'}`)
+    console.log(
+      `   ${index + 1}. ${call.provider} ${call.endpoint} - ${call.responseTime}ms - ${call.success ? '✅' : '❌'}`
+    )
   })
 
   const responseTimeMetrics = monitoringService.getMetrics('api_response_time')
   console.log('\n⏱️ Métriques de temps de réponse:')
   responseTimeMetrics.slice(-3).forEach((metric, index) => {
-    console.log(`   ${index + 1}. ${metric.value.toFixed(2)}ms (${new Date(metric.timestamp).toLocaleTimeString()})`)
+    console.log(
+      `   ${index + 1}. ${metric.value.toFixed(2)}ms (${new Date(metric.timestamp).toLocaleTimeString()})`
+    )
   })
 
   // ========================================
   // 7. SIMULATION D'ALERTES
   // ========================================
 
-  console.log('\n🚨 Simulation d\'alertes:\n')
+  console.log("\n🚨 Simulation d'alertes:\n")
 
   // Simuler un taux d'erreur élevé
   for (let i = 0; i < 10; i++) {
@@ -187,12 +199,12 @@ async function demonstrateMonitoringService() {
   const newHealthStatus = await monitoringService.getHealthStatus()
   const newStats = monitoringService.getStats()
 
-  console.log('📊 Nouvelles métriques après simulation d\'erreurs:')
+  console.log("📊 Nouvelles métriques après simulation d'erreurs:")
   console.log(`   Taux d'Erreur: ${newStats.errorRate.toFixed(2)}%`)
   console.log(`   Statut: ${newHealthStatus.status.toUpperCase()}`)
 
   if (newStats.errorRate > 10) {
-    console.log('🚨 ALERTE: Taux d\'erreur élevé détecté!')
+    console.log("🚨 ALERTE: Taux d'erreur élevé détecté!")
   }
 
   if (newStats.averageResponseTime > 1000) {

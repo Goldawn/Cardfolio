@@ -14,7 +14,7 @@ interface AddWishlistItemRequest {
 
 // GET /api/users/[userId]/wishlist
 // Renvoie toutes les cartes de wishlist de l'utilisateur, toutes listes confondues
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(_request: NextRequest, { params }: RouteParams) {
   const { userId } = await params
 
   try {
@@ -37,7 +37,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 // Ajoute une carte à la liste par défaut de l'utilisateur
 export async function POST(request: NextRequest, { params }: RouteParams) {
   const { userId } = await params
-  const { scryfallId, quantity = 1 }: AddWishlistItemRequest = await request.json()
+  const { scryfallId, quantity = 1 }: AddWishlistItemRequest =
+    await request.json()
 
   if (!scryfallId || quantity < 1) {
     return new Response(JSON.stringify({ error: 'Données invalides' }), {

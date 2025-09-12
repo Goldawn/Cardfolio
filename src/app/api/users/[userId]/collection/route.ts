@@ -31,7 +31,7 @@ interface DeleteCardRequest {
   scryfallId: string
 }
 
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(_request: NextRequest, { params }: RouteParams) {
   const { userId } = await params
 
   try {
@@ -94,7 +94,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   const { userId } = await params
-  const { scryfallId, quantityDelta, newPriceEntry }: UpdateCardRequest = await request.json()
+  const { scryfallId, quantityDelta, newPriceEntry }: UpdateCardRequest =
+    await request.json()
 
   if (!scryfallId || typeof quantityDelta !== 'number') {
     return new Response(

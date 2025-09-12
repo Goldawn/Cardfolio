@@ -1,29 +1,28 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
-import manaSymbols from '../assets/mock/mana.json'
-import { formatAndParseText } from '../../lib/mtgCards'
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts'
-import styles from './CardModal.module.css'
-import useModalKeyboardNavigation from '../hooks/useModalKeyboardNavigation'
 import { useCurrencyContext } from '@/context/'
 import type { GameCard } from '@/types'
 import type { JSX } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import {
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
+import { formatAndParseText } from '../../lib/mtgCards'
+import useModalKeyboardNavigation from '../hooks/useModalKeyboardNavigation'
+import styles from './CardModal.module.css'
 
 interface CardModalProps {
   card: GameCard
   onClose: () => void
-  cardList?: GameCard[]
-  currentIndex?: number
+  cardList?: GameCard[] | undefined
+  currentIndex?: number | undefined
 }
 
 export default function CardModal({
@@ -95,7 +94,8 @@ export default function CardModal({
   const getCurrentImage = () => {
     if ((currentCard as any).layout === 'reversible_card') {
       return flipped
-        ? (currentCard as any).reversibleImage?.large || currentCard.image?.large
+        ? (currentCard as any).reversibleImage?.large ||
+            currentCard.image?.large
         : currentCard.image?.large
     }
     return currentCard.image?.large
@@ -176,7 +176,8 @@ export default function CardModal({
 
         <div className={styles.content}>
           <div className={styles.cardQuantityPanel}>
-            {isFrontAndBack || (currentCard as any).layout === 'reversible_card' ? (
+            {isFrontAndBack ||
+            (currentCard as any).layout === 'reversible_card' ? (
               <div
                 key={currentCard.id}
                 className={`${styles.cardContainer} ${styles.cardTransition}`}

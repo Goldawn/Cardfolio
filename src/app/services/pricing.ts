@@ -4,13 +4,14 @@
  */
 
 import { cardApiManager } from './CardApiManager'
-import type { PriceData } from '@/card-api-service/dto'
 
 /**
  * Récupère le prix d'une carte par son nom
  * Utilise le nouveau PricingService avec fallback automatique
  */
-export const fetchCardPrice = async (cardName: string): Promise<{
+export const fetchCardPrice = async (
+  cardName: string
+): Promise<{
   usd: number
   eur: number
 }> => {
@@ -26,7 +27,9 @@ export const fetchCardPrice = async (cardName: string): Promise<{
  * Récupère le prix d'une carte par son ID
  * Utilise le nouveau PricingService avec fallback automatique
  */
-export const fetchCardPriceById = async (cardId: string): Promise<{
+export const fetchCardPriceById = async (
+  cardId: string
+): Promise<{
   usd: number
   eur: number
 }> => {
@@ -44,14 +47,18 @@ export const fetchCardPriceById = async (cardId: string): Promise<{
  * Récupère les prix de plusieurs cartes
  * Utilise le nouveau PricingService pour une meilleure performance
  */
-export const fetchBulkCardPrices = async (cardNames: string[]): Promise<Array<{
-  cardName: string
-  usd: number
-  eur: number
-}>> => {
+export const fetchBulkCardPrices = async (
+  cardNames: string[]
+): Promise<
+  Array<{
+    cardName: string
+    usd: number
+    eur: number
+  }>
+> => {
   try {
     const results = await Promise.allSettled(
-      cardNames.map(async (cardName) => {
+      cardNames.map(async cardName => {
         const price = await cardApiManager.fetchCardPrice(cardName)
         return {
           cardName,
@@ -62,7 +69,10 @@ export const fetchBulkCardPrices = async (cardNames: string[]): Promise<Array<{
     )
 
     return results
-      .filter((result): result is PromiseFulfilledResult<any> => result.status === 'fulfilled')
+      .filter(
+        (result): result is PromiseFulfilledResult<any> =>
+          result.status === 'fulfilled'
+      )
       .map(result => result.value)
   } catch (error) {
     console.error('Erreur lors de la récupération des prix en lot:', error)
