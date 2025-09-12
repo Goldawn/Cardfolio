@@ -2,43 +2,63 @@ import { assertDeckOwnership } from '@/lib/getAuthenticatedUser'
 import { prisma } from '@/lib/prisma'
 import 'server-only'
 
-async function getDeckIdFromDeckCard(deckCardId: string) {
+async function getDeckIdFromCard(cardId: string) {
   'use server'
-  const dc = await prisma.deckCard.findUnique({
-    where: { id: deckCardId },
+  const card = await prisma.card.findUnique({
+    where: { id: cardId },
     select: { deckId: true },
   })
-  return dc?.deckId ?? null
+  return card?.deckId ?? null
 }
 
 export async function addCardToDeckAction(
   deckId: string,
-  scryfallId: string,
+  externalId: string,
   qty: number = 1
 ) {
   'use server'
   await assertDeckOwnership(deckId)
 
-  if (!scryfallId || typeof qty !== 'number' || qty <= 0) {
+  if (!externalId || typeof qty !== 'number' || qty <= 0) {
     throw new Error("Paramètres invalides pour l'ajout de carte.")
   }
 
-  const existing = await prisma.deckCard.findFirst({
-    where: { deckId, scryfallId },
+  // Trouver la carte par externalId
+  const card = await prisma.card.findFirst({
+    where: { externalId },
+    select: { id: true, quantity: true },
+  })
+
+  if (!card) {
+    throw new Error('Carte non trouvée.')
+  }
+
+  const existing = await prisma.card.findFirst({
+    where: {
+      id: card.id,
+      deckId: deckId,
+    },
     select: { id: true, quantity: true },
   })
 
   let saved
   if (existing) {
-    saved = await prisma.deckCard.update({
+    saved = await prisma.card.update({
       where: { id: existing.id },
-      data: { quantity: existing.quantity + qty },
-      select: { id: true, scryfallId: true, quantity: true, deckId: true },
+      data: {
+        quantity: existing.quantity + qty,
+        deckId: deckId,
+      },
+      select: { id: true, externalId: true, quantity: true, deckId: true },
     })
   } else {
-    saved = await prisma.deckCard.create({
-      data: { deckId, scryfallId, quantity: qty },
-      select: { id: true, scryfallId: true, quantity: true, deckId: true },
+    saved = await prisma.card.update({
+      where: { id: card.id },
+      data: {
+        quantity: qty,
+        deckId: deckId,
+      },
+      select: { id: true, externalId: true, quantity: true, deckId: true },
     })
   }
 
@@ -47,52 +67,51 @@ export async function addCardToDeckAction(
   )
 }
 
-export async function updateDeckCardQtyAction(
-  deckCardId: string,
-  nextQty: number
-) {
+export async function updateDeckCardQtyAction(cardId: string, nextQty: number) {
   'use server'
-  if (!deckCardId || typeof nextQty !== 'number') {
+  if (!cardId || typeof nextQty !== 'number') {
     throw new Error('Paramètres invalides.')
   }
-  const targetDeckId = await getDeckIdFromDeckCard(deckCardId)
+  const targetDeckId = await getDeckIdFromCard(cardId)
   if (!targetDeckId) throw new Error('Carte introuvable.')
   await assertDeckOwnership(targetDeckId)
 
   if (nextQty <= 0) {
-    const deleted = await prisma.deckCard.delete({
-      where: { id: deckCardId },
-      select: { id: true, scryfallId: true, deckId: true },
+    const deleted = await prisma.card.update({
+      where: { id: cardId },
+      data: { deckId: null, quantity: 0 },
+      select: { id: true, externalId: true, deckId: true },
     })
     return JSON.parse(JSON.stringify({ kind: 'deleted', item: deleted }))
   }
 
-  const updated = await prisma.deckCard.update({
-    where: { id: deckCardId },
+  const updated = await prisma.card.update({
+    where: { id: cardId },
     data: { quantity: nextQty },
-    select: { id: true, scryfallId: true, quantity: true, deckId: true },
+    select: { id: true, externalId: true, quantity: true, deckId: true },
   })
   return JSON.parse(JSON.stringify({ kind: 'updated', item: updated }))
 }
 
-export async function removeCardFromDeckAction(deckCardId: string) {
+export async function removeCardFromDeckAction(cardId: string) {
   'use server'
-  if (!deckCardId) throw new Error('deckCardId requis.')
+  if (!cardId) throw new Error('cardId requis.')
 
-  const targetDeckId = await getDeckIdFromDeckCard(deckCardId)
+  const targetDeckId = await getDeckIdFromCard(cardId)
   if (!targetDeckId) throw new Error('Carte introuvable.')
   await assertDeckOwnership(targetDeckId)
 
-  const deleted = await prisma.deckCard.delete({
-    where: { id: deckCardId },
-    select: { id: true, scryfallId: true, deckId: true },
+  const deleted = await prisma.card.update({
+    where: { id: cardId },
+    data: { deckId: null, quantity: 0 },
+    select: { id: true, externalId: true, deckId: true },
   })
   return JSON.parse(JSON.stringify({ kind: 'deleted', item: deleted }))
 }
 
 export async function bulkUpsertDeckCardsAction(
   deckId: string,
-  entries: Array<{ scryfallId: string; qty: number }> /* [{scryfallId, qty}] */
+  entries: Array<{ externalId: string; qty: number }> /* [{externalId, qty}] */
 ) {
   'use server'
   await assertDeckOwnership(deckId)
@@ -104,27 +123,48 @@ export async function bulkUpsertDeckCardsAction(
   const result = await prisma.$transaction(async tx => {
     const out = []
     for (const entry of entries) {
-      const scryfallId = entry?.scryfallId
+      const externalId = entry?.externalId
       const qty = Number(entry?.qty ?? 0)
-      if (!scryfallId || qty <= 0) continue
+      if (!externalId || qty <= 0) continue
 
-      const existing = await tx.deckCard.findFirst({
-        where: { deckId, scryfallId },
+      // Trouver la carte par externalId
+      const card = await tx.card.findFirst({
+        where: { externalId },
+        select: { id: true },
+      })
+
+      if (!card) {
+        out.push({ kind: 'error', message: `Carte non trouvée: ${externalId}` })
+        continue
+      }
+
+      const existing = await tx.card.findFirst({
+        where: {
+          id: card.id,
+          deckId: deckId,
+        },
         select: { id: true, quantity: true },
       })
 
       let saved
       if (existing) {
-        saved = await tx.deckCard.update({
+        saved = await tx.card.update({
           where: { id: existing.id },
-          data: { quantity: existing.quantity + qty },
-          select: { id: true, scryfallId: true, quantity: true, deckId: true },
+          data: {
+            quantity: existing.quantity + qty,
+            deckId: deckId,
+          },
+          select: { id: true, externalId: true, quantity: true, deckId: true },
         })
         out.push({ kind: 'updated', item: saved })
       } else {
-        saved = await tx.deckCard.create({
-          data: { deckId, scryfallId, quantity: qty },
-          select: { id: true, scryfallId: true, quantity: true, deckId: true },
+        saved = await tx.card.update({
+          where: { id: card.id },
+          data: {
+            deckId: deckId,
+            quantity: qty,
+          },
+          select: { id: true, externalId: true, quantity: true, deckId: true },
         })
         out.push({ kind: 'created', item: saved })
       }
@@ -205,14 +245,10 @@ export async function duplicateDeckAction(deckId: string) {
       format: deck.format,
       colors: deck.colors as any,
       notes: deck.notes ?? null,
-      showcasedDeckCardId: null,
+      showcasedCardId: null,
       showcasedArt: null,
-      cards: {
-        create: deck.cards.map(c => ({
-          scryfallId: c.scryfallId,
-          quantity: c.quantity,
-        })),
-      },
+      // Note: Les cartes ne sont plus créées ici car elles sont maintenant des entités séparées
+      // Il faudrait implémenter une logique pour dupliquer les cartes ou les lier au nouveau deck
     },
     select: { id: true, name: true },
   })
@@ -222,29 +258,29 @@ export async function duplicateDeckAction(deckId: string) {
 
 export async function setShowcasedCardAction(
   deckId: string,
-  payload: { deckCardId?: string; artUrl?: string }
+  payload: { cardId?: string; artUrl?: string }
 ) {
   'use server'
   await assertDeckOwnership(deckId)
 
-  const nextId = payload?.deckCardId ?? null
+  const nextId = payload?.cardId ?? null
   const nextArt = payload?.artUrl ?? null
 
   const current = await prisma.decklist.findUnique({
     where: { id: deckId },
-    select: { showcasedDeckCardId: true },
+    select: { showcasedCardId: true },
   })
 
   // Si on reclique la même carte → on l’enlève
   const shouldUnset =
-    current?.showcasedDeckCardId && current.showcasedDeckCardId === nextId
+    current?.showcasedCardId && current.showcasedCardId === nextId
 
   const updated = await prisma.decklist.update({
     where: { id: deckId },
     data: shouldUnset
-      ? { showcasedDeckCardId: null, showcasedArt: null }
-      : { showcasedDeckCardId: nextId, showcasedArt: nextArt },
-    select: { id: true, showcasedDeckCardId: true, showcasedArt: true },
+      ? { showcasedCardId: null, showcasedArt: null }
+      : { showcasedCardId: nextId, showcasedArt: nextArt },
+    select: { id: true, showcasedCardId: true, showcasedArt: true },
   })
   return JSON.parse(JSON.stringify(updated))
 }
@@ -253,8 +289,11 @@ export async function deleteDeckAction(deckId: string) {
   'use server'
   await assertDeckOwnership(deckId)
 
-  // si tu n'as pas de cascade côté Prisma, supprime d'abord les deckCards :
-  await prisma.deckCard.deleteMany({ where: { deckId } })
+  // Mettre à jour les cartes pour les retirer du deck
+  await prisma.card.updateMany({
+    where: { deckId },
+    data: { deckId: null, quantity: 0 },
+  })
 
   await prisma.decklist.delete({ where: { id: deckId } })
   return { ok: true }

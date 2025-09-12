@@ -8,10 +8,10 @@ export function useCollection(
 ) {
   const [collection, setCollection] = useState<AppCollectionItem[]>(
     initialCollection.map((c: any) => ({
-      scryfallId: c.scryfallId,
+      externalId: c.externalId,
       quantity: c.quantity,
       priceHistory: c.priceHistory,
-      dbId: c.dbId || c.id || c.scryfallId, // Fallback pour dbId
+      dbId: c.dbId || c.id || c.externalId, // Fallback pour dbId
     }))
   )
 
@@ -52,7 +52,7 @@ export function useCollection(
 
   // Ajouter une carte à la collection
   const addToCollection = (card: any): void => {
-    const scryfallId = card.id
+    const externalId = card.id
 
     startTransition(async () => {
       try {
@@ -65,20 +65,20 @@ export function useCollection(
           eur: eur,
         }
 
-        const result = await actions.addToCollection(scryfallId, newPriceEntry)
+        const result = await actions.addToCollection(externalId, newPriceEntry)
         const { item } = result || {}
         if (!item) return
 
         setCollection(prev => {
-          const idx = prev.findIndex(c => c.scryfallId === scryfallId)
+          const idx = prev.findIndex(c => c.externalId === externalId)
           if (idx === -1) {
             return [
               ...prev,
               {
-                scryfallId,
+                externalId,
                 quantity: item.quantity,
                 priceHistory: item.priceHistory || [newPriceEntry],
-                dbId: item.id || item.dbId || scryfallId,
+                dbId: item.id || item.dbId || externalId,
               },
             ]
           }
@@ -106,19 +106,19 @@ export function useCollection(
         if (!result) return
 
         if (result.kind === 'deleted') {
-          setCollection(prev => prev.filter(c => c.scryfallId !== cardId))
+          setCollection(prev => prev.filter(c => c.externalId !== cardId))
           setRecentlyAdded(prev => prev.filter(e => e.id !== cardId))
           return
         }
 
         if (result.kind === 'updated' && result.item) {
           setCollection(prev => {
-            const idx = prev.findIndex(c => c.scryfallId === cardId)
+            const idx = prev.findIndex(c => c.externalId === cardId)
             if (idx === -1) {
               return [
                 ...prev,
                 {
-                  scryfallId: cardId,
+                  externalId: cardId,
                   quantity: result.item.quantity,
                   priceHistory: [],
                   dbId: result.item.id || result.item.dbId || cardId,
@@ -150,7 +150,7 @@ export function useCollection(
       try {
         const result = await actions.removeFromCollection(cardId)
         if (result?.kind === 'deleted') {
-          setCollection(prev => prev.filter(c => c.scryfallId !== cardId))
+          setCollection(prev => prev.filter(c => c.externalId !== cardId))
           setRecentlyAdded(prev => prev.filter(e => e.id !== cardId))
         }
       } catch (err) {
@@ -168,11 +168,11 @@ export function useCollection(
         if (!result) return
 
         if (result.kind === 'deleted') {
-          setCollection(prev => prev.filter(c => c.scryfallId !== cardId))
+          setCollection(prev => prev.filter(c => c.externalId !== cardId))
         } else if (result.kind === 'updated' && result.item) {
           setCollection(prev =>
             prev.map(c =>
-              c.scryfallId === cardId
+              c.externalId === cardId
                 ? { ...c, quantity: result.item.quantity }
                 : c
             )

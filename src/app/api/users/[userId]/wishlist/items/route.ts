@@ -14,7 +14,7 @@ interface UpdateWishlistItemRequest {
 }
 
 interface DeleteWishlistItemRequest {
-  scryfallId: string
+  externalId: string
   wishlistId?: string
 }
 
@@ -23,7 +23,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
   const { userId } = await params
 
   try {
-    const items = await prisma.wishlistItem.findMany({
+    const items = await prisma.card.findMany({
       where: {
         wishlist: {
           userId: userId,
@@ -49,11 +49,11 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
 // // POST – Ajoute une carte à une liste de souhaits
 // export async function POST(request, { params }) {
 //   const { userId } = await params;
-//   const { scryfallId, quantity = 1, wishlistId } = await request.json();
+//   const { externalId, quantity = 1, wishlistId } = await request.json();
 
-//   if (!userId || !scryfallId || !wishlistId) {
+//   if (!userId || !externalId || !wishlistId) {
 //     return new Response(
-//       JSON.stringify({ error: "Champs requis manquants (userId, scryfallId, wishlistId)" }),
+//       JSON.stringify({ error: "Champs requis manquants (userId, externalId, wishlistId)" }),
 //       { status: 400 }
 //     );
 //   }
@@ -70,16 +70,16 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
 //     }
 
 //     // 🔍 Vérifie si la carte est déjà dans la liste
-//     const existingItem = await prisma.wishlistItem.findFirst({
+//     const existingItem = await prisma.card.findFirst({
 //       where: {
 //         wishlistId,
-//         scryfallId,
+//         externalId,
 //       },
 //     });
 
 //     if (existingItem) {
 //       // 🆙 Met à jour la quantité
-//       const updatedItem = await prisma.wishlistItem.update({
+//       const updatedItem = await prisma.card.update({
 //         where: { id: existingItem.id },
 //         data: {
 //           quantity: { increment: quantity },
@@ -89,9 +89,9 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
 //       return Response.json(updatedItem);
 //     } else {
 //       // ➕ Ajoute la carte à la wishlist
-//       const createdItem = await prisma.wishlistItem.create({
+//       const createdItem = await prisma.card.create({
 //         data: {
-//           scryfallId,
+//           externalId,
 //           quantity,
 //           wishlist: {
 //             connect: { id: wishlistId },
@@ -124,7 +124,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
   }
 
   try {
-    const item = await prisma.wishlistItem.findFirst({
+    const item = await prisma.card.findFirst({
       where: {
         id: itemId,
         wishlist: {
@@ -140,11 +140,11 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     const newQuantity = item.quantity + quantityDelta
     if (newQuantity < 1) {
-      await prisma.wishlistItem.delete({ where: { id: itemId } })
+      await prisma.card.delete({ where: { id: itemId } })
       return new Response(null, { status: 204 })
     }
 
-    const updated = await prisma.wishlistItem.update({
+    const updated = await prisma.card.update({
       where: { id: itemId },
       data: {
         quantity: newQuantity,
@@ -164,9 +164,9 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 // DELETE – Supprime un item OU tous les items d'une wishlist
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   const { userId } = await params
-  const { scryfallId }: DeleteWishlistItemRequest = await request.json()
+  const { externalId }: DeleteWishlistItemRequest = await request.json()
   console.log('UserId de la route DELETE', userId)
-  console.log('entrée dans la route de delete', scryfallId)
+  console.log('entrée dans la route de delete', externalId)
 
   if (!userId) {
     return new Response(JSON.stringify({ error: 'userId manquant' }), {
@@ -175,9 +175,9 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
   }
 
   try {
-    const existing = await prisma.wishlistItem.findFirst({
+    const existing = await prisma.card.findFirst({
       where: {
-        scryfallId,
+        externalId,
       },
     })
     console.log('existing', existing)
@@ -189,7 +189,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     }
 
     // Suppression d'un seul item
-    await prisma.wishlistItem.delete({
+    await prisma.card.delete({
       where: { id: existing.id },
     })
     return new Response(null, { status: 204 })

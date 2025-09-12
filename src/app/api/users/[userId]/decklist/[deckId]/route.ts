@@ -31,7 +31,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    const items = await prisma.deckCard.findMany({
+    const items = await prisma.card.findMany({
       where: {
         deckId,
       },

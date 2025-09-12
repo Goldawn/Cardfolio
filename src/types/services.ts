@@ -1,12 +1,12 @@
 // Types pour les services mis à jour pour la cohérence avec la BDD
 // =================================================================
 
-import { Card } from './base-updated'
+import { Card } from './base'
 
 // Types pour les cartes enrichies (mis à jour)
 export type EnrichedCard = {
   id: string
-  externalId: string // ✅ externalId au lieu de scryfallId
+  externalId: string // ✅ externalId au lieu de externalId
   name: string
   type?: string
   legalities?: Record<string, string>
@@ -19,7 +19,7 @@ export type EnrichedCard = {
 
 // Types pour les problèmes de légalité (mis à jour)
 export type LegalityIssue = {
-  externalId: string // ✅ externalId au lieu de scryfallId
+  externalId: string // ✅ externalId au lieu de externalId
   name: string
   qty: number
   problems: string[]
@@ -35,7 +35,7 @@ export type DeckLegalityResult = {
   issues: LegalityIssue[]
   commander?: {
     name: string
-    externalId: string // ✅ externalId au lieu de scryfallId
+    externalId: string // ✅ externalId au lieu de externalId
     colors: string[]
   }
   colorIdentity?: string[]

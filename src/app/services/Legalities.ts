@@ -69,7 +69,7 @@ interface EnrichedCard {
 }
 
 interface LegalityIssue {
-  scryfallId: string
+  externalId: string
   name: string
   qty: number
   problems: string[]
@@ -144,7 +144,7 @@ export function checkRarityRules({
       const qty = countsByCard.get(c.id) || 0
       if (qty > 0 && !isCommon(c)) {
         issues.push({
-          scryfallId: c.id,
+          externalId: c.id,
           name: c.name,
           qty,
           problems: ['Pauper: doit être commune'],
@@ -162,7 +162,7 @@ export function checkRarityRules({
       if (commanderScryfallId && c.id === commanderScryfallId) return // exception commandant
       if (!isCommon(c)) {
         issues.push({
-          scryfallId: c.id,
+          externalId: c.id,
           name: c.name,
           qty,
           problems: ['Pauper Commander: doit être commune (hors commandant)'],
@@ -178,8 +178,8 @@ export function checkRarityRules({
  *  Évaluation globale
  *  =========================
  * @param deck     { id, format, ... }
- * @param deckCards [{ id, scryfallId, quantity }, ...]
- * @param enriched  cartes enrichies formatCard() (id==scryfallId, name, type, legalities, rarity, ...)
+ * @param deckCards [{ id, externalId, quantity }, ...]
+ * @param enriched  cartes enrichies formatCard() (id==externalId, name, type, legalities, rarity, ...)
  * @param opts { commanderScryfallId?: string | null }
  */
 export function evaluateDeckLegality(
@@ -194,11 +194,11 @@ export function evaluateDeckLegality(
   const minRequired = MIN_SIZE_BY_FORMAT[format as MTGFormat] ?? 60
 
   // Compteurs
-  const countsByCard = new Map<string, number>() // scryfallId -> qty
+  const countsByCard = new Map<string, number>() // externalId -> qty
   deckCards.forEach(dc =>
     countsByCard.set(
-      dc.scryfallId,
-      (countsByCard.get(dc.scryfallId) || 0) + (dc.quantity || 0)
+      dc.externalId,
+      (countsByCard.get(dc.externalId) || 0) + (dc.quantity || 0)
     )
   )
 
@@ -242,7 +242,7 @@ export function evaluateDeckLegality(
 
     if (perCardIssues.length) {
       issues.push({
-        scryfallId: c.id,
+        externalId: c.id,
         name: c.name,
         qty,
         problems: perCardIssues,
@@ -267,6 +267,6 @@ export function evaluateDeckLegality(
     minRequired,
     sizeOk,
     isSingleton: SINGLETON_FORMATS.has(format as MTGFormat),
-    issues, // [{ scryfallId, name, qty, problems:[] }]
+    issues, // [{ externalId, name, qty, problems:[] }]
   }
 }

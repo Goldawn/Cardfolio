@@ -1,7 +1,7 @@
 // Types de Collection mis à jour pour la cohérence avec la BDD
 // =============================================================
 
-import { Card, GameType } from './base-updated'
+import { Card, GameType } from './base'
 
 // Collection avec relation directe vers Card
 export type Collection<TGameType extends GameType = GameType> = {
@@ -43,9 +43,9 @@ export type CollectionChangeLog<TGameType extends GameType = GameType> = {
 // =========================================================
 
 export type AppCollectionItem = {
-  externalId: string // ✅ externalId au lieu de scryfallId
+  externalId: string // ✅ externalId au lieu de externalId
   quantity: number
-  priceHistory: import('./base-updated').PriceHistory[]
+  priceHistory: import('./base').PriceHistory[]
   dbId: string
 }
 

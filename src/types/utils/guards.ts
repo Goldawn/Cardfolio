@@ -1,12 +1,12 @@
 // Type guard functions
 // ====================
 
-import { GameType, BaseCard } from '../base'
+import { GameType } from '../base'
+import { FleshAndBloodCard } from '../games/flesh-and-blood'
+import { LorcanaCard } from '../games/lorcana'
 import { MTGCard } from '../games/magic'
 import { PokemonCard } from '../games/pokemon'
-import { LorcanaCard } from '../games/lorcana'
 import { YugiohCard } from '../games/yugioh'
-import { FleshAndBloodCard } from '../games/flesh-and-blood'
 
 // Union type pour toutes les cartes
 export type GameCard =

@@ -18,7 +18,7 @@ export default async function DecklistPage(): Promise<JSX.Element> {
       id: true,
       name: true,
       colors: true,
-      showcasedDeckCardId: true,
+      showcasedCardId: true,
       showcasedArt: true,
       format: true,
       createdAt: true,
@@ -44,7 +44,7 @@ export default async function DecklistPage(): Promise<JSX.Element> {
         userId: authed.id,
         name: name.trim(),
         colors: '[]',
-        showcasedDeckCardId: null,
+        showcasedCardId: null,
         // format: "commander",
       },
       select: {

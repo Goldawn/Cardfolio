@@ -31,7 +31,7 @@ export default function DeckTile({
 }: DeckTileProps) {
   const art = getArtLarge(card)
   const isShowcased =
-    String(deckState?.showcasedDeckCardId ?? '') ===
+    String(deckState?.showcasedCardId ?? '') ===
     String(card?.deckCardId ?? '')
   const onDec = () => updateDeckCardQty(card.deckCardId, Math.max(0, qty - 1))
   const onInc = () => updateDeckCardQty(card.deckCardId, qty + 1)

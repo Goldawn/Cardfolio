@@ -15,7 +15,7 @@ async function getDefaultCollectionId(): Promise<string | null> {
 }
 
 export async function addToCollectionAction(
-  scryfallId: string,
+  externalId: string,
   newPriceEntry: any
 ): Promise<any> {
   'use server'
@@ -25,8 +25,22 @@ export async function addToCollectionAction(
   const collectionId = await getDefaultCollectionId()
   if (!collectionId) return { kind: 'noop' }
 
-  const existing = await prisma.collectionItem.findFirst({
-    where: { collectionId, scryfallId },
+  // Trouver la carte par externalId
+  const card = await prisma.card.findFirst({
+    where: { externalId },
+    select: { id: true },
+  })
+
+  if (!card) {
+    // Si la carte n'existe pas, on pourrait l'importer ici ou retourner une erreur
+    return { kind: 'error', message: 'Card not found' }
+  }
+
+  const existing = await prisma.card.findFirst({
+    where: {
+      id: card.id,
+      collectionId: collectionId,
+    },
     select: { id: true, quantity: true, priceHistory: true },
   })
 
@@ -36,27 +50,31 @@ export async function addToCollectionAction(
 
   let saved
   if (existing) {
-    saved = await prisma.collectionItem.update({
+    saved = await prisma.card.update({
       where: { id: existing.id },
-      data: { quantity: { increment: 1 }, priceHistory: mergedHistory },
+      data: {
+        quantity: { increment: 1 },
+        priceHistory: mergedHistory,
+        collectionId: collectionId,
+      },
       select: {
         id: true,
-        scryfallId: true,
+        externalId: true,
         quantity: true,
         priceHistory: true,
       },
     })
   } else {
-    saved = await prisma.collectionItem.create({
+    saved = await prisma.card.update({
+      where: { id: card.id },
       data: {
-        collectionId,
-        scryfallId,
         quantity: 1,
         priceHistory: mergedHistory,
+        collectionId: collectionId,
       },
       select: {
         id: true,
-        scryfallId: true,
+        externalId: true,
         quantity: true,
         priceHistory: true,
       },
@@ -66,7 +84,7 @@ export async function addToCollectionAction(
   await prisma.collectionChangeLog.create({
     data: {
       userId,
-      scryfallId,
+      cardId: card.id,
       changeType: existing ? 'add' : 'create',
       quantity: +1,
       totalAfter: saved.quantity,
@@ -79,7 +97,7 @@ export async function addToCollectionAction(
 }
 
 export async function updateCollectionQuantityAction(
-  scryfallId: string,
+  externalId: string,
   delta: number
 ) {
   'use server'
@@ -91,26 +109,39 @@ export async function updateCollectionQuantityAction(
   const collectionId = await getDefaultCollectionId()
   if (!collectionId) return { kind: 'noop' }
 
-  const existing = await prisma.collectionItem.findFirst({
-    where: { collectionId, scryfallId },
+  // Trouver la carte par externalId
+  const card = await prisma.card.findFirst({
+    where: { externalId },
+    select: { id: true, gameType: true },
+  })
+
+  if (!card) {
+    return { kind: 'error', message: 'Card not found' }
+  }
+
+  const existing = await prisma.card.findFirst({
+    where: {
+      id: card.id,
+      collectionId: collectionId,
+    },
     select: { id: true, quantity: true },
   })
 
   if (!existing) {
     if (delta > 0) {
-      const created = await prisma.collectionItem.create({
+      const created = await prisma.card.update({
+        where: { id: card.id },
         data: {
           collectionId: collectionId as string,
-          scryfallId: scryfallId as string,
           quantity: delta as number,
           priceHistory: [],
         },
-        select: { id: true, scryfallId: true, quantity: true },
+        select: { id: true, externalId: true, quantity: true },
       })
       await prisma.collectionChangeLog.create({
         data: {
           userId,
-          scryfallId,
+          cardId: card.id,
           changeType: 'add',
           quantity: delta,
           totalAfter: created.quantity,
@@ -123,29 +154,32 @@ export async function updateCollectionQuantityAction(
 
   const nextQty = existing.quantity + delta
   if (nextQty <= 0) {
-    await prisma.collectionItem.delete({ where: { id: existing.id } })
+    await prisma.card.update({
+      where: { id: existing.id },
+      data: { collectionId: null, quantity: 0 },
+    })
     await prisma.collectionChangeLog.create({
       data: {
         userId,
-        scryfallId,
-        changeType: 'remove_all',
+        cardId: card.id,
+        changeType: 'remove',
         quantity: -existing.quantity,
         totalAfter: 0,
       },
     })
-    return JSON.parse(JSON.stringify({ kind: 'deleted', scryfallId }))
+    return JSON.parse(JSON.stringify({ kind: 'deleted', externalId }))
   }
 
-  const updated = await prisma.collectionItem.update({
+  const updated = await prisma.card.update({
     where: { id: existing.id },
     data: { quantity: nextQty },
-    select: { id: true, scryfallId: true, quantity: true },
+    select: { id: true, externalId: true, quantity: true },
   })
 
   await prisma.collectionChangeLog.create({
     data: {
       userId,
-      scryfallId,
+      cardId: card.id,
       changeType: delta > 0 ? 'add' : 'remove',
       quantity: delta,
       totalAfter: updated.quantity,
@@ -155,7 +189,7 @@ export async function updateCollectionQuantityAction(
   return JSON.parse(JSON.stringify({ kind: 'updated', item: updated }))
 }
 
-export async function removeFromCollectionAction(scryfallId: string) {
+export async function removeFromCollectionAction(externalId: string) {
   'use server'
   const actionUser = await getAuthenticatedUser({ throwError: true })
   const userId = actionUser.id
@@ -163,23 +197,39 @@ export async function removeFromCollectionAction(scryfallId: string) {
   const collectionId = await getDefaultCollectionId()
   if (!collectionId) return { kind: 'noop' }
 
-  const existing = await prisma.collectionItem.findFirst({
-    where: { collectionId, scryfallId },
+  // Trouver la carte par externalId
+  const card = await prisma.card.findFirst({
+    where: { externalId },
+    select: { id: true, gameType: true },
+  })
+
+  if (!card) {
+    return { kind: 'error', message: 'Card not found' }
+  }
+
+  const existing = await prisma.card.findFirst({
+    where: {
+      id: card.id,
+      collectionId: collectionId,
+    },
     select: { id: true, quantity: true },
   })
   if (!existing) return { kind: 'noop' }
 
-  await prisma.collectionItem.delete({ where: { id: existing.id } })
+  await prisma.card.update({
+    where: { id: existing.id },
+    data: { collectionId: null, quantity: 0 },
+  })
 
   await prisma.collectionChangeLog.create({
     data: {
       userId,
-      scryfallId,
-      changeType: 'remove_all',
+      cardId: card.id,
+      changeType: 'remove',
       quantity: -existing.quantity,
       totalAfter: 0,
     },
   })
 
-  return JSON.parse(JSON.stringify({ kind: 'deleted', scryfallId }))
+  return JSON.parse(JSON.stringify({ kind: 'deleted', externalId }))
 }

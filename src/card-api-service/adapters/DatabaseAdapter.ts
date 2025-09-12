@@ -138,7 +138,7 @@ export class DatabaseAdapter {
   }
 
   /**
-   * Synchronise les cartes manquantes en identifiant les scryfallId référencés mais non présents
+   * Synchronise les cartes manquantes en identifiant les externalId référencés mais non présents
    */
   async syncMissingCards(): Promise<{ missing: string[]; total: number }> {
     try {

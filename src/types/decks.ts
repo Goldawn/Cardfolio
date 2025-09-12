@@ -1,7 +1,7 @@
 // Types de Deck mis à jour pour la cohérence avec la BDD
 // ======================================================
 
-import { Card, GameType } from './base-updated'
+import { Card, GameType } from './base'
 
 // Decklist avec relation directe vers Card
 export type Decklist<
@@ -28,7 +28,7 @@ export type Decklist<
 // ======================================================
 
 export type AppDeckCard = {
-  externalId: string // ✅ externalId au lieu de scryfallId
+  externalId: string // ✅ externalId au lieu de externalId
   quantity: number
   allocated?: number
 }

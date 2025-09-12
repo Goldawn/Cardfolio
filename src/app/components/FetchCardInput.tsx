@@ -1,9 +1,15 @@
+/**
+ * ⚠️  FICHIER PARTIELLEMENT REFACTORISÉ
+ * Ce fichier contient encore du code mort qui doit être migré vers Prisma
+ * TODO: Remplacer tous les appels API par des requêtes Prisma directes
+ */
+
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
 import Card from './Card'
 import styles from './FetchCardInput.module.css'
-import { cardApiManager } from '@/app/services/CardApiManager'
+// CardApiManager supprimé - utiliser Prisma directement'
 import type { JSX } from 'react'
 import type { GameCard, ApiResponse } from '@/types'
 
@@ -29,7 +35,7 @@ export default function FetchCardInput(): JSX.Element {
     setSearchResponse(prev => ({ ...prev, loading: true, error: undefined }))
     
     try {
-      const results = await cardApiManager.searchCards(searchQuery, {
+      const results = await /* TODO: Remplacer par Prisma */ cardApiManager./* TODO: Remplacer par prisma.card.findMany */ searchCards(searchQuery, {
         unique: 'prints' // Pour afficher toutes les variations d'une carte
       })
       setSearchResponse({ data: results, error: undefined, loading: false })
@@ -48,7 +54,7 @@ export default function FetchCardInput(): JSX.Element {
     }
 
     try {
-      const newSuggestions = await cardApiManager.getAutocompleteSuggestions(searchQuery)
+      const newSuggestions = await /* TODO: Remplacer par Prisma */ cardApiManager.getAutocompleteSuggestions(searchQuery)
       setSuggestions(newSuggestions)
     } catch (err) {
       console.error('Erreur lors de la récupération des suggestions:', err)

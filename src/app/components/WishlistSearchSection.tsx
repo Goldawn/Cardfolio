@@ -1,6 +1,12 @@
+/**
+ * ⚠️  FICHIER PARTIELLEMENT REFACTORISÉ
+ * Ce fichier contient encore du code mort qui doit être migré vers Prisma
+ * TODO: Remplacer tous les appels API par des requêtes Prisma directes
+ */
+
 'use client'
 
-import { cardApiManager } from '@/app/services/CardApiManager'
+// CardApiManager supprimé - utiliser Prisma directement'
 import type { GameCard } from '@/types'
 import { useCallback, useEffect, useState } from 'react'
 
@@ -48,7 +54,7 @@ export default function WishlistSearchSection({
   const debouncedQuery = useDebounce(searchInput, 300)
 
   // Instance du service Card API
-  const cardService = cardApiManager.getCardService()
+  const cardService = /* TODO: Remplacer par Prisma */ cardApiManager.getCardService()
 
   // Suggestions (autocomplete) - NOUVEAU: Utilise le CardService
   useEffect(() => {
@@ -79,7 +85,7 @@ export default function WishlistSearchSection({
 
     try {
       // Utilisation du nouveau service
-      const results = await cardService.searchCards({
+      const results = await cardService./* TODO: Remplacer par prisma.card.findMany */ searchCards({
         query: q,
         options: {
           unique: 'prints', // Pour afficher toutes les variations d'une carte
@@ -108,7 +114,7 @@ export default function WishlistSearchSection({
       const _exactCard = await cardService.fetchCardByName(exactName)
 
       // Puis recherche de tous les prints de cette carte
-      const allPrints = await cardService.searchCards({
+      const allPrints = await cardService./* TODO: Remplacer par prisma.card.findMany */ searchCards({
         query: `!"${exactName}"`,
         options: {
           order: 'released',

@@ -1,16 +1,13 @@
 // /lib/mtgSections.ts
+import { MTGCard, MTG_BUCKETS, MTG_COLOR_ORDER, MTG_TYPE_ORDER } from '@/types'
 import {
-  BUCKETS,
-  TYPE_ORDER,
-  COLOR_ORDER,
+  bucketLabel,
+  colorBucketOf,
   getMV,
   isLand,
   primaryTypeOf,
-  colorBucketOf,
-  bucketLabel, // ✅ import ajouté
 } from './mtgCards'
-import { sortByName, sortByMVThenName } from './mtgSorts'
-import { MTGCard, MTGColor, MTGCardType } from '@/types'
+import { sortByMVThenName, sortByName } from './mtgSorts'
 
 export const buildNameList = (cards: MTGCard[] = []): MTGCard[] =>
   cards
@@ -29,83 +26,83 @@ export interface SectionResult {
   lands: MTGCard[]
 }
 
-export const buildMvSections = (cards: MTGCard[] = []): SectionResult => {
-  const map = new Map<string, MTGCard[]>(BUCKETS.map(b => [b, [] as MTGCard[]]))
+/**
+ * Helper générique pour créer des sections groupées
+ * Utilise les types existants de @types/utils pour la cohérence
+ */
+function buildGenericSections<T extends string>(
+  cards: MTGCard[],
+  groupBy: (card: MTGCard) => T,
+  order: readonly T[],
+  sectionKey: string,
+  sectionTitle: (key: T) => string,
+  sortFn: (a: MTGCard, b: MTGCard) => number = sortByName
+): SectionResult {
+  const map = new Map<T, MTGCard[]>(order.map(k => [k, [] as MTGCard[]]))
   const lands: MTGCard[] = []
 
-  for (const c of cards) {
-    const qty = Number(c?.quantity || 0)
+  // Filtrer et grouper les cartes
+  for (const card of cards) {
+    const qty = Number(card?.quantity || 0)
     if (!qty) continue
 
-    if (isLand(c)) {
-      lands.push(c)
+    if (isLand(card)) {
+      lands.push(card)
       continue
     }
 
-    const b = bucketLabel(getMV(c)) // "1-" | "2" | ... | "7+"
-    if (!map.has(b)) map.set(b, []) // garde-fou si jamais
-    map.get(b)!.push(c)
+    const key = groupBy(card)
+    const arr = map.get(key)
+    if (arr) arr.push(card)
   }
 
-  for (const b of map.keys()) map.get(b)!.sort(sortByName)
-
-  const sections = BUCKETS.map(b => ({
-    key: `mv-${b}`,
-    title: `Coût ${b}`,
-    items: map.get(b) || [],
-  })).filter(s => s.items.length)
-
-  return { sections, lands: lands.sort(sortByName) }
-}
-
-export const buildTypeSections = (cards: MTGCard[] = []): SectionResult => {
-  const map = new Map<MTGCardType, MTGCard[]>()
-
-  for (const c of cards) {
-    const qty = Number(c?.quantity || 0)
-    if (!qty) continue
-    const k = primaryTypeOf(c)
-    const arr = map.get(k) || []
-    arr.push(c)
-    map.set(k, arr)
+  // Trier chaque groupe
+  for (const key of map.keys()) {
+    const arr = map.get(key)
+    if (arr) arr.sort(sortFn)
   }
 
-  for (const k of map.keys()) map.get(k)!.sort(sortByMVThenName)
+  // Créer les sections
+  const sections = order
+    .map(key => ({
+      key: `${sectionKey}-${key}`,
+      title: sectionTitle(key),
+      items: map.get(key) || [],
+    }))
+    .filter(s => s.items.length > 0)
 
-  const sections = TYPE_ORDER.filter(k => k !== 'land')
-    .map(k => ({ key: `type-${k}`, title: k, items: map.get(k) || [] }))
-    .filter(s => s.items.length)
-
-  const lands = (map.get('land') || []).slice().sort(sortByMVThenName)
-
-  return { sections, lands }
+  return {
+    sections,
+    lands: lands.sort(sortFn),
+  }
 }
 
-export const buildColorSections = (cards: MTGCard[] = []): SectionResult => {
-  const map = new Map<MTGColor, MTGCard[]>(
-    COLOR_ORDER.map(k => [k, [] as MTGCard[]])
+export const buildMvSections = (cards: MTGCard[] = []): SectionResult =>
+  buildGenericSections(
+    cards,
+    c => bucketLabel(getMV(c)),
+    MTG_BUCKETS,
+    'mv',
+    b => `Coût ${b}`,
+    sortByName
   )
-  const lands: MTGCard[] = []
 
-  for (const c of cards) {
-    const qty = Number(c?.quantity || 0)
-    if (!qty) continue
+export const buildTypeSections = (cards: MTGCard[] = []): SectionResult =>
+  buildGenericSections(
+    cards,
+    primaryTypeOf,
+    MTG_TYPE_ORDER.filter(k => k !== 'land'),
+    'type',
+    t => t,
+    sortByMVThenName
+  )
 
-    if (isLand(c)) {
-      lands.push(c)
-      continue
-    }
-    map.get(colorBucketOf(c))!.push(c) // W/U/B/R/G/M/C
-  }
-
-  for (const k of map.keys()) map.get(k)!.sort(sortByMVThenName)
-  lands.sort(sortByMVThenName)
-
-  const sections = COLOR_ORDER.map(k => ({
-    key: `color-${k}`,
-    title: k,
-    items: map.get(k) || [],
-  })).filter(s => s.items.length)
-
-  return { sections, lands }
-}
+export const buildColorSections = (cards: MTGCard[] = []): SectionResult =>
+  buildGenericSections(
+    cards,
+    colorBucketOf,
+    MTG_COLOR_ORDER,
+    'color',
+    c => c,
+    sortByMVThenName
+  )

@@ -186,7 +186,7 @@ export default function Collection(): JSX.Element {
           data.map(async (item: any) => {
             try {
               const card = await cardService.fetchCard({
-                cardId: item.scryfallId,
+                cardId: item.externalId,
               })
               return {
                 ...card,
@@ -198,12 +198,12 @@ export default function Collection(): JSX.Element {
               }
             } catch (error) {
               console.error(
-                `Erreur enrichissement carte ${item.scryfallId}:`,
+                `Erreur enrichissement carte ${item.externalId}:`,
                 error
               )
               // Retourner une carte basique en cas d'erreur
               return {
-                id: item.scryfallId,
+                id: item.externalId,
                 name: 'Carte non trouvée',
                 gameType: 'magic' as const,
                 quantity: item.quantity,

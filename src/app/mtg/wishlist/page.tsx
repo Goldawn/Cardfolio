@@ -61,7 +61,7 @@ export default function WishlistPage(): JSX.Element {
             const enriched = await Promise.all(
               items.map(async (item: any) => {
                 const formatted = await cardService.fetchCard({
-                  cardId: item.scryfallId,
+                  cardId: item.externalId,
                 })
                 return {
                   ...formatted,
@@ -161,7 +161,7 @@ export default function WishlistPage(): JSX.Element {
         {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ scryfallId: cardId }),
+          body: JSON.stringify({ externalId: cardId }),
         }
       )
       if (!res.ok) throw new Error('Erreur lors de la suppression')
@@ -183,7 +183,7 @@ export default function WishlistPage(): JSX.Element {
         {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ scryfallId: cardId, quantityDelta: delta }),
+          body: JSON.stringify({ externalId: cardId, quantityDelta: delta }),
         }
       )
       if (!res.ok) throw new Error('Erreur lors de la modification')

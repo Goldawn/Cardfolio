@@ -44,7 +44,7 @@ export default async function SingleDeckPage({ params }: SingleDeckPageProps): P
     select: {
       id: true,
       name: true,
-      showcasedDeckCardId: true,
+      showcasedCardId: true,
       showcasedArt: true,
       colors: true,
       format: true,
@@ -60,22 +60,22 @@ export default async function SingleDeckPage({ params }: SingleDeckPageProps): P
   }
 
   // Récupère les cartes du deck (brut, sans enrichissement Scryfall)
-  const deckCards = await prisma.deckCard.findMany({
+  const deckCards = await prisma.card.findMany({
     where: { deckId },
-    select: { id: true, scryfallId: true, quantity: true },
+    select: { id: true, externalId: true, quantity: true },
     orderBy: { id: 'asc' },
   })
 
   // 👇 collection par défaut du user (pour “ajouter depuis la collection”)
   const defaultCollection = await prisma.collection.findFirst({
     where: { userId },
-    include: { items: true },
+    include: { cards: true },
     orderBy: [{ isDefault: 'desc' }, { createdAt: 'asc' }],
   })
 
   const userCollectionItems =
-    defaultCollection?.items?.map(it => ({
-      scryfallId: it.scryfallId,
+    defaultCollection?.cards?.map(it => ({
+      externalId: it.externalId,
       quantity: it.quantity,
     })) ?? []
 

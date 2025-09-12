@@ -49,7 +49,7 @@ export default function DeckRow({
   if (!qty) return null
 
   const isShowcased =
-    String(deckState?.showcasedDeckCardId ?? '') ===
+    String(deckState?.showcasedCardId ?? '') ===
     String(card?.deckCardId ?? '')
   const rowProblem = showLegality && problems.length > 0
 

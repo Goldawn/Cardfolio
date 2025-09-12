@@ -42,7 +42,7 @@ export default function DeckPile({
 
   const art = getArtLarge(card)
   const isShowcased =
-    String(deckState?.showcasedDeckCardId ?? '') ===
+    String(deckState?.showcasedCardId ?? '') ===
     String(card?.deckCardId ?? '')
 
   // Légalité (robuste aux deux façons d'appeler le composant)

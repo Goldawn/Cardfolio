@@ -39,7 +39,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     })
 
     const listsWithTotalQuantity = lists.map(list => {
-      const totalQuantity = list.items.reduce(
+      const totalQuantity = list.cards.reduce(
         (sum, item) => sum + item.quantity,
         0
       )
@@ -102,7 +102,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     if (duplicate) {
       const original = await prisma.wishlistList.findUnique({
         where: { id: listId },
-        include: { items: true },
+        include: { cards: true },
       })
 
       if (!original) {
@@ -116,8 +116,8 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
           name, // 👈 ici aussi
           user: { connect: { id: userId } },
           items: {
-            create: original.items.map(item => ({
-              scryfallId: item.scryfallId,
+            create: original.cards.map(item => ({
+              externalId: item.externalId,
               quantity: item.quantity,
             })),
           },

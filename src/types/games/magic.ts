@@ -1,8 +1,8 @@
 // Types spécifiques Magic: The Gathering mis à jour
 // ================================================
 
-import { Card } from '../base-updated'
-import { Collection, Decklist, WishlistList } from '../collections-updated'
+import { Card } from '../base'
+import { Collection, Decklist, WishlistList } from '../collections'
 
 export type MTGColor = 'W' | 'U' | 'B' | 'R' | 'G' | 'C' | 'M'
 export type MTGCardType =
@@ -77,14 +77,14 @@ export type MTGDecklist = Decklist<'magic', MTGColor, MTGFormat>
 // Types spécifiques pour les opérations Magic
 export type MTGCollectionOperation = {
   type: 'add' | 'remove' | 'update'
-  externalId: string // ✅ externalId au lieu de scryfallId
+  externalId: string // ✅ externalId au lieu de externalId
   quantity?: number
   priceEntry?: any
 }
 
 export type MTGDeckOperation = {
   type: 'add' | 'remove' | 'update' | 'allocate'
-  externalId: string // ✅ externalId au lieu de scryfallId
+  externalId: string // ✅ externalId au lieu de externalId
   quantity?: number
   allocated?: number
 }

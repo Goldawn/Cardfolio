@@ -20,18 +20,18 @@ export default async function CollectionPage(): Promise<JSX.Element> {
   // Récupère (ou crée si vide) la collection par défaut du user
   let def = await prisma.collection.findFirst({
     where: { userId },
-    include: { items: true },
+    include: { cards: true },
     orderBy: [{ isDefault: 'desc' }, { createdAt: 'asc' }],
   })
 
   if (!def) {
     def = await prisma.collection.create({
       data: { userId, name: 'Main', isDefault: true },
-      include: { items: true },
+      include: { cards: true },
     })
   }
 
-  const initialItems = JSON.parse(JSON.stringify(def.items ?? []))
+  const initialItems = JSON.parse(JSON.stringify(def.cards ?? []))
 
   return (
     <CollectionClient

@@ -60,10 +60,10 @@ export default function DeckHeader({ deck, colors, cards }: DeckHeaderProps) {
       null
 
     const showcased = cards?.find(
-      (c: any) => c.deckCardId === deck?.showcasedDeckCardId
+      (c: any) => c.deckCardId === deck?.showcasedCardId
     )
     return pickImage(showcased) || pickImage(cards?.[0]) || null
-  }, [deck?.showcasedArt, deck?.showcasedDeckCardId, cards])
+  }, [deck?.showcasedArt, deck?.showcasedCardId, cards])
 
   const typeCounts = useMemo(() => {
     const out = {

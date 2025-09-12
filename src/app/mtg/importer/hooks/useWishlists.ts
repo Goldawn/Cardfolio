@@ -1,9 +1,13 @@
-import { useState, useMemo, useTransition } from 'react'
-import type { WishlistList, WishlistItem } from '@/types/collections'
+import type { WishlistList } from '@/types/collections'
+import { useMemo, useState, useTransition } from 'react'
 
 export interface WishlistActions {
   createWishlist: (name: string) => Promise<any>
-  addToWishlist: (listId: string, cardId: string, quantity: number) => Promise<any>
+  addToWishlist: (
+    listId: string,
+    cardId: string,
+    quantity: number
+  ) => Promise<any>
 }
 
 export function useWishlists(
@@ -20,7 +24,7 @@ export function useWishlists(
   const wishlistTotals = useMemo(() => {
     const map = new Map<string, number>()
     wishlistLists.forEach((list: WishlistList) => {
-      list.items.forEach((item: WishlistItem) => {
+      list.cards.forEach((item: WishlistItem) => {
         const prev = map.get(item.cardId) || 0
         map.set(item.cardId, prev + item.quantity)
       })
@@ -38,7 +42,7 @@ export function useWishlists(
       setWishlistLists(prev => {
         const exists = prev.some(l => l.id === list.id)
         if (exists) return prev
-        return [...prev, { ...list, items: list.items ?? [] }]
+        return [...prev, { ...list, items: list.cards ?? [] }]
       })
       return list.id
     } catch (e) {
@@ -60,28 +64,30 @@ export function useWishlists(
         setWishlistLists(prev =>
           prev.map(list => {
             if (list.id !== listId) return list
-            const idx = list.items.findIndex((it: WishlistItem) => it.cardId === card.id)
+            const idx = list.cards.findIndex(
+              (it: WishlistItem) => it.cardId === card.id
+            )
             if (idx === -1) {
               return {
                 ...list,
                 items: [
-                  ...list.items,
-                  { 
-                    id: item.id, 
-                    cardId: card.id, 
+                  ...list.cards,
+                  {
+                    id: item.id,
+                    cardId: card.id,
                     quantity: item.quantity,
                     dateAdded: new Date(),
                     updatedAt: new Date(),
-                    wishlistId: listId
+                    wishlistId: listId,
                   },
                 ],
               }
             }
-            const newItems = [...list.items]
-            newItems[idx] = { 
-              ...newItems[idx], 
+            const newItems = [...list.cards]
+            newItems[idx] = {
+              ...newItems[idx],
               quantity: item.quantity,
-              updatedAt: new Date()
+              updatedAt: new Date(),
             }
             return { ...list, items: newItems }
           })
@@ -97,6 +103,6 @@ export function useWishlists(
     wishlistTotals,
     isPending,
     createWishlist,
-    addToWishlist
+    addToWishlist,
   }
 }

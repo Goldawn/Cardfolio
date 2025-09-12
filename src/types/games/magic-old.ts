@@ -1,7 +1,7 @@
 // Types spécifiques Magic: The Gathering
 // ======================================
 
-import { BaseCard, CardImages } from '../base'
+import { CardImages } from '../base'
 import { Collection } from '../collections'
 import { Decklist } from '../decks'
 

@@ -42,7 +42,7 @@ export default function WishlistList({
     }
   }
 
-  const uniqueCount = list.items?.length ?? 0
+  const uniqueCount = list.cards?.length ?? 0
   const totalCount = list.totalQuantity ?? 0
 
   return (

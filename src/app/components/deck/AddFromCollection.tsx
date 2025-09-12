@@ -1,6 +1,12 @@
+/**
+ * ⚠️  FICHIER PARTIELLEMENT REFACTORISÉ
+ * Ce fichier contient encore du code mort qui doit être migré vers Prisma
+ * TODO: Remplacer tous les appels API par des requêtes Prisma directes
+ */
+
 'use client'
 
-import { cardApiManager } from '@/app/services/CardApiManager'
+// CardApiManager supprimé - utiliser Prisma directement'
 import type { AppCollectionItem, AppDeckCard, GameCard } from '@/types'
 import type { JSX } from 'react'
 import { useEffect, useMemo, useState, useTransition } from 'react'
@@ -10,7 +16,7 @@ interface AddFromCollectionProps {
   deckId: string
   collectionItems: AppCollectionItem[]
   currentDeckCards: AppDeckCard[]
-  onAdd: (scryfallId: string, qty: number) => Promise<void>
+  onAdd: (externalId: string, qty: number) => Promise<void>
 }
 
 export default function AddFromCollection({
@@ -20,7 +26,7 @@ export default function AddFromCollection({
   onAdd,
 }: AddFromCollectionProps): JSX.Element {
   console.log(collectionItems)
-  const cardService = cardApiManager.getCardService()
+  const cardService = /* TODO: Remplacer par Prisma */ cardApiManager.getCardService()
   const [isPending, startTransition] = useTransition()
   const [enriched, setEnriched] = useState<
     (GameCard & { ownedQuantity: number })[]
@@ -33,7 +39,7 @@ export default function AddFromCollection({
   const inDeckMap = useMemo(() => {
     const m = new Map<string, number>()
     ;(currentDeckCards || []).forEach((dc: AppDeckCard) => {
-      m.set(dc.scryfallId, (m.get(dc.scryfallId) || 0) + (dc.quantity || 0))
+      m.set(dc.externalId, (m.get(dc.externalId) || 0) + (dc.quantity || 0))
     })
     return m
   }, [currentDeckCards])
@@ -49,7 +55,7 @@ export default function AddFromCollection({
       try {
         // Utilisation du CardService pour le bulk fetch
         const cardIds = collectionItems.map(
-          (it: AppCollectionItem) => it.scryfallId
+          (it: AppCollectionItem) => it.externalId
         )
         const result = await cardService.fetchBulkCards({
           cardIds,
@@ -63,7 +69,7 @@ export default function AddFromCollection({
         const enriched = result.cards.map((card: GameCard) => {
           const owned =
             collectionItems.find(
-              (ci: AppCollectionItem) => ci.scryfallId === card.id
+              (ci: AppCollectionItem) => ci.externalId === card.id
             )?.quantity || 0
           return { ...card, ownedQuantity: owned }
         })
@@ -98,18 +104,18 @@ export default function AddFromCollection({
     )
   }, [enriched, query])
 
-  const handleQtyChange = (scryfallId: string, value: number): void => {
+  const handleQtyChange = (externalId: string, value: number): void => {
     const v = Math.max(1, Math.min(99, Number(value) || 1))
-    setQtyById(prev => ({ ...prev, [scryfallId]: v }))
+    setQtyById(prev => ({ ...prev, [externalId]: v }))
   }
 
-  const addOne = (scryfallId: string): void => {
-    const wanted = qtyById[scryfallId] ?? 1
+  const addOne = (externalId: string): void => {
+    const wanted = qtyById[externalId] ?? 1
     const owned =
       collectionItems.find(
-        (ci: AppCollectionItem) => ci.scryfallId === scryfallId
+        (ci: AppCollectionItem) => ci.externalId === externalId
       )?.quantity || 0
-    const inDeck = inDeckMap.get(scryfallId) || 0
+    const inDeck = inDeckMap.get(externalId) || 0
     let qty = wanted
 
     if (respectOwned) {
@@ -120,9 +126,9 @@ export default function AddFromCollection({
 
     startTransition(async () => {
       try {
-        await onAdd(scryfallId, qty)
+        await onAdd(externalId, qty)
         // Option: reset quantité à 1
-        setQtyById(prev => ({ ...prev, [scryfallId]: 1 }))
+        setQtyById(prev => ({ ...prev, [externalId]: 1 }))
       } catch (e) {
         console.error('Erreur ajout carte depuis collection:', e)
       }

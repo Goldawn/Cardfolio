@@ -8,7 +8,7 @@ interface RouteParams {
 
 // Types pour les requêtes
 interface CardUsageRequest {
-  scryfallIds: string[]
+  externalIds: string[]
 }
 
 interface CardUsage {
@@ -30,27 +30,27 @@ type CardUsageMap = Record<string, CardUsage>
 // SETUP de la route pour récupérer
 export async function POST(req: NextRequest, { params }: RouteParams) {
   const { userId } = await params
-  const { scryfallIds }: CardUsageRequest = await req.json()
+  const { externalIds }: CardUsageRequest = await req.json()
 
   console.log('userID :', userId)
-  console.log('scryfallIds :', scryfallIds)
+  console.log('externalIds :', externalIds)
 
-  // if (!scryfallIds.length) {
-  //   return Response.json({ error: "No scryfallIds provided" }, { status: 400 });
+  // if (!externalIds.length) {
+  //   return Response.json({ error: "No externalIds provided" }, { status: 400 });
   // }
 
   const [collection, wishlists] = await Promise.all([
     // const [collection, wishlists, decklists] = await Promise.all([
-    prisma.collectionItem.findMany({
-      where: { userId: userId, scryfallId: { in: scryfallIds } } as any,
-      select: { scryfallId: true, quantity: true },
+    prisma.card.findMany({
+      where: { userId: userId, externalId: { in: externalIds } } as any,
+      select: { externalId: true, quantity: true },
     }),
     prisma.wishlistList.findMany({
       where: { userId },
       include: {
         items: {
-          where: { scryfallId: { in: scryfallIds } },
-          select: { scryfallId: true, quantity: true },
+          where: { externalId: { in: externalIds } },
+          select: { externalId: true, quantity: true },
         },
       },
     }),
@@ -58,8 +58,8 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     //   where: { userId },
     //   include: {
     //     cards: {
-    //       where: { scryfallId: { in: scryfallIds } },
-    //       select: { scryfallId: true, quantity: true }
+    //       where: { externalId: { in: externalIds } },
+    //       select: { externalId: true, quantity: true }
     //     }
     //   }
     // })
@@ -67,19 +67,19 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 
   const usage: CardUsageMap = {}
 
-  scryfallIds.forEach(id => {
+  externalIds.forEach(id => {
     usage[id] = { collection: 0, wishlists: [], decklists: [] }
   })
 
   // Collection
   collection.forEach(item => {
-    usage[item.scryfallId].collection = item.quantity
+    usage[item.externalId].collection = item.quantity
   })
 
   // Wishlists
   wishlists.forEach(list => {
-    list.items.forEach(item => {
-      usage[item.scryfallId].wishlists.push({
+    list.cards.forEach(item => {
+      usage[item.externalId].wishlists.push({
         listId: list.id,
         name: list.name,
         quantity: item.quantity,
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
   // Decklists
   // decklists.forEach(deck => {
   //   deck.cards.forEach(card => {
-  //     usage[card.scryfallId].decklists.push({
+  //     usage[card.externalId].decklists.push({
   //       deckId: deck.id,
   //       name: deck.name,
   //       quantity: card.quantity

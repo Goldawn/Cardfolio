@@ -1,22 +1,48 @@
-import { useState, useEffect, useCallback } from 'react'
-import { cardApiManager } from '@/app/services/CardApiManager'
 import type { GameSet } from '@/card-api-service/dto'
+import { prisma } from '@/lib/prisma'
+import { useCallback, useEffect, useState } from 'react'
 
 export function useSets() {
   const [sets, setSets] = useState<GameSet[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Charger tous les sets
+  // Charger tous les sets depuis la BDD
   const loadSets = useCallback(async () => {
     setLoading(true)
     setError(null)
-    
+
     try {
-      const setsData = await cardApiManager.fetchSets()
-      setSets(setsData)
+      // Récupérer les sets uniques depuis les cartes en BDD
+      const setsData = await prisma.card.findMany({
+        select: {
+          setName: true,
+          setCode: true,
+        },
+        distinct: ['setName', 'setCode'],
+        where: {
+          setName: { not: null },
+          setCode: { not: null },
+        },
+      })
+
+      // Transformer en format GameSet
+      const gameSets: GameSet[] = setsData.map(set => ({
+        id: set.setCode!,
+        code: set.setCode!,
+        name: set.setName!,
+        releaseDate: '', // Pas stocké en BDD pour l'instant
+        type: 'expansion', // Par défaut
+        parentSetCode: null,
+      }))
+
+      setSets(gameSets)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors du chargement des sets')
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Erreur lors du chargement des sets'
+      )
       console.error('Erreur lors du chargement des sets:', err)
     } finally {
       setLoading(false)
@@ -31,7 +57,7 @@ export function useSets() {
   // Filtrer les sets par nom
   const filterSetsByName = (query: string): GameSet[] => {
     if (query.length <= 2) return []
-    
+
     const matchingSets = sets.filter((set: GameSet) =>
       set.name.toLowerCase().includes(query.toLowerCase())
     )
@@ -52,7 +78,10 @@ export function useSets() {
     // Ajouter les sous-sets orphelins
     subSets
       .filter(
-        (sub: GameSet) => !parentSets.some((parent: GameSet) => parent.code === sub.parentSetCode)
+        (sub: GameSet) =>
+          !parentSets.some(
+            (parent: GameSet) => parent.code === sub.parentSetCode
+          )
       )
       .forEach((sub: GameSet) => structuredSets.push(sub))
 
@@ -64,6 +93,6 @@ export function useSets() {
     loading,
     error,
     loadSets,
-    filterSetsByName
+    filterSetsByName,
   }
 }

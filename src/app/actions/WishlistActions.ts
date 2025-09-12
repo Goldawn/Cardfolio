@@ -21,9 +21,9 @@ export async function createWishlistAction(name = 'wishlist') {
 export async function addManyToWishlistAction(
   listId: string,
   items: Array<{
-    scryfallId: string
+    externalId: string
     quantity: number
-  }> /* [{scryfallId, quantity}] */
+  }> /* [{externalId, quantity}] */
 ) {
   'use server'
   await assertWishlistOwnership(listId)
@@ -32,34 +32,61 @@ export async function addManyToWishlistAction(
     return { items: [] }
   }
 
-  // Upsert en masse (filtre et normalise)
-  const ops = items
-    .map(it => ({
-      scryfallId: String(it?.scryfallId || ''),
-      quantity: Number(it?.quantity || 0),
-    }))
-    .filter(it => it.scryfallId && it.quantity > 0)
-    .map(it =>
-      prisma.wishlistItem.upsert({
-        // ✅ bon nom de clé composite (cf. message d'erreur: wishlistId_scryfallId)
-        where: {
-          wishlistId_scryfallId: {
-            wishlistId: listId,
-            scryfallId: it.scryfallId,
-          },
-        },
-        update: { quantity: { increment: it.quantity } },
-        // ✅ bon champ FK: wishlistId
-        create: {
-          wishlistId: listId,
-          scryfallId: it.scryfallId,
-          quantity: it.quantity,
-        },
-        select: { id: true, scryfallId: true, quantity: true },
-      })
-    )
+  // Traiter chaque item individuellement car nous devons d'abord trouver la carte par externalId
+  const results = []
 
-  const results = await prisma.$transaction(ops)
+  for (const item of items) {
+    const externalId = String(item?.externalId || '')
+    const quantity = Number(item?.quantity || 0)
+
+    if (!externalId || quantity <= 0) continue
+
+    // Trouver la carte par externalId
+    const card = await prisma.card.findFirst({
+      where: { externalId },
+      select: { id: true, quantity: true },
+    })
+
+    if (!card) {
+      results.push({
+        kind: 'error',
+        message: `Carte non trouvée: ${externalId}`,
+        externalId,
+      })
+      continue
+    }
+
+    // Vérifier si la carte est déjà dans cette wishlist
+    const existing = await prisma.card.findFirst({
+      where: {
+        id: card.id,
+        wishlistId: listId,
+      },
+      select: { id: true, quantity: true },
+    })
+
+    let updated
+    if (existing) {
+      // Mettre à jour la quantité existante
+      updated = await prisma.card.update({
+        where: { id: existing.id },
+        data: { quantity: existing.quantity + quantity },
+        select: { id: true, externalId: true, quantity: true },
+      })
+      results.push({ kind: 'updated', item: updated })
+    } else {
+      // Ajouter la carte à la wishlist
+      updated = await prisma.card.update({
+        where: { id: card.id },
+        data: {
+          wishlistId: listId,
+          quantity: quantity,
+        },
+        select: { id: true, externalId: true, quantity: true },
+      })
+      results.push({ kind: 'created', item: updated })
+    }
+  }
 
   return JSON.parse(JSON.stringify({ items: results }))
 }

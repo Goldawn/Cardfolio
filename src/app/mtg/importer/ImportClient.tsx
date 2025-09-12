@@ -68,7 +68,7 @@ export default function ImportClient({
   // Les cartes sont déjà formatées par le service
   const formattedCards = cards
   const enrichedCards = formattedCards.map((card: GameCard) => {
-    const owned = collection.find(c => c.scryfallId === card.id)
+    const owned = collection.find(c => c.externalId === card.id)
     const totalWished = wishlistTotals.get(card.id) || 0
     return {
       ...card,

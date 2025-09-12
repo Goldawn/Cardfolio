@@ -1,6 +1,12 @@
+/**
+ * ⚠️  FICHIER PARTIELLEMENT REFACTORISÉ
+ * Ce fichier contient encore du code mort qui doit être migré vers Prisma
+ * TODO: Remplacer tous les appels API par des requêtes Prisma directes
+ */
+
 'use client'
 
-import { cardApiManager } from '@/app/services/CardApiManager'
+// CardApiManager supprimé - utiliser Prisma directement'
 import { useCurrencyContext } from '@/context/'
 import type { AppCollectionItem, CollectionActions, GameCard } from '@/types'
 import type { MTGCard } from '@/types/games/magic'
@@ -12,13 +18,13 @@ import CollectionActionBar from '../../components/CollectionActionBar'
 import Loader from '../../components/Loader'
 import SetBar from '../../components/SetBar' // ✅ intégré
 import useCardFilters from '../../hooks/useCardFilters'
-import type { GameSet } from '../../services/Scryfall'
+// Service Scryfall supprimé - utiliser Prisma directement'
 import {
   fetchMoreCards,
   fetchSetCards,
   fetchSets,
 } from '../../services/Scryfall'
-import { fetchCardPrice } from '../../services/pricing'
+// Service pricing supprimé - utiliser Prisma directement'
 import styles from './page.module.css'
 
 interface CollectionClientProps {
@@ -31,12 +37,12 @@ export default function CollectionClient({
   actions,
 }: CollectionClientProps): JSX.Element {
   const { currency } = useCurrencyContext()
-  const cardService = cardApiManager.getCardService()
+  const cardService = /* TODO: Remplacer par Prisma */ cardApiManager.getCardService()
 
-  // collection brute (scryfallId, qty, priceHistory, dbId)
+  // collection brute (externalId, qty, priceHistory, dbId)
   const [collection, setCollection] = useState<AppCollectionItem[]>(
     (initialItems || []).map((it: any) => ({
-      scryfallId: it.scryfallId,
+      externalId: it.externalId,
       quantity: it.quantity,
       priceHistory: it.priceHistory || [],
       dbId: it.id,
@@ -56,7 +62,7 @@ export default function CollectionClient({
 
   // charge la liste des sets
   useEffect(() => {
-    const loadSets = async () => setSets(await fetchSets())
+    const loadSets = async () => setSets(await /* TODO: Remplacer par prisma.card.findMany avec distinct */ fetchSets())
     loadSets()
   }, [])
 
@@ -70,8 +76,8 @@ export default function CollectionClient({
       try {
         const cards = await Promise.all(
           collection.map(async it => {
-            const formatted = await cardService.fetchCard({
-              cardId: it.scryfallId,
+            const formatted = await cardService./* TODO: Remplacer par prisma.card.findFirst */ fetchCard({
+              cardId: it.externalId,
             })
             return {
               ...formatted,
@@ -144,7 +150,7 @@ export default function CollectionClient({
       ? enrichedCollection
       : selectedSetCards
           .map(card => {
-            const owned = collection.find(c => c.scryfallId === card.id)
+            const owned = collection.find(c => c.externalId === card.id)
             return {
               ...card,
               quantity: owned?.quantity || 0,
@@ -250,7 +256,7 @@ export default function CollectionClient({
   const [isPending, startTransition] = useTransition()
 
   const handleAddToCollection = (card: GameCard): void => {
-    const scryfallId = card.id
+    const externalId = card.id
     startTransition(async () => {
       try {
         const { usd, eur } = await fetchCardPrice(card.name)
@@ -261,17 +267,17 @@ export default function CollectionClient({
           [currencyKey]: lastPrice,
         }
 
-        const result = await actions.addToCollection(scryfallId, newPriceEntry)
+        const result = await actions.addToCollection(externalId, newPriceEntry)
         const { item } = result || {}
         if (!item) return
 
         setCollection(prev => {
-          const idx = prev.findIndex(c => c.scryfallId === scryfallId)
+          const idx = prev.findIndex(c => c.externalId === externalId)
           if (idx === -1) {
             return [
               ...prev,
               {
-                scryfallId,
+                externalId,
                 quantity: item.quantity,
                 priceHistory: item.priceHistory || [newPriceEntry],
                 dbId: item.id,
@@ -299,18 +305,18 @@ export default function CollectionClient({
         if (!result) return
 
         if (result.kind === 'deleted') {
-          setCollection(prev => prev.filter(c => c.scryfallId !== cardId))
+          setCollection(prev => prev.filter(c => c.externalId !== cardId))
           return
         }
 
         if (result.kind === 'updated' && result.item) {
           setCollection(prev => {
-            const idx = prev.findIndex(c => c.scryfallId === cardId)
+            const idx = prev.findIndex(c => c.externalId === cardId)
             if (idx === -1) {
               return [
                 ...prev,
                 {
-                  scryfallId: cardId,
+                  externalId: cardId,
                   quantity: result.item.quantity,
                   priceHistory: [],
                   dbId: result.item.id,
@@ -333,7 +339,7 @@ export default function CollectionClient({
       try {
         const result = await actions.removeFromCollection(cardId)
         if (result?.kind === 'deleted') {
-          setCollection(prev => prev.filter(c => c.scryfallId !== cardId))
+          setCollection(prev => prev.filter(c => c.externalId !== cardId))
         }
       } catch (e) {
         console.error('removeFromCollection error:', e)

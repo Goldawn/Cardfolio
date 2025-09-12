@@ -24,7 +24,7 @@ export type ColorDistribution<TColor = string> = {
   total: number
 }
 
-export type CollectionStats<
+export type GenericCollectionStats<
   TColor extends string = string,
   TCardType extends string = string,
   TRarity extends string = CardRarity,

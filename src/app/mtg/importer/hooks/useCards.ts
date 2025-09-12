@@ -1,4 +1,10 @@
-import { cardApiManager } from '@/app/services/CardApiManager'
+/**
+ * ⚠️  FICHIER PARTIELLEMENT REFACTORISÉ
+ * Ce fichier contient encore du code mort qui doit être migré vers Prisma
+ * TODO: Remplacer tous les appels API par des requêtes Prisma directes
+ */
+
+// CardApiManager supprimé - utiliser Prisma directement'
 import type { GameSet } from '@/card-api-service/dto'
 import type { MTGCard } from '@/types/games/magic'
 import { useCallback, useMemo, useState } from 'react'
@@ -9,7 +15,7 @@ export function useCards() {
   const [error, setError] = useState<string | null>(null)
 
   // Instance du service Card API
-  const cardService = useMemo(() => cardApiManager.getCardService(), [])
+  const cardService = useMemo(() => /* TODO: Remplacer par Prisma */ cardApiManager.getCardService(), [])
 
   // Charger les cartes d'un set
   const loadSetCards = useCallback(

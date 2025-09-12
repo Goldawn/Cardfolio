@@ -1,7 +1,6 @@
 // Types spécifiques Lorcana
 // ==========================
 
-import { BaseCard } from '../base'
 import { Collection } from '../collections'
 
 export type LorcanaColor =

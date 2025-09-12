@@ -1,6 +1,12 @@
+/**
+ * ⚠️  FICHIER PARTIELLEMENT REFACTORISÉ
+ * Ce fichier contient encore du code mort qui doit être migré vers Prisma
+ * TODO: Remplacer tous les appels API par des requêtes Prisma directes
+ */
+
 'use client'
 
-import { cardApiManager } from '@/app/services/CardApiManager'
+// CardApiManager supprimé - utiliser Prisma directement'
 import type { MTGCard } from '@/types/games/magic'
 import { useEffect, useRef, useState, useTransition } from 'react'
 import styles from './AddFromCollection.module.css'
@@ -24,7 +30,7 @@ function useDebounce<T>(value: T, delay: number): T {
 
 interface ManualAddProps {
   deckId: string
-  onAdd: (scryfallId: string, qty: number) => Promise<void>
+  onAdd: (externalId: string, qty: number) => Promise<void>
   defaultQty?: number
 }
 
@@ -44,7 +50,7 @@ export default function ManualAdd({
   const debouncedQuery = useDebounce(query, 350)
 
   // Instance du service Card API
-  const cardService = cardApiManager.getCardService()
+  const cardService = /* TODO: Remplacer par Prisma */ cardApiManager.getCardService()
 
   useEffect(() => {
     if (!debouncedQuery || debouncedQuery.trim().length < 2) {
@@ -65,7 +71,7 @@ export default function ManualAdd({
 
       try {
         // Utilisation du nouveau service Card API
-        const searchResults = await cardService.searchCards({
+        const searchResults = await cardService./* TODO: Remplacer par prisma.card.findMany */ searchCards({
           query: debouncedQuery,
           options: {
             // Tu peux enrichir la requête avec des opérateurs (t:creature, set:woe…)
@@ -96,26 +102,26 @@ export default function ManualAdd({
     }
   }, [debouncedQuery])
 
-  const handleAdd = async (scryfallId: string, qty: number) => {
+  const handleAdd = async (externalId: string, qty: number) => {
     startTransition(async () => {
       try {
-        await onAdd(scryfallId, qty)
+        await onAdd(externalId, qty)
         // Optionnel: retirer de la liste des résultats
-        setResults(prev => prev.filter(card => card.id !== scryfallId))
+        setResults(prev => prev.filter(card => card.id !== externalId))
       } catch (err) {
         console.error('Erreur ajout carte:', err)
       }
     })
   }
 
-  const updateQty = (scryfallId: string, newQty: number) => {
+  const updateQty = (externalId: string, newQty: number) => {
     setQtyById(prev => ({
       ...prev,
-      [scryfallId]: Math.max(1, newQty),
+      [externalId]: Math.max(1, newQty),
     }))
   }
 
-  const getQty = (scryfallId: string) => qtyById[scryfallId] || defaultQty
+  const getQty = (externalId: string) => qtyById[externalId] || defaultQty
 
   return (
     <div className={styles.manualAddContainer}>

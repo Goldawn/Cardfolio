@@ -1,6 +1,12 @@
+/**
+ * ⚠️  FICHIER PARTIELLEMENT REFACTORISÉ
+ * Ce fichier contient encore du code mort qui doit être migré vers Prisma
+ * TODO: Remplacer tous les appels API par des requêtes Prisma directes
+ */
+
 'use client'
 
-import { cardApiManager } from '@/app/services/CardApiManager'
+// CardApiManager supprimé - utiliser Prisma directement'
 import type { GameCard } from '@/types'
 import type { JSX } from 'react'
 import { useEffect, useMemo, useState, useTransition } from 'react'
@@ -29,7 +35,7 @@ export default function DeckClient({
   actions,
 }: DeckClientProps): JSX.Element {
   // console.log(deck)
-  const cardService = cardApiManager.getCardService()
+  const cardService = /* TODO: Remplacer par Prisma */ cardApiManager.getCardService()
   const [deckState, setDeckState] = useState(deck) // { id, name, format, showcasedCard }
   const [deckCards, setDeckCards] = useState(initialDeckCards || [])
   const [enriched, setEnriched] = useState<GameCard[]>([]) // cartes formatées  { deckCardId, decklistQuantity }
@@ -48,8 +54,8 @@ export default function DeckClient({
       try {
         const out = await Promise.all(
           deckCards.map(async dc => {
-            const formatted = await cardService.fetchCard({
-              cardId: dc.scryfallId,
+            const formatted = await cardService./* TODO: Remplacer par prisma.card.findFirst */ fetchCard({
+              cardId: dc.externalId,
             })
             return {
               ...formatted,
@@ -75,7 +81,7 @@ export default function DeckClient({
     const set = new Set<string>()
     // on s’appuie sur "enriched" + "deckCards" pour ne compter que les cartes présentes
     const qtyById = new Map(
-      deckCards.map(dc => [dc.scryfallId, dc.quantity || 0])
+      deckCards.map(dc => [dc.externalId, dc.quantity || 0])
     )
     enriched.forEach((c: GameCard) => {
       const qty = qtyById.get(c.id) || 0
@@ -109,23 +115,23 @@ export default function DeckClient({
   }, [deckState.format, deckCards, enriched])
 
   const isCardProblematic = (card: any): boolean => {
-    return legality.issues.some(i => i.scryfallId === card.id)
+    return legality.issues.some(i => i.externalId === card.id)
   }
 
   // -------- Handlers deck (server actions) --------
-  const addCardToDeck = (scryfallId: string, qty: number = 1): void => {
+  const addCardToDeck = (externalId: string, qty: number = 1): void => {
     startTransition(async () => {
       try {
-        const res = await actions.addCardToDeck(deck.id, scryfallId, qty)
+        const res = await actions.addCardToDeck(deck.id, externalId, qty)
         if (!res?.item) return
-        const item = res.item // { id, scryfallId, quantity }
+        const item = res.item // { id, externalId, quantity }
         setDeckCards(prev => {
-          const idx = prev.findIndex(d => d.scryfallId === item.scryfallId)
+          const idx = prev.findIndex(d => d.externalId === item.externalId)
           if (idx === -1)
             return [
               {
                 id: item.id,
-                scryfallId: item.scryfallId,
+                externalId: item.externalId,
                 quantity: item.quantity,
               },
               ...prev,
@@ -183,7 +189,7 @@ export default function DeckClient({
         })
         setDeckState((prev: any) => ({
           ...prev,
-          showcasedDeckCardId: updated.showcasedDeckCardId ?? null,
+          showcasedCardId: updated.showcasedCardId ?? null,
           showcasedArt: updated.showcasedArt ?? null,
         }))
       } catch (e) {
@@ -240,8 +246,8 @@ export default function DeckClient({
             deckId={deckState.id}
             collectionItems={initialUserCollectionItems}
             currentDeckCards={deckCards}
-            onAdd={async (scryfallId: string, qty: number) => {
-              await addCardToDeck(scryfallId, qty)
+            onAdd={async (externalId: string, qty: number) => {
+              await addCardToDeck(externalId, qty)
             }}
           />
         )}
@@ -249,8 +255,8 @@ export default function DeckClient({
         {tab === 'manual' && (
           <ManualAdd
             deckId={deckState.id}
-            onAdd={async (scryfallId: string, qty: number) => {
-              await addCardToDeck(scryfallId, qty)
+            onAdd={async (externalId: string, qty: number) => {
+              await addCardToDeck(externalId, qty)
             }}
           />
         )}

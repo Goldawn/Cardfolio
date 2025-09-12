@@ -8,7 +8,7 @@ interface RouteParams {
 
 // Types pour les requêtes
 interface AddCardRequest {
-  scryfallId: string
+  externalId: string
   quantity: number
   priceHistory?: Array<{
     date: string
@@ -18,7 +18,7 @@ interface AddCardRequest {
 }
 
 interface UpdateCardRequest {
-  scryfallId: string
+  externalId: string
   quantityDelta: number
   newPriceEntry?: {
     date: string
@@ -28,7 +28,7 @@ interface UpdateCardRequest {
 }
 
 interface DeleteCardRequest {
-  scryfallId: string
+  externalId: string
 }
 
 export async function GET(_request: NextRequest, { params }: RouteParams) {
@@ -38,10 +38,10 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     const defaultCollection = await prisma.collection.findFirst({
       where: { userId },
       orderBy: [{ isDefault: 'desc' }, { createdAt: 'asc' }],
-      include: { items: true }, // <- CollectionItem[]
+      include: { cards: true }, // <- CollectionItem[]
     })
 
-    return Response.json(defaultCollection?.items || [])
+    return Response.json(defaultCollection?.cards || [])
   } catch (error) {
     console.error('Erreur API collection :', error)
     return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
@@ -54,18 +54,18 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   const { userId } = await params
   const body: AddCardRequest = await request.json()
 
-  const { scryfallId, quantity, priceHistory } = body
+  const { externalId, quantity, priceHistory } = body
 
-  if (!scryfallId || !quantity) {
+  if (!externalId || !quantity) {
     return new Response(JSON.stringify({ error: 'Données manquantes' }), {
       status: 400,
     })
   }
 
   try {
-    const newCard = await prisma.collectionItem.create({
+    const newCard = await prisma.card.create({
       data: {
-        scryfallId,
+        cardId: card.id,
         quantity,
         priceHistory: priceHistory || [],
         userId,
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     await prisma.collectionChangeLog.create({
       data: {
         userId,
-        scryfallId,
+        cardId: card.id,
         changeType: 'add',
         quantity,
         totalAfter: quantity,
@@ -94,10 +94,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   const { userId } = await params
-  const { scryfallId, quantityDelta, newPriceEntry }: UpdateCardRequest =
+  const { externalId, quantityDelta, newPriceEntry }: UpdateCardRequest =
     await request.json()
 
-  if (!scryfallId || typeof quantityDelta !== 'number') {
+  if (!externalId || typeof quantityDelta !== 'number') {
     return new Response(
       JSON.stringify({ error: 'Données manquantes ou invalides' }),
       {
@@ -107,10 +107,10 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
   }
 
   try {
-    const existing = await prisma.collectionItem.findFirst({
+    const existing = await prisma.card.findFirst({
       where: {
         userId: userId,
-        scryfallId,
+        cardId: card.id,
       } as any,
     })
 
@@ -124,14 +124,14 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     // 👇 Si on supprime la carte (quantité <= 0)
     if (newQuantity < 1) {
-      await prisma.collectionItem.delete({
+      await prisma.card.delete({
         where: { id: existing.id },
       })
 
       await prisma.collectionChangeLog.create({
         data: {
           userId,
-          scryfallId,
+          cardId: card.id,
           changeType: 'remove',
           quantity: quantityDelta,
           totalAfter: 0,
@@ -142,7 +142,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     }
 
     // 👇 Sinon, on met à jour la carte normalement
-    const updated = await prisma.collectionItem.update({
+    const updated = await prisma.card.update({
       where: { id: existing.id },
       data: {
         quantity: newQuantity,
@@ -156,7 +156,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     await prisma.collectionChangeLog.create({
       data: {
         userId,
-        scryfallId,
+        cardId: card.id,
         changeType: quantityDelta > 0 ? 'add' : 'remove',
         quantity: quantityDelta,
         totalAfter: newQuantity,
@@ -174,19 +174,19 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   const { userId } = await params
-  const { scryfallId }: DeleteCardRequest = await request.json()
+  const { externalId }: DeleteCardRequest = await request.json()
 
-  if (!scryfallId) {
-    return new Response(JSON.stringify({ error: 'scryfallId manquant' }), {
+  if (!externalId) {
+    return new Response(JSON.stringify({ error: 'externalId manquant' }), {
       status: 400,
     })
   }
 
   try {
-    const existing = await prisma.collectionItem.findFirst({
+    const existing = await prisma.card.findFirst({
       where: {
         userId: userId,
-        scryfallId,
+        cardId: card.id,
       } as any,
     })
 
@@ -196,7 +196,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       })
     }
 
-    await prisma.collectionItem.delete({
+    await prisma.card.delete({
       where: { id: existing.id },
     })
 

@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import type { GameCard } from '@/types'
 
 interface LegalityIssue {
-  scryfallId: string
+  externalId: string
   problems: string[]
 }
 
@@ -14,7 +14,7 @@ export function useLegalityIndex(legality: Legality | null) {
   const issuesById = useMemo(() => {
     const m = new Map<string, string[]>()
     ;(legality?.issues || []).forEach(i =>
-      m.set(i.scryfallId, i.problems || [])
+      m.set(i.externalId, i.problems || [])
     )
     return m
   }, [legality])

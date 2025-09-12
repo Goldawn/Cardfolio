@@ -1,7 +1,6 @@
 // Types spécifiques Flesh and Blood
 // ==================================
 
-import { BaseCard } from '../base'
 import { Collection } from '../collections'
 
 export type FleshAndBloodClass =

@@ -1,7 +1,6 @@
 // Types spécifiques Pokemon
 // ==========================
 
-import { BaseCard } from '../base'
 import { Collection } from '../collections'
 
 export type PokemonType =

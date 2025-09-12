@@ -8,7 +8,7 @@ interface RouteParams {
 
 // Types pour les requêtes
 interface AddWishlistItemRequest {
-  scryfallId: string
+  externalId: string
   quantity?: number
 }
 
@@ -18,9 +18,12 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
   const { userId } = await params
 
   try {
-    const allItems = await prisma.wishlistItem.findMany({
-      where: { userId: userId } as any,
-      include: { list: true } as any,
+    const allItems = await prisma.card.findMany({
+      where: {
+        wishlistId: { not: null },
+        wishlistList: { userId: userId },
+      },
+      include: { wishlistList: true },
       orderBy: { dateAdded: 'desc' },
     })
 
@@ -37,10 +40,10 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
 // Ajoute une carte à la liste par défaut de l'utilisateur
 export async function POST(request: NextRequest, { params }: RouteParams) {
   const { userId } = await params
-  const { scryfallId, quantity = 1 }: AddWishlistItemRequest =
+  const { externalId, quantity = 1 }: AddWishlistItemRequest =
     await request.json()
 
-  if (!scryfallId || quantity < 1) {
+  if (!externalId || quantity < 1) {
     return new Response(JSON.stringify({ error: 'Données invalides' }), {
       status: 400,
     })
@@ -66,18 +69,29 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       })
     }
 
+    // Trouver la carte par externalId
+    const card = await prisma.card.findFirst({
+      where: { externalId },
+      select: { id: true, quantity: true },
+    })
+
+    if (!card) {
+      return new Response(JSON.stringify({ error: 'Carte non trouvée' }), {
+        status: 404,
+      })
+    }
+
     // Vérifier si la carte est déjà présente dans cette liste
-    const existing = await prisma.wishlistItem.findFirst({
+    const existing = await prisma.card.findFirst({
       where: {
-        userId: userId,
-        listId: defaultList.id,
-        scryfallId,
-      } as any,
+        id: card.id,
+        wishlistId: defaultList.id,
+      },
     })
 
     if (existing) {
       // Incrémenter la quantité
-      const updated = await prisma.wishlistItem.update({
+      const updated = await prisma.card.update({
         where: { id: existing.id },
         data: {
           quantity: existing.quantity + quantity,
@@ -86,14 +100,13 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
       return Response.json(updated)
     } else {
-      // Créer un nouvel item
-      const newItem = await prisma.wishlistItem.create({
+      // Ajouter la carte à la wishlist
+      const newItem = await prisma.card.update({
+        where: { id: card.id },
         data: {
-          scryfallId,
-          quantity,
-          userId,
-          listId: defaultList.id,
-        } as any,
+          wishlistId: defaultList.id,
+          quantity: quantity,
+        },
       })
 
       return Response.json(newItem)

@@ -1,7 +1,6 @@
 // Types spécifiques Yu-Gi-Oh!
 // ============================
 
-import { BaseCard } from '../base'
 import { Collection } from '../collections'
 
 export type YugiohAttribute =
