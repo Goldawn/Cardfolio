@@ -1,13 +1,7 @@
-/**
- * ⚠️  FICHIER PARTIELLEMENT REFACTORISÉ
- * Ce fichier contient encore du code mort qui doit être migré vers Prisma
- * TODO: Remplacer tous les appels API par des requêtes Prisma directes
- */
-
 'use client'
 
-// CardApiManager supprimé - utiliser Prisma directement'
-import type { GameCard } from '@/types'
+import { prisma } from '@/lib/prisma'
+import type { MTGCard } from '@/types'
 import type { JSX } from 'react'
 import { useEffect, useMemo, useState, useTransition } from 'react'
 import Card from '../../../components/Card'
@@ -35,15 +29,14 @@ export default function DeckClient({
   actions,
 }: DeckClientProps): JSX.Element {
   // console.log(deck)
-  const cardService = /* TODO: Remplacer par Prisma */ cardApiManager.getCardService()
   const [deckState, setDeckState] = useState(deck) // { id, name, format, showcasedCard }
   const [deckCards, setDeckCards] = useState(initialDeckCards || [])
-  const [enriched, setEnriched] = useState<GameCard[]>([]) // cartes formatées  { deckCardId, decklistQuantity }
+  const [enriched, setEnriched] = useState<MTGCard[]>([]) // cartes formatées  { deckCardId, decklistQuantity }
   const [tab, setTab] = useState<string>('fromCollection') // "fromCollection" | "manual" | "import"
   const [isPending, startTransition] = useTransition()
   const [deckColors, setDeckColors] = useState<string[]>([]) // ["W","U","B","R","G","C"]
 
-  // -------- Enrichissement Scryfall des cartes du deck --------
+  // -------- Enrichissement des cartes du deck avec Prisma --------
   useEffect(() => {
     let cancelled = false
     const load = async () => {
@@ -52,21 +45,60 @@ export default function DeckClient({
         return
       }
       try {
-        const out = await Promise.all(
-          deckCards.map(async dc => {
-            const formatted = await cardService./* TODO: Remplacer par prisma.card.findFirst */ fetchCard({
-              cardId: dc.externalId,
-            })
+        // Récupération des cartes depuis la base de données
+        const cardIds = deckCards.map(dc => dc.externalId)
+        const cards = await prisma.card.findMany({
+          where: {
+            externalId: { in: cardIds },
+          },
+          select: {
+            id: true,
+            externalId: true,
+            name: true,
+            gameType: true,
+            gameData: true,
+            imageSmall: true,
+            imageNormal: true,
+            imageLarge: true,
+            setCode: true,
+            setName: true,
+            rarity: true,
+            artist: true,
+            collectorNumber: true,
+          },
+        })
+
+        // Association des cartes avec les données du deck
+        const out = deckCards
+          .map(dc => {
+            const card = cards.find(c => c.externalId === dc.externalId)
+            if (!card) return null
+
             return {
-              ...formatted,
+              id: card.externalId,
+              externalId: card.externalId,
+              name: card.name,
+              gameType: card.gameType,
+              setCode: card.setCode,
+              setName: card.setName,
+              rarity: card.rarity,
+              artist: card.artist,
+              collectorNumber: card.collectorNumber,
+              gameData: card.gameData as any,
+              image:
+                card.imageLarge || card.imageNormal || card.imageSmall || '',
+              imageSmall: card.imageSmall,
+              imageNormal: card.imageNormal,
+              imageLarge: card.imageLarge,
               decklistQuantity: dc.quantity,
               deckCardId: dc.id,
-            }
+            } as unknown as MTGCard
           })
-        )
+          .filter(Boolean) as MTGCard[]
+
         if (!cancelled) setEnriched(out)
       } catch (e) {
-        console.error('Erreur enrichissement Scryfall deck:', e)
+        console.error('Erreur enrichissement deck:', e)
         if (!cancelled) setEnriched([])
       }
     }
@@ -83,7 +115,7 @@ export default function DeckClient({
     const qtyById = new Map(
       deckCards.map(dc => [dc.externalId, dc.quantity || 0])
     )
-    enriched.forEach((c: GameCard) => {
+    enriched.forEach((c: MTGCard) => {
       const qty = qtyById.get(c.id) || 0
       if (qty <= 0) return
       if ((c as any).type?.includes('Basic Land')) return // ignore lands de base

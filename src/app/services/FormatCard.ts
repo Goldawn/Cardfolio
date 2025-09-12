@@ -10,7 +10,7 @@ import type { MTGCard } from '@/types/games/magic'
 // Instance de l'adapter via le manager
 const getScryfallAdapter = () => {
   const cardService = cardApiManager.getCardService()
-  return cardService.adapters.get('scryfall')
+  return cardService.getAdapter('scryfall')
 }
 
 /**
@@ -19,6 +19,9 @@ const getScryfallAdapter = () => {
  */
 export const formatCard = (rawCard: ScryfallCardDTO): MTGCard => {
   const adapter = getScryfallAdapter()
+  if (!adapter) {
+    throw new Error('Scryfall adapter not found')
+  }
   return adapter.transformCard(rawCard)
 }
 
@@ -28,6 +31,9 @@ export const formatCard = (rawCard: ScryfallCardDTO): MTGCard => {
  */
 export const formatCards = (rawCards: ScryfallCardDTO[]): MTGCard[] => {
   const adapter = getScryfallAdapter()
+  if (!adapter) {
+    throw new Error('Scryfall adapter not found')
+  }
   return adapter.transformCards(rawCards)
 }
 
@@ -37,6 +43,9 @@ export const formatCards = (rawCards: ScryfallCardDTO[]): MTGCard[] => {
  */
 export const validateCardData = (rawCard: any): boolean => {
   const adapter = getScryfallAdapter()
+  if (!adapter) {
+    throw new Error('Scryfall adapter not found')
+  }
   return adapter.validateRawData(rawCard)
 }
 
@@ -46,6 +55,9 @@ export const validateCardData = (rawCard: any): boolean => {
  */
 export const extractCardId = (rawCard: ScryfallCardDTO): string => {
   const adapter = getScryfallAdapter()
+  if (!adapter) {
+    throw new Error('Scryfall adapter not found')
+  }
   return adapter.extractCardId(rawCard)
 }
 
@@ -55,9 +67,12 @@ export const extractCardId = (rawCard: ScryfallCardDTO): string => {
  */
 export const extractCardName = (rawCard: ScryfallCardDTO): string => {
   const adapter = getScryfallAdapter()
+  if (!adapter) {
+    throw new Error('Scryfall adapter not found')
+  }
   return adapter.extractCardName(rawCard)
 }
 
 // Export des types pour compatibilité
-export type { MTGCard } from '@/types/games/magic'
 export type { ScryfallCardDTO } from '@/card-api-service/dto'
+export type { MTGCard } from '@/types/games/magic'

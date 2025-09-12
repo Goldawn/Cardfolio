@@ -32,8 +32,10 @@ export function useSets() {
         code: set.setCode!,
         name: set.setName!,
         releaseDate: '', // Pas stocké en BDD pour l'instant
-        type: 'expansion', // Par défaut
-        parentSetCode: null,
+        setType: 'expansion', // Par défaut
+        cardCount: 0, // Pas stocké en BDD pour l'instant
+        digital: false, // Par défaut
+        parentSetCode: undefined,
       }))
 
       setSets(gameSets)

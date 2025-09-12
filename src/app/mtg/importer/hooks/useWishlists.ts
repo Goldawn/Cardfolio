@@ -1,3 +1,4 @@
+import type { Card } from '@/types/base'
 import type { WishlistList } from '@/types/collections'
 import { useMemo, useState, useTransition } from 'react'
 
@@ -24,9 +25,9 @@ export function useWishlists(
   const wishlistTotals = useMemo(() => {
     const map = new Map<string, number>()
     wishlistLists.forEach((list: WishlistList) => {
-      list.cards.forEach((item: WishlistItem) => {
-        const prev = map.get(item.cardId) || 0
-        map.set(item.cardId, prev + item.quantity)
+      list.cards.forEach((card: Card) => {
+        const prev = map.get(card.id) || 0
+        map.set(card.id, prev + 1) // Assuming quantity is always 1 for wishlist
       })
     })
     return map
@@ -42,7 +43,7 @@ export function useWishlists(
       setWishlistLists(prev => {
         const exists = prev.some(l => l.id === list.id)
         if (exists) return prev
-        return [...prev, { ...list, items: list.cards ?? [] }]
+        return [...prev, { ...list, cards: list.cards ?? [] }]
       })
       return list.id
     } catch (e) {
@@ -64,32 +65,18 @@ export function useWishlists(
         setWishlistLists(prev =>
           prev.map(list => {
             if (list.id !== listId) return list
-            const idx = list.cards.findIndex(
-              (it: WishlistItem) => it.cardId === card.id
-            )
+            const idx = list.cards.findIndex((c: Card) => c.id === card.id)
             if (idx === -1) {
               return {
                 ...list,
-                items: [
+                cards: [
                   ...list.cards,
-                  {
-                    id: item.id,
-                    cardId: card.id,
-                    quantity: item.quantity,
-                    dateAdded: new Date(),
-                    updatedAt: new Date(),
-                    wishlistId: listId,
-                  },
+                  card, // Add the card directly
                 ],
               }
             }
-            const newItems = [...list.cards]
-            newItems[idx] = {
-              ...newItems[idx],
-              quantity: item.quantity,
-              updatedAt: new Date(),
-            }
-            return { ...list, items: newItems }
+            // Card already exists, no need to update quantity for wishlist
+            return list
           })
         )
       } catch (err) {

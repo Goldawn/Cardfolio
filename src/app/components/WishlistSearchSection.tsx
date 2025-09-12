@@ -1,13 +1,7 @@
-/**
- * ⚠️  FICHIER PARTIELLEMENT REFACTORISÉ
- * Ce fichier contient encore du code mort qui doit être migré vers Prisma
- * TODO: Remplacer tous les appels API par des requêtes Prisma directes
- */
-
 'use client'
 
-// CardApiManager supprimé - utiliser Prisma directement'
-import type { GameCard } from '@/types'
+import { prisma } from '@/lib/prisma'
+import type { MTGCard } from '@/types'
 import { useCallback, useEffect, useState } from 'react'
 
 // Hook useDebounce simple
@@ -33,7 +27,7 @@ interface WishlistSearchSectionProps {
   StopAddingToWishlist: () => void
   wishlistId: string
   onHoverCard: (cardId: string, imageUrl: string) => void
-  onCardAdded: (card: GameCard, quantity: number) => void
+  onCardAdded: (card: MTGCard, quantity: number) => void
 }
 
 export default function WishlistSearchSection({
@@ -46,35 +40,42 @@ export default function WishlistSearchSection({
 }: WishlistSearchSectionProps) {
   const [searchInput, setSearchInput] = useState('')
   const [suggestions, setSuggestions] = useState<string[]>([])
-  const [searchResults, setSearchResults] = useState<GameCard[]>([])
+  const [searchResults, setSearchResults] = useState<MTGCard[]>([])
   const [loading, setLoading] = useState(false)
   const [highlightIndex, setHighlightIndex] = useState(-1)
   const [freezeAutocomplete, setFreezeAutocomplete] = useState(false)
 
   const debouncedQuery = useDebounce(searchInput, 300)
 
-  // Instance du service Card API
-  const cardService = /* TODO: Remplacer par Prisma */ cardApiManager.getCardService()
-
-  // Suggestions (autocomplete) - NOUVEAU: Utilise le CardService
+  // Suggestions (autocomplete) avec Prisma
   useEffect(() => {
     const fetchSuggestions = async () => {
       if (debouncedQuery.length < 3 || freezeAutocomplete)
         return setSuggestions([])
       try {
-        // Utilisation du nouveau service d'autocomplete
-        const suggestions =
-          await cardService.getAutocompleteSuggestions(debouncedQuery)
-        setSuggestions(suggestions)
+        // Recherche de suggestions dans la base de données
+        const suggestionsResults = await prisma.card.findMany({
+          where: {
+            name: { contains: debouncedQuery },
+          },
+          select: {
+            name: true,
+          },
+          distinct: ['name'],
+          take: 10,
+        })
+
+        const newSuggestions = suggestionsResults.map(card => card.name)
+        setSuggestions(newSuggestions)
       } catch (error) {
         console.error('Erreur chargement suggestions:', error)
         setSuggestions([])
       }
     }
     fetchSuggestions()
-  }, [debouncedQuery, freezeAutocomplete, cardService])
+  }, [debouncedQuery, freezeAutocomplete])
 
-  // Recherche générale - NOUVEAU
+  // Recherche générale avec Prisma
   const handleSearch = async (query: string): Promise<void> => {
     const q = (query ?? searchInput).trim()
     if (!q) return
@@ -84,14 +85,51 @@ export default function WishlistSearchSection({
     setHighlightIndex(-1)
 
     try {
-      // Utilisation du nouveau service
-      const results = await cardService./* TODO: Remplacer par prisma.card.findMany */ searchCards({
-        query: q,
-        options: {
-          unique: 'prints', // Pour afficher toutes les variations d'une carte
+      // Recherche directe avec Prisma
+      const results = await prisma.card.findMany({
+        where: {
+          OR: [{ name: { contains: q } }, { setCode: { contains: q } }],
         },
+        select: {
+          id: true,
+          externalId: true,
+          name: true,
+          gameType: true,
+          gameData: true,
+          imageSmall: true,
+          imageNormal: true,
+          imageLarge: true,
+          setCode: true,
+          setName: true,
+          rarity: true,
+          artist: true,
+          collectorNumber: true,
+        },
+        take: 20,
       })
-      setSearchResults(results as GameCard[])
+
+      // Transformer les résultats pour correspondre au format MTGCard
+      const formattedResults = results.map(
+        card =>
+          ({
+            id: card.externalId,
+            externalId: card.externalId,
+            name: card.name,
+            gameType: card.gameType,
+            setCode: card.setCode,
+            setName: card.setName,
+            rarity: card.rarity,
+            artist: card.artist,
+            collectorNumber: card.collectorNumber,
+            gameData: card.gameData as any,
+            image: card.imageLarge || card.imageNormal || card.imageSmall || '',
+            imageSmall: card.imageSmall,
+            imageNormal: card.imageNormal,
+            imageLarge: card.imageLarge,
+          }) as unknown as MTGCard
+      )
+
+      setSearchResults(formattedResults)
     } catch (error) {
       console.error('Erreur chargement résultats:', error)
     } finally {
@@ -99,7 +137,7 @@ export default function WishlistSearchSection({
     }
   }
 
-  // Recherche exacte des prints - NOUVEAU
+  // Recherche exacte des prints avec Prisma
   const handleSearchExactPrints = async (exactName: string): Promise<void> => {
     // 1) on gèle l'autocomplete pour éviter qu'il se rouvre (cas "Opt")
     setFreezeAutocomplete(true)
@@ -110,23 +148,55 @@ export default function WishlistSearchSection({
 
     setLoading(true)
     try {
-      // Utilisation du nouveau service pour récupérer la carte exacte
-      const _exactCard = await cardService.fetchCardByName(exactName)
-
-      // Puis recherche de tous les prints de cette carte
-      const allPrints = await cardService./* TODO: Remplacer par prisma.card.findMany */ searchCards({
-        query: `!"${exactName}"`,
-        options: {
-          order: 'released',
-          unique: 'prints',
+      // Recherche exacte par nom avec Prisma
+      const results = await prisma.card.findMany({
+        where: {
+          name: { contains: exactName },
         },
+        select: {
+          id: true,
+          externalId: true,
+          name: true,
+          gameType: true,
+          gameData: true,
+          imageSmall: true,
+          imageNormal: true,
+          imageLarge: true,
+          setCode: true,
+          setName: true,
+          rarity: true,
+          artist: true,
+          collectorNumber: true,
+        },
+        take: 20,
       })
 
-      setSearchResults(allPrints as GameCard[])
+      // Transformer les résultats pour correspondre au format MTGCard
+      const formattedResults = results.map(
+        card =>
+          ({
+            id: card.externalId,
+            externalId: card.externalId,
+            name: card.name,
+            gameType: card.gameType,
+            setCode: card.setCode,
+            setName: card.setName,
+            rarity: card.rarity,
+            artist: card.artist,
+            collectorNumber: card.collectorNumber,
+            gameData: card.gameData as any,
+            image: card.imageLarge || card.imageNormal || card.imageSmall || '',
+            imageSmall: card.imageSmall,
+            imageNormal: card.imageNormal,
+            imageLarge: card.imageLarge,
+          }) as unknown as MTGCard
+      )
+
+      setSearchResults(formattedResults)
     } catch (error) {
       console.error('Erreur chargement prints exacts:', error)
       // Fallback vers la recherche générale
-      await handleSearch(`!"${exactName}"`)
+      await handleSearch(exactName)
     } finally {
       setLoading(false)
     }
@@ -166,7 +236,7 @@ export default function WishlistSearchSection({
   )
 
   // Ajout à la wishlist
-  const handleAddToWishlist = async (card: GameCard, quantity: number = 1) => {
+  const handleAddToWishlist = async (card: MTGCard, quantity: number = 1) => {
     try {
       // Logique d'ajout à la wishlist (inchangée)
       // ... votre logique existante ...
@@ -235,7 +305,7 @@ export default function WishlistSearchSection({
                   <p>
                     {card.setCode} - {card.rarity}
                   </p>
-                  <p>Prix: ${card.priceHistory?.[0]?.usd || 'N/A'}</p>
+                  <p>Prix: ${(card as any).priceHistory?.[0]?.usd || 'N/A'}</p>
                 </div>
                 <div className="card-actions">
                   <button

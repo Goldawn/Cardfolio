@@ -2,7 +2,8 @@
 // ================================================
 
 import { Card } from '../base'
-import { Collection, Decklist, WishlistList } from '../collections'
+import { Collection, WishlistList } from '../collections'
+import { Decklist } from '../decks'
 
 export type MTGColor = 'W' | 'U' | 'B' | 'R' | 'G' | 'C' | 'M'
 export type MTGCardType =

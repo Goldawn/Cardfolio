@@ -1,12 +1,6 @@
-/**
- * ⚠️  FICHIER PARTIELLEMENT REFACTORISÉ
- * Ce fichier contient encore du code mort qui doit être migré vers Prisma
- * TODO: Remplacer tous les appels API par des requêtes Prisma directes
- */
-
 'use client'
 
-// CardApiManager supprimé - utiliser Prisma directement'
+import { prisma } from '@/lib/prisma'
 import type { MTGCard } from '@/types/games/magic'
 import { useEffect, useRef, useState, useTransition } from 'react'
 import styles from './AddFromCollection.module.css'
@@ -49,8 +43,7 @@ export default function ManualAdd({
 
   const debouncedQuery = useDebounce(query, 350)
 
-  // Instance du service Card API
-  const cardService = /* TODO: Remplacer par Prisma */ cardApiManager.getCardService()
+  // Utilisation directe de Prisma pour la recherche
 
   useEffect(() => {
     if (!debouncedQuery || debouncedQuery.trim().length < 2) {
@@ -70,21 +63,49 @@ export default function ManualAdd({
       abortRef.current = ctrl
 
       try {
-        // Utilisation du nouveau service Card API
-        const searchResults = await cardService./* TODO: Remplacer par prisma.card.findMany */ searchCards({
-          query: debouncedQuery,
-          options: {
-            // Tu peux enrichir la requête avec des opérateurs (t:creature, set:woe…)
-            // Ces options seront passées au provider Scryfall
+        // Recherche directe dans la base de données avec Prisma
+        const searchResults = await prisma.card.findMany({
+          where: {
+            OR: [
+              { name: { contains: debouncedQuery } },
+              { setCode: { contains: debouncedQuery } },
+            ],
           },
+          select: {
+            id: true,
+            externalId: true,
+            name: true,
+            gameType: true,
+            gameData: true,
+            imageSmall: true,
+            imageNormal: true,
+            setCode: true,
+            rarity: true,
+          },
+          take: 20, // Limiter les résultats
         })
 
         if (cancelled) return
 
-        setResults(searchResults)
+        // Transformer les résultats pour correspondre au format MTGCard
+        const formattedResults = searchResults.map(
+          card =>
+            ({
+              id: card.externalId,
+              externalId: card.externalId,
+              name: card.name,
+              gameType: card.gameType,
+              setCode: card.setCode,
+              rarity: card.rarity,
+              gameData: card.gameData as any,
+              image: card.imageSmall || card.imageNormal || '',
+            }) as unknown as MTGCard
+        )
+
+        setResults(formattedResults)
       } catch (e: any) {
         if (!cancelled && e.name !== 'AbortError') {
-          console.error('Recherche Scryfall:', e)
+          console.error('Recherche base de données:', e)
           setError("Impossible d'effectuer la recherche. Réessaie.")
           setResults([])
         }
@@ -133,7 +154,7 @@ export default function ManualAdd({
           type="text"
           value={query}
           onChange={e => setQuery(e.target.value)}
-          placeholder="Nom de la carte (ex: Lightning Bolt, t:creature, set:woe...)"
+          placeholder="Nom de la carte, set code ou type..."
           className={styles.searchInput}
         />
         {loading && <div className={styles.loadingSpinner}>Recherche...</div>}
@@ -151,9 +172,9 @@ export default function ManualAdd({
               <div key={card.id} className={styles.resultItem}>
                 <div className={styles.cardInfo}>
                   <div className={styles.cardImage}>
-                    {card.image?.small && (
+                    {card.image && (
                       <img
-                        src={card.image.small}
+                        src={card.image}
                         alt={card.name}
                         className={styles.cardImageSmall}
                       />
@@ -192,7 +213,7 @@ export default function ManualAdd({
                   </div>
 
                   <button
-                    onClick={() => handleAdd(card.id, getQty(card.id))}
+                    onClick={() => handleAdd(card.externalId, getQty(card.id))}
                     disabled={isPending}
                     className={styles.addButton}
                   >

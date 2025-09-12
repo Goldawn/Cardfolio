@@ -1,6 +1,7 @@
 // Types spécifiques Yu-Gi-Oh!
 // ============================
 
+import { Card } from '../base'
 import { Collection } from '../collections'
 
 export type YugiohAttribute =
@@ -76,7 +77,7 @@ export type YugiohGameData = {
   property?: string
 }
 
-export type YugiohCard = BaseCard<
+export type YugiohCard = Card<
   YugiohGameData,
   YugiohAttribute,
   YugiohCardType,

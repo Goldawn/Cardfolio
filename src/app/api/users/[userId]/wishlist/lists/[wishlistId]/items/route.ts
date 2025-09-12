@@ -1,3 +1,4 @@
+import { CardServiceFactory } from '@/card-api-service'
 import { prisma } from '@/lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -111,18 +112,49 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
       return Response.json(updatedItem)
     } else {
-      // Ajoute la carte à la wishlist
-      const createdItem = await prisma.card.create({
-        data: {
-          externalId,
-          quantity,
-          wishlist: {
-            connect: { id: wishlistId },
-          },
-        },
-      })
+      // Récupérer les informations complètes de la carte via l'API
+      const cardService = CardServiceFactory.create()
 
-      return Response.json(createdItem)
+      try {
+        const cardData = await cardService.fetchCard({ cardId: externalId })
+
+        // Ajoute la carte à la wishlist avec les vraies données
+        const createdItem = await prisma.card.create({
+          data: {
+            externalId,
+            name: cardData.name,
+            gameType: cardData.gameType || 'magic',
+            gameData: cardData.gameData || {},
+            quantity,
+            wishlist: {
+              connect: { id: wishlistId },
+            },
+          },
+        })
+
+        return Response.json(createdItem)
+      } catch (apiError) {
+        console.error(
+          'Erreur lors de la récupération des données de carte:',
+          apiError
+        )
+
+        // Fallback avec des données minimales si l'API échoue
+        const createdItem = await prisma.card.create({
+          data: {
+            externalId,
+            name: 'Unknown Card', // Fallback name
+            gameType: 'magic', // Default game type
+            gameData: {}, // Empty game data
+            quantity,
+            wishlist: {
+              connect: { id: wishlistId },
+            },
+          },
+        })
+
+        return Response.json(createdItem)
+      }
     }
   } catch (error) {
     console.error('❌ Erreur POST wishlist item:', error)

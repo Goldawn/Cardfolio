@@ -35,12 +35,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
   console.log('userID :', userId)
   console.log('externalIds :', externalIds)
 
-  // if (!externalIds.length) {
-  //   return Response.json({ error: "No externalIds provided" }, { status: 400 });
-  // }
-
   const [collection, wishlists] = await Promise.all([
-    // const [collection, wishlists, decklists] = await Promise.all([
     prisma.card.findMany({
       where: { userId: userId, externalId: { in: externalIds } } as any,
       select: { externalId: true, quantity: true },
@@ -48,21 +43,12 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     prisma.wishlistList.findMany({
       where: { userId },
       include: {
-        items: {
+        cards: {
           where: { externalId: { in: externalIds } },
           select: { externalId: true, quantity: true },
         },
       },
     }),
-    // prisma.decklist.findMany({
-    //   where: { userId },
-    //   include: {
-    //     cards: {
-    //       where: { externalId: { in: externalIds } },
-    //       select: { externalId: true, quantity: true }
-    //     }
-    //   }
-    // })
   ])
 
   const usage: CardUsageMap = {}
@@ -86,17 +72,6 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       })
     })
   })
-
-  // Decklists
-  // decklists.forEach(deck => {
-  //   deck.cards.forEach(card => {
-  //     usage[card.externalId].decklists.push({
-  //       deckId: deck.id,
-  //       name: deck.name,
-  //       quantity: card.quantity
-  //     });
-  //   });
-  // });
 
   return Response.json(usage)
 }

@@ -374,4 +374,11 @@ export class CardService {
       return []
     }
   }
+
+  /**
+   * Récupère un adapter par son nom
+   */
+  getAdapter(adapterName: string): ICardAdapter | undefined {
+    return this.adapters.get(adapterName)
+  }
 }

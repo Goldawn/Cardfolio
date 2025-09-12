@@ -65,7 +65,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
     const newCard = await prisma.card.create({
       data: {
-        cardId: card.id,
+        externalId,
         quantity,
         priceHistory: priceHistory || [],
         userId,
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     await prisma.collectionChangeLog.create({
       data: {
         userId,
-        cardId: card.id,
+        cardId: newCard.id,
         changeType: 'add',
         quantity,
         totalAfter: quantity,
@@ -110,7 +110,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const existing = await prisma.card.findFirst({
       where: {
         userId: userId,
-        cardId: card.id,
+        externalId,
       } as any,
     })
 
@@ -131,7 +131,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       await prisma.collectionChangeLog.create({
         data: {
           userId,
-          cardId: card.id,
+          cardId: existing.id,
           changeType: 'remove',
           quantity: quantityDelta,
           totalAfter: 0,
@@ -156,7 +156,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     await prisma.collectionChangeLog.create({
       data: {
         userId,
-        cardId: card.id,
+        cardId: updated.id,
         changeType: quantityDelta > 0 ? 'add' : 'remove',
         quantity: quantityDelta,
         totalAfter: newQuantity,
@@ -186,7 +186,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const existing = await prisma.card.findFirst({
       where: {
         userId: userId,
-        cardId: card.id,
+        externalId,
       } as any,
     })
 

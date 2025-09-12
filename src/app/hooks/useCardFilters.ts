@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
-import type { GameCard, FilterState, CardRarity } from '@/types'
+import type { CardRarity, FilterState, GameCard } from '@/types'
+import { useEffect, useMemo, useState } from 'react'
 
 export default function useCardFilters(cards: GameCard[] = []) {
   const [filterState, setFilterState] = useState<FilterState>({
@@ -11,7 +11,7 @@ export default function useCardFilters(cards: GameCard[] = []) {
     selectedColors: [],
     selectedTypes: [],
     selectedRarities: [],
-    selectedSets: []
+    selectedSets: [],
   })
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('')
 
@@ -25,27 +25,27 @@ export default function useCardFilters(cards: GameCard[] = []) {
   const toggleColorFilter = (color: string): void => {
     setFilterState(prev => ({
       ...prev,
-      selectedColors: prev.selectedColors.includes(color) 
-        ? prev.selectedColors.filter(c => c !== color) 
-        : [...prev.selectedColors, color]
+      selectedColors: prev.selectedColors.includes(color)
+        ? prev.selectedColors.filter(c => c !== color)
+        : [...prev.selectedColors, color],
     }))
   }
 
   const toggleTypeFilter = (type: string): void => {
     setFilterState(prev => ({
       ...prev,
-      selectedTypes: prev.selectedTypes.includes(type) 
-        ? prev.selectedTypes.filter(t => t !== type) 
-        : [...prev.selectedTypes, type]
+      selectedTypes: prev.selectedTypes.includes(type)
+        ? prev.selectedTypes.filter(t => t !== type)
+        : [...prev.selectedTypes, type],
     }))
   }
 
   const toggleRarityFilter = (rarity: CardRarity): void => {
     setFilterState(prev => ({
       ...prev,
-      selectedRarities: prev.selectedRarities.includes(rarity) 
-        ? prev.selectedRarities.filter(r => r !== rarity) 
-        : [...prev.selectedRarities, rarity]
+      selectedRarities: prev.selectedRarities.includes(rarity)
+        ? prev.selectedRarities.filter(r => r !== rarity)
+        : [...prev.selectedRarities, rarity],
     }))
   }
 
@@ -66,17 +66,23 @@ export default function useCardFilters(cards: GameCard[] = []) {
 
       const matchesColor =
         filterState.selectedColors.length === 0 ||
-        card.colors?.some(color => filterState.selectedColors.includes(color)) ||
-        (filterState.selectedColors.includes('C') && (card.colors?.length === 0)) ||
-        (filterState.selectedColors.includes('M') && (card.colors?.length ?? 0) > 1)
+        card.colors?.some(color =>
+          filterState.selectedColors.includes(color)
+        ) ||
+        (filterState.selectedColors.includes('C') &&
+          card.colors?.length === 0) ||
+        (filterState.selectedColors.includes('M') &&
+          (card.colors?.length ?? 0) > 1)
       const matchesType =
         filterState.selectedTypes.length === 0 ||
-        filterState.selectedTypes.some(type => 
+        filterState.selectedTypes.some(type =>
           'type' in card.gameData ? card.gameData.type?.includes(type) : false
         )
       const matchesRarity =
         filterState.selectedRarities.length === 0 ||
-        (card.rarity ? filterState.selectedRarities.includes(card.rarity) : false)
+        (card.rarity
+          ? filterState.selectedRarities.includes(card.rarity)
+          : false)
       return matchesSearch && matchesColor && matchesType && matchesRarity
     })
   }
@@ -94,7 +100,9 @@ export default function useCardFilters(cards: GameCard[] = []) {
           result = (a.name || '').localeCompare(b.name || '')
           break
         case 'date':
-          result = new Date(a.addedAt || '').getTime() - new Date(b.addedAt || '').getTime()
+          result =
+            new Date(a.dateAdded || '').getTime() -
+            new Date(b.dateAdded || '').getTime()
           break
         case 'set':
           result = (a.setCode || '').localeCompare(b.setCode || '')
@@ -109,7 +117,12 @@ export default function useCardFilters(cards: GameCard[] = []) {
           result = (a.colors?.[0] || '').localeCompare(b.colors?.[0] || '')
           break
         case 'rarity':
-          const order: Record<string, number> = { mythic: 4, rare: 3, uncommon: 2, common: 1 }
+          const order: Record<string, number> = {
+            mythic: 4,
+            rare: 3,
+            uncommon: 2,
+            common: 1,
+          }
           result =
             (order[a.rarity?.toLowerCase() || ''] || 0) -
             (order[b.rarity?.toLowerCase() || ''] || 0)
@@ -136,11 +149,14 @@ export default function useCardFilters(cards: GameCard[] = []) {
 
   return {
     sortOption: filterState.sortOption,
-    setSortOption: (option: string) => setFilterState(prev => ({ ...prev, sortOption: option })),
+    setSortOption: (option: string) =>
+      setFilterState(prev => ({ ...prev, sortOption: option })),
     sortOrderAsc: filterState.sortOrderAsc,
-    setSortOrderAsc: (asc: boolean) => setFilterState(prev => ({ ...prev, sortOrderAsc: asc })),
+    setSortOrderAsc: (asc: boolean) =>
+      setFilterState(prev => ({ ...prev, sortOrderAsc: asc })),
     searchQuery: filterState.searchQuery,
-    setSearchQuery: (query: string) => setFilterState(prev => ({ ...prev, searchQuery: query })),
+    setSearchQuery: (query: string) =>
+      setFilterState(prev => ({ ...prev, searchQuery: query })),
     selectedColors: filterState.selectedColors,
     toggleColorFilter,
     selectedTypes: filterState.selectedTypes,

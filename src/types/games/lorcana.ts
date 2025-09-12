@@ -1,6 +1,7 @@
 // Types spécifiques Lorcana
 // ==========================
 
+import { Card } from '../base'
 import { Collection } from '../collections'
 
 export type LorcanaColor =
@@ -30,7 +31,7 @@ export type LorcanaGameData = {
   flavor?: string
 }
 
-export type LorcanaCard = BaseCard<
+export type LorcanaCard = Card<
   LorcanaGameData,
   LorcanaColor,
   LorcanaCardType,

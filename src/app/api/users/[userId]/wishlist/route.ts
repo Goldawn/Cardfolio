@@ -21,9 +21,9 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     const allItems = await prisma.card.findMany({
       where: {
         wishlistId: { not: null },
-        wishlistList: { userId: userId },
+        wishlist: { userId: userId },
       },
-      include: { wishlistList: true },
+      include: { wishlist: true },
       orderBy: { dateAdded: 'desc' },
     })
 

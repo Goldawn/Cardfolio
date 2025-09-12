@@ -78,7 +78,7 @@ export default function Card({
     <div className={`${styles.card} ${className}`} onClick={handleRootClick}>
       <img
         className={`${cardClass}`}
-        src={card.image?.small || card.image?.normal || '/placeholder.png'} // <-- fallback
+        src={typeof card.image === 'string' ? card.image : '/placeholder.png'} // <-- fallback
         alt={cardName}
         onClick={handleOpenModal}
       />
@@ -189,11 +189,11 @@ export default function Card({
         </button>
       )}
 
-      {modal && isModalOpen && (
+      {modal && isModalOpen && isMTGCard(card) && (
         <CardModal
           card={card}
           onClose={handleCloseModal}
-          cardList={cardList}
+          cardList={cardList?.filter(isMTGCard)}
           currentIndex={currentIndex}
         />
       )}

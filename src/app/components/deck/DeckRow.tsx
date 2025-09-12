@@ -49,8 +49,7 @@ export default function DeckRow({
   if (!qty) return null
 
   const isShowcased =
-    String(deckState?.showcasedCardId ?? '') ===
-    String(card?.deckCardId ?? '')
+    String(deckState?.showcasedCardId ?? '') === String(card?.deckCardId ?? '')
   const rowProblem = showLegality && problems.length > 0
 
   // Rareté -> classes CSS
@@ -78,7 +77,7 @@ export default function DeckRow({
   const onInc = () => updateDeckCardQty(card.deckCardId, qty + 1)
   const onDelete = () => removeCardFromDeck(card.deckCardId)
   const onToggleShowcase = () =>
-    setShowcased(card.deckCardId, card?.image?.artCrop || '')
+    setShowcased(card.deckCardId, getArtLarge(card) || '')
 
   // Champs partagés
   const name = card.name || ''

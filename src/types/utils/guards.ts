@@ -1,7 +1,7 @@
 // Type guard functions
 // ====================
 
-import { GameType } from '../base'
+import { Card, GameType } from '../base'
 import { FleshAndBloodCard } from '../games/flesh-and-blood'
 import { LorcanaCard } from '../games/lorcana'
 import { MTGCard } from '../games/magic'
@@ -19,7 +19,7 @@ export type GameCard =
 export function isGameCard<T extends GameType>(
   card: any,
   gameType: T
-): card is BaseCard<any, any, any, any> & { gameType: T } {
+): card is Card<any, any, any, any> & { gameType: T } {
   return card?.gameType === gameType
 }
 

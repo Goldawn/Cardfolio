@@ -1,15 +1,10 @@
-/**
- * ⚠️  FICHIER PARTIELLEMENT REFACTORISÉ
- * Ce fichier contient encore du code mort qui doit être migré vers Prisma
- * TODO: Remplacer tous les appels API par des requêtes Prisma directes
- */
-
 'use client'
 
-// CardApiManager supprimé - utiliser Prisma directement'
 import { useCurrencyContext } from '@/context/'
-import type { AppCollectionItem, CollectionActions, GameCard } from '@/types'
+import { prisma } from '@/lib/prisma'
+import type { AppCollectionItem, CollectionActions } from '@/types'
 import type { MTGCard } from '@/types/games/magic'
+import { isMTGCard } from '@/types/utils/guards'
 import Link from 'next/link'
 import type { JSX } from 'react'
 import { useEffect, useMemo, useState, useTransition } from 'react'
@@ -18,13 +13,7 @@ import CollectionActionBar from '../../components/CollectionActionBar'
 import Loader from '../../components/Loader'
 import SetBar from '../../components/SetBar' // ✅ intégré
 import useCardFilters from '../../hooks/useCardFilters'
-// Service Scryfall supprimé - utiliser Prisma directement'
-import {
-  fetchMoreCards,
-  fetchSetCards,
-  fetchSets,
-} from '../../services/Scryfall'
-// Service pricing supprimé - utiliser Prisma directement'
+// Services supprimés - utiliser Prisma directement
 import styles from './page.module.css'
 
 interface CollectionClientProps {
@@ -37,7 +26,6 @@ export default function CollectionClient({
   actions,
 }: CollectionClientProps): JSX.Element {
   const { currency } = useCurrencyContext()
-  const cardService = /* TODO: Remplacer par Prisma */ cardApiManager.getCardService()
 
   // collection brute (externalId, qty, priceHistory, dbId)
   const [collection, setCollection] = useState<AppCollectionItem[]>(
@@ -50,10 +38,10 @@ export default function CollectionClient({
   )
 
   // cartes enrichies avec Scryfall + formatCard (pour l'affichage sans set sélectionné)
-  const [enrichedCollection, setEnrichedCollection] = useState<GameCard[]>([])
+  const [enrichedCollection, setEnrichedCollection] = useState<MTGCard[]>([])
 
   // sets & navigation par extension
-  const [sets, setSets] = useState<GameSet[]>([])
+  const [sets, setSets] = useState<any[]>([])
   const [selectedSet, setSelectedSet] = useState<string | undefined>()
   const [selectedSetCards, setSelectedSetCards] = useState<MTGCard[]>([])
   const [nextPage, setNextPage] = useState<string | undefined>()
@@ -62,7 +50,10 @@ export default function CollectionClient({
 
   // charge la liste des sets
   useEffect(() => {
-    const loadSets = async () => setSets(await /* TODO: Remplacer par prisma.card.findMany avec distinct */ fetchSets())
+    const loadSets = async () => {
+      // TODO: Remplacer par une requête Prisma pour récupérer les sets
+      setSets([])
+    }
     loadSets()
   }, [])
 
@@ -74,37 +65,76 @@ export default function CollectionClient({
         return
       }
       try {
-        const cards = await Promise.all(
-          collection.map(async it => {
-            const formatted = await cardService./* TODO: Remplacer par prisma.card.findFirst */ fetchCard({
-              cardId: it.externalId,
-            })
+        // Récupération des cartes depuis la base de données
+        const cardIds = collection.map(it => it.externalId)
+        const cards = await prisma.card.findMany({
+          where: {
+            externalId: { in: cardIds },
+          },
+          select: {
+            id: true,
+            externalId: true,
+            name: true,
+            gameType: true,
+            gameData: true,
+            imageSmall: true,
+            imageNormal: true,
+            imageLarge: true,
+            setCode: true,
+            setName: true,
+            rarity: true,
+            artist: true,
+            collectorNumber: true,
+          },
+        })
+
+        // Association des cartes avec les données de collection
+        const enrichedCards = collection
+          .map(it => {
+            const card = cards.find(c => c.externalId === it.externalId)
+            if (!card) return null
+
             return {
-              ...formatted,
+              id: card.externalId,
+              externalId: card.externalId,
+              name: card.name,
+              gameType: card.gameType,
+              setCode: card.setCode,
+              setName: card.setName,
+              rarity: card.rarity,
+              artist: card.artist,
+              collectorNumber: card.collectorNumber,
+              gameData: card.gameData as any,
+              image:
+                card.imageLarge || card.imageNormal || card.imageSmall || '',
+              imageSmall: card.imageSmall,
+              imageNormal: card.imageNormal,
+              imageLarge: card.imageLarge,
               quantity: it.quantity,
               priceHistory: it.priceHistory || [],
               dbId: it.dbId,
-            }
+            } as unknown as MTGCard
           })
-        )
-        setEnrichedCollection(cards)
+          .filter(Boolean) as MTGCard[]
+
+        setEnrichedCollection(enrichedCards)
       } catch (e) {
-        console.error('Erreur enrichissement Scryfall:', e)
+        console.error('Erreur enrichissement collection:', e)
         setEnrichedCollection([])
       }
     }
     loadEnriched()
   }, [collection])
 
-  // charge les cartes d’un set
+  // charge les cartes d'un set
   useEffect(() => {
     if (!selectedSet) return
     const loadCards = async () => {
       setLoading(true)
       try {
-        const data = await fetchSetCards(selectedSet, 'en')
-        setSelectedSetCards(data.data)
-        setNextPage(data.has_more ? data.next_page : undefined)
+        // TODO: Remplacer par une requête Prisma pour récupérer les cartes du set
+        setSelectedSetCards([])
+        setNextPage(undefined)
       } finally {
         setLoading(false)
       }
@@ -118,9 +148,9 @@ export default function CollectionClient({
     const loadMoreCards = async () => {
       setLoading(true)
       try {
-        const data = await fetchMoreCards(nextPage)
-        setSelectedSetCards(prev => [...prev, ...data.data])
-        setNextPage(data.has_more ? data.next_page : undefined)
+        // TODO: Remplacer par une requête Prisma pour la pagination
+        setSelectedSetCards(prev => [...prev])
+        setNextPage(undefined)
       } finally {
         setLoading(false)
       }
@@ -255,13 +285,13 @@ export default function CollectionClient({
   // ---------- Actions côté client (Server Actions derrière) ----------
   const [isPending, startTransition] = useTransition()
 
-  const handleAddToCollection = (card: GameCard): void => {
+  const handleAddToCollection = (card: MTGCard): void => {
     const externalId = card.id
     startTransition(async () => {
       try {
-        const { usd, eur } = await fetchCardPrice(card.name)
-        const lastPrice = eur || usd || 0
-        const currencyKey = eur ? 'eur' : 'usd'
+        // TODO: Remplacer par une récupération de prix depuis la base de données
+        const lastPrice = 0
+        const currencyKey = 'usd'
         const newPriceEntry = {
           date: new Date().toISOString().split('T')[0],
           [currencyKey]: lastPrice,
@@ -416,23 +446,25 @@ export default function CollectionClient({
         {loading && <Loader />}
 
         <div className={styles.cardContainer}>
-          {sortedAndFilteredCards.map((card: GameCard, index: number) => (
-            <Card
-              key={card.id}
-              card={card}
-              cardList={sortedAndFilteredCards}
-              currentIndex={index}
-              showName
-              showQuantity
-              showPrice
-              showAddToCollectionButton
-              showDeleteButton
-              onAddToCollection={() => handleAddToCollection(card)}
-              updateQuantity={handleUpdateQuantity}
-              onRemove={handleRemove}
-              compareWithCollection={Boolean(selectedSet)}
-            />
-          ))}
+          {sortedAndFilteredCards
+            .filter(isMTGCard)
+            .map((card: MTGCard, index: number) => (
+              <Card
+                key={card.id}
+                card={card}
+                cardList={sortedAndFilteredCards.filter(isMTGCard)}
+                currentIndex={index}
+                showName
+                showQuantity
+                showPrice
+                showAddToCollectionButton
+                showDeleteButton
+                onAddToCollection={() => handleAddToCollection(card)}
+                updateQuantity={handleUpdateQuantity}
+                onRemove={handleRemove}
+                compareWithCollection={Boolean(selectedSet)}
+              />
+            ))}
         </div>
       </div>
     </div>

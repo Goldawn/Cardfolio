@@ -29,7 +29,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     const lists = await prisma.wishlistList.findMany({
       where: { userId },
       include: {
-        items: {
+        cards: {
           select: {
             quantity: true,
           },
@@ -115,9 +115,12 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         data: {
           name, // 👈 ici aussi
           user: { connect: { id: userId } },
-          items: {
+          cards: {
             create: original.cards.map(item => ({
               externalId: item.externalId,
+              name: item.name,
+              gameType: item.gameType,
+              gameData: item.gameData as any,
               quantity: item.quantity,
             })),
           },

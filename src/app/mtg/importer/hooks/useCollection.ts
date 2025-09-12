@@ -1,6 +1,6 @@
-import { useState, useTransition } from 'react'
-import { fetchCardPrice } from '../../../services/pricing'
+import { PricingService } from '@/card-api-service'
 import type { AppCollectionItem, CollectionActions } from '@/types'
+import { useState, useTransition } from 'react'
 
 export function useCollection(
   initialCollection: AppCollectionItem[],
@@ -15,11 +15,13 @@ export function useCollection(
     }))
   )
 
-  const [recentlyAdded, setRecentlyAdded] = useState<Array<{ 
-    id: string
-    card: any
-    count: number 
-  }>>([])
+  const [recentlyAdded, setRecentlyAdded] = useState<
+    Array<{
+      id: string
+      card: any
+      count: number
+    }>
+  >([])
 
   const [isPending, startTransition] = useTransition()
 
@@ -56,7 +58,8 @@ export function useCollection(
 
     startTransition(async () => {
       try {
-        const { usd, eur } = await fetchCardPrice(card.name)
+        const pricingService = new PricingService()
+        const { usd, eur } = await pricingService.fetchSimplePrice(card.name)
 
         const _lastPrice = eur || usd || 0
         const newPriceEntry = {
@@ -160,7 +163,10 @@ export function useCollection(
   }
 
   // Gérer le clic sur une carte récemment ajoutée
-  const handleRecentCardClick = (cardId: string, formattedCards: any[]): void => {
+  const handleRecentCardClick = (
+    cardId: string,
+    formattedCards: any[]
+  ): void => {
     const cardObj = formattedCards.find(c => c.id === cardId) || { id: cardId }
     startTransition(async () => {
       try {
@@ -193,6 +199,6 @@ export function useCollection(
     addToCollection,
     updateQuantity,
     removeFromCollection,
-    handleRecentCardClick
+    handleRecentCardClick,
   }
 }

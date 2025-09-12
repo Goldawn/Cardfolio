@@ -40,12 +40,13 @@ export class ScryfallAdapter implements ICardAdapter {
     // Base commune pour toutes les cartes
     const baseCard: Omit<MTGCard, 'name' | 'gameData' | 'image' | 'layout'> = {
       id: rawData.id || '',
+      externalId: rawData.id || '',
       gameType: 'magic' as const,
-      setCode: rawData.set || undefined,
-      setName: rawData.set_name || undefined,
+      setCode: rawData.set || '',
+      setName: rawData.set_name || '',
       lang: rawData.lang || 'en',
       quantity: 1,
-      addedAt: new Date().toISOString().split('T')[0],
+      dateAdded: new Date(),
       priceHistory: [
         {
           date: new Date().toISOString().split('T')[0],
@@ -54,8 +55,8 @@ export class ScryfallAdapter implements ICardAdapter {
         },
       ],
       rarity: (rawData.rarity as CardRarity) || undefined,
-      collectorNumber: rawData.collector_number || undefined,
-      artist: rawData.artist || undefined,
+      collectorNumber: rawData.collector_number || '',
+      artist: rawData.artist || '',
       legalities: rawData.legalities || {},
       colors: checkColorlessIdentity(rawData),
     }
@@ -95,11 +96,12 @@ export class ScryfallAdapter implements ICardAdapter {
       const frontFace = rawData.card_faces?.[0]
       const backFace = rawData.card_faces?.[1]
 
+      const frontImage = extractImage(frontFace || rawData)
       return {
         ...baseCard,
         name: rawData.name,
         gameData,
-        image: extractImage(frontFace || rawData),
+        image: frontImage.normal || frontImage.small || '',
         layout: layoutType,
         // Ajout des données de la face arrière
         reversibleImage: backFace ? extractImage(backFace) : undefined,
@@ -107,11 +109,12 @@ export class ScryfallAdapter implements ICardAdapter {
     }
 
     // Carte normale
+    const cardImage = extractImage(rawData)
     return {
       ...baseCard,
       name: rawData.name,
       gameData,
-      image: extractImage(rawData),
+      image: cardImage.normal || cardImage.small || '',
     }
   }
 

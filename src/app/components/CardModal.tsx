@@ -1,7 +1,7 @@
 'use client'
 
 import { useCurrencyContext } from '@/context/'
-import type { GameCard } from '@/types'
+import type { MTGCard, PriceHistory } from '@/types'
 import type { JSX } from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import {
@@ -18,10 +18,14 @@ import { formatAndParseText } from '../../lib/mtgCards'
 import useModalKeyboardNavigation from '../hooks/useModalKeyboardNavigation'
 import styles from './CardModal.module.css'
 
+// Helper pour obtenir l'URL d'image d'une carte
+const getCardImageUrl = (card: MTGCard): string =>
+  card.imageLarge || card.imageNormal || card.imageSmall || ''
+
 interface CardModalProps {
-  card: GameCard
+  card: MTGCard
   onClose: () => void
-  cardList?: GameCard[] | undefined
+  cardList?: MTGCard[] | undefined
   currentIndex?: number | undefined
 }
 
@@ -81,66 +85,71 @@ export default function CardModal({
     if (!currentCard.priceHistory || currentCard.priceHistory.length === 0)
       return []
 
-    // console.log(currentCard.priceHistory)
     return currentCard.priceHistory
-      .map(entry => ({
+      .map((entry: PriceHistory) => ({
         date: entry.date,
-        eur: parseFloat(entry.eur.toString()),
-        usd: parseFloat(entry.usd.toString()),
+        eur: entry.eur,
+        usd: entry.usd,
       }))
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
   }, [currentCard])
 
-  const getCurrentImage = () => {
+  const getCurrentImage = (): string => {
     if ((currentCard as any).layout === 'reversible_card') {
       return flipped
         ? (currentCard as any).reversibleImage?.large ||
-            currentCard.image?.large
-        : currentCard.image?.large
+            getCardImageUrl(currentCard)
+        : getCardImageUrl(currentCard)
     }
-    return currentCard.image?.large
+    return getCardImageUrl(currentCard)
   }
 
-  const renderCardFace = (cardData: any) => (
-    <>
-      <h2>{cardData.name}</h2>
-      {cardData.manaCost && (
+  const renderCardFace = (cardData: MTGCard) => {
+    const { gameData, colors } = cardData
+
+    return (
+      <>
+        <h2>{cardData.name}</h2>
+        {gameData?.manaCost && (
+          <p>
+            <strong>Coût de mana :</strong>{' '}
+            {formatAndParseText(gameData.manaCost)}
+          </p>
+        )}
         <p>
-          <strong>Coût de mana :</strong>{' '}
-          {formatAndParseText(cardData.manaCost)}
+          <strong>Type :</strong>{' '}
+          {gameData?.typeLine || gameData?.type || 'N/A'}
         </p>
-      )}
-      <p>
-        <strong>Type :</strong> {cardData.type}
-      </p>
-      {cardData.power && cardData.toughness && (
-        <p>
-          <strong>Statistiques :</strong> {cardData.power}/{cardData.toughness}
-        </p>
-      )}
-      {cardData.loyalty && (
-        <p>
-          <strong>Points de loyauté :</strong> {cardData.loyalty}
-        </p>
-      )}
-      {cardData.oracleText && (
-        <p>
-          <strong>Description :</strong>{' '}
-          {formatAndParseText(cardData.oracleText)}
-        </p>
-      )}
-      {cardData.flavorText && (
-        <p>
-          <em>{formatAndParseText(cardData.flavorText)}</em>
-        </p>
-      )}
-      {cardData.colors?.length > 0 && (
-        <p>
-          <strong>Couleurs :</strong> {cardData.colors.join(', ')}
-        </p>
-      )}
-    </>
-  )
+        {gameData?.power && gameData?.toughness && (
+          <p>
+            <strong>Statistiques :</strong> {gameData.power}/
+            {gameData.toughness}
+          </p>
+        )}
+        {(gameData as any)?.loyalty && (
+          <p>
+            <strong>Points de loyauté :</strong> {(gameData as any).loyalty}
+          </p>
+        )}
+        {gameData?.oracleText && (
+          <p>
+            <strong>Description :</strong>{' '}
+            {formatAndParseText(gameData.oracleText)}
+          </p>
+        )}
+        {gameData?.flavorText && (
+          <p>
+            <em>{formatAndParseText(gameData.flavorText)}</em>
+          </p>
+        )}
+        {colors && colors.length > 0 && (
+          <p>
+            <strong>Couleurs :</strong> {colors.join(', ')}
+          </p>
+        )}
+      </>
+    )
+  }
 
   return (
     <div
@@ -188,7 +197,7 @@ export default function CardModal({
                   <div
                     className={styles.cardFace}
                     style={{
-                      backgroundImage: `url(${currentCard.image?.large})`,
+                      backgroundImage: `url(${getCardImageUrl(currentCard)})`,
                     }}
                   >
                     <button
@@ -201,7 +210,7 @@ export default function CardModal({
                   <div
                     className={styles.cardFace}
                     style={{
-                      backgroundImage: `url(${(currentCard as any).reversibleImage?.large || (currentCard as any).cardBack?.image?.large})`,
+                      backgroundImage: `url(${(currentCard as any).reversibleImage?.large || (currentCard as any).cardBack?.imageLarge || (currentCard as any).cardBack?.imageNormal})`,
                     }}
                   >
                     <button
@@ -237,15 +246,15 @@ export default function CardModal({
             {renderCardFace(displayedCard)}
 
             <p>
-              <strong>Rareté :</strong> {currentCard.rarity}
+              <strong>Rareté :</strong> {currentCard.rarity || 'N/A'}
             </p>
             <p>
-              <strong>Set:</strong> {currentCard.setName} ({currentCard.setCode}
-              )
+              <strong>Set:</strong> {currentCard.setName || 'N/A'} (
+              {currentCard.setCode || 'N/A'})
             </p>
             <p>
               <strong>Numéro de collection :</strong>{' '}
-              {currentCard.collectorNumber}
+              {currentCard.collectorNumber || 'N/A'}
             </p>
 
             {isDualFaceLayout && (currentCard as any).cardBack && (
@@ -267,15 +276,16 @@ export default function CardModal({
                 ))}
             </ul>
             <p>
-              <strong>Illustrateur :</strong> {currentCard.artist}
+              <strong>Illustrateur :</strong> {currentCard.artist || 'N/A'}
             </p>
           </div>
 
           <div className={styles.tradingPanel}>
             {currentCard.priceHistory &&
-              currentCard.priceHistory.map(price => (
+              currentCard.priceHistory.map((price: PriceHistory) => (
                 <p key={price.date}>
-                  <strong>{price.date} :</strong> {(price as any)[currency]}{' '}
+                  <strong>{price.date} :</strong>{' '}
+                  {currency === 'eur' ? price.eur : price.usd}{' '}
                   {currency === 'eur' ? '€' : '$'}
                 </p>
               ))}

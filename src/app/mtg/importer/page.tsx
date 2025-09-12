@@ -84,7 +84,7 @@ export default async function MTGImportPage(): Promise<JSX.Element> {
       saved = await prisma.card.create({
         data: {
           collectionId,
-          cardId: card.id,
+          externalId,
           quantity: 1,
           priceHistory: mergedHistory,
         },
@@ -101,7 +101,7 @@ export default async function MTGImportPage(): Promise<JSX.Element> {
     await prisma.collectionChangeLog.create({
       data: {
         userId,
-        cardId: card.id,
+        cardId: saved.id,
         changeType: existing ? 'add' : 'create',
         quantity: +1,
         totalAfter: saved.quantity,
@@ -132,7 +132,7 @@ export default async function MTGImportPage(): Promise<JSX.Element> {
       await prisma.collectionChangeLog.create({
         data: {
           userId,
-          cardId: card.id,
+          cardId: existing.id,
           changeType: 'remove',
           quantity: -1,
           totalAfter: 0,
@@ -151,7 +151,7 @@ export default async function MTGImportPage(): Promise<JSX.Element> {
     await prisma.collectionChangeLog.create({
       data: {
         userId,
-        cardId: card.id,
+        cardId: updated.id,
         changeType: 'remove',
         quantity: -1,
         totalAfter: updated.quantity,
@@ -186,7 +186,7 @@ export default async function MTGImportPage(): Promise<JSX.Element> {
         const created = await prisma.card.create({
           data: {
             collectionId: collectionsFromDb[0]?.id,
-            cardId: card.id,
+            externalId,
             quantity: delta,
             priceHistory: [],
           },
@@ -195,7 +195,7 @@ export default async function MTGImportPage(): Promise<JSX.Element> {
         await prisma.collectionChangeLog.create({
           data: {
             userId,
-            cardId: card.id,
+            cardId: created.id,
             changeType: 'add',
             quantity: delta,
             totalAfter: created.quantity,
@@ -213,7 +213,7 @@ export default async function MTGImportPage(): Promise<JSX.Element> {
       await prisma.collectionChangeLog.create({
         data: {
           userId,
-          cardId: card.id,
+          cardId: existing.id,
           changeType: 'remove_all',
           quantity: -existing.quantity,
           totalAfter: 0,
@@ -231,7 +231,7 @@ export default async function MTGImportPage(): Promise<JSX.Element> {
     await prisma.collectionChangeLog.create({
       data: {
         userId,
-        cardId: card.id,
+        cardId: updated.id,
         changeType: delta > 0 ? 'add' : 'remove',
         quantity: delta,
         totalAfter: updated.quantity,
@@ -335,7 +335,7 @@ export default async function MTGImportPage(): Promise<JSX.Element> {
     await prisma.collectionChangeLog.create({
       data: {
         userId,
-        cardId: card.id,
+        cardId: existing.id,
         changeType: 'remove_all',
         quantity: -existing.quantity,
         totalAfter: 0,

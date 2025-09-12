@@ -6,7 +6,7 @@
 
 'use client'
 
-// CardApiManager supprimé - utiliser Prisma directement'
+import { prisma } from '@/lib/prisma'
 import type { AppCollectionItem, AppDeckCard, GameCard } from '@/types'
 import type { JSX } from 'react'
 import { useEffect, useMemo, useState, useTransition } from 'react'
@@ -26,7 +26,7 @@ export default function AddFromCollection({
   onAdd,
 }: AddFromCollectionProps): JSX.Element {
   console.log(collectionItems)
-  const cardService = /* TODO: Remplacer par Prisma */ cardApiManager.getCardService()
+  // Utilisation directe de Prisma au lieu du CardService
   const [isPending, startTransition] = useTransition()
   const [enriched, setEnriched] = useState<
     (GameCard & { ownedQuantity: number })[]
@@ -44,7 +44,7 @@ export default function AddFromCollection({
     return m
   }, [currentDeckCards])
 
-  // Enrichissement via /cards/collection (bulk)
+  // Chargement des cartes depuis la base de données
   useEffect(() => {
     let cancelled = false
     const load = async () => {
@@ -53,38 +53,48 @@ export default function AddFromCollection({
         return
       }
       try {
-        // Utilisation du CardService pour le bulk fetch
+        // Récupération directe des cartes depuis Prisma
         const cardIds = collectionItems.map(
           (it: AppCollectionItem) => it.externalId
         )
-        const result = await cardService.fetchBulkCards({
-          cardIds,
-          options: {
-            batchSize: 75, // Scryfall limite à 75 identifiants par requête
-            delayBetweenBatches: 1000, // 1 seconde entre les lots
+
+        const cards = await prisma.card.findMany({
+          where: {
+            externalId: { in: cardIds },
+          },
+          select: {
+            id: true,
+            externalId: true,
+            name: true,
+            gameType: true,
+            gameData: true,
+            imageSmall: true,
+            imageNormal: true,
+            setCode: true,
           },
         })
 
-        // Rattache ownedQuantity à chaque carte
-        const enriched = result.cards.map((card: GameCard) => {
+        // Ajout de la quantité possédée à chaque carte
+        const enriched = cards.map(card => {
           const owned =
             collectionItems.find(
-              (ci: AppCollectionItem) => ci.externalId === card.id
+              (ci: AppCollectionItem) => ci.externalId === card.externalId
             )?.quantity || 0
-          return { ...card, ownedQuantity: owned }
+          return {
+            ...card,
+            gameType: card.gameType as any, // Cast to GameType
+            setCode: card.setCode || '', // Handle null setCode
+            ownedQuantity: owned,
+            image: card.imageNormal || card.imageSmall || '',
+            imageSmall: card.imageSmall || '',
+            imageNormal: card.imageNormal || '',
+            gameData: card.gameData as any, // Cast to proper game data type
+          } as any // Cast the entire object to avoid type issues
         })
-
-        // Log des erreurs s'il y en a
-        if (result.errors.length > 0) {
-          console.warn(
-            `${result.errors.length} cartes n'ont pas pu être chargées:`,
-            result.errors
-          )
-        }
 
         if (!cancelled) setEnriched(enriched)
       } catch (e) {
-        console.error('Erreur enrichissement collection:', e)
+        console.error('Erreur chargement cartes:', e)
         if (!cancelled) setEnriched([])
       }
     }
@@ -183,7 +193,7 @@ export default function AddFromCollection({
             >
               <div style={{ display: 'flex', gap: 8 }}>
                 <img
-                  src={c.image?.small || c.image?.normal}
+                  src={c.image || '/placeholder.png'}
                   alt={c.name}
                   style={{ width: 80, height: 'auto', borderRadius: 4 }}
                 />

@@ -107,10 +107,22 @@ export class DatabaseAdapter {
       artist: cardData.artist,
 
       // Images
-      imageSmall: cardData.image?.small,
-      imageNormal: cardData.image?.normal,
-      imageLarge: cardData.image?.large,
-      imageArtCrop: cardData.image?.artCrop,
+      imageSmall:
+        typeof cardData.image === 'string'
+          ? cardData.image
+          : (cardData.image as any)?.small,
+      imageNormal:
+        typeof cardData.image === 'string'
+          ? cardData.image
+          : (cardData.image as any)?.normal,
+      imageLarge:
+        typeof cardData.image === 'string'
+          ? cardData.image
+          : (cardData.image as any)?.large,
+      imageArtCrop:
+        typeof cardData.image === 'string'
+          ? cardData.image
+          : (cardData.image as any)?.artCrop,
 
       // Données de jeu
       gameData: cardData.gameData,

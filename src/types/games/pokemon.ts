@@ -1,6 +1,7 @@
 // Types spécifiques Pokemon
 // ==========================
 
+import { Card } from '../base'
 import { Collection } from '../collections'
 
 export type PokemonType =
@@ -65,7 +66,7 @@ export type PokemonAbility = {
   type: 'Pokémon Power' | 'Poké-Body' | 'Poké-Power' | 'Ability'
 }
 
-export type PokemonCard = BaseCard<
+export type PokemonCard = Card<
   PokemonGameData,
   PokemonType,
   PokemonCardType,

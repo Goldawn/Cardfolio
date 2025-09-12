@@ -1,6 +1,7 @@
 // Types spécifiques Flesh and Blood
 // ==================================
 
+import { Card } from '../base'
 import { Collection } from '../collections'
 
 export type FleshAndBloodClass =
@@ -64,7 +65,7 @@ export type FleshAndBloodGameData = {
   livingLegend?: boolean
 }
 
-export type FleshAndBloodCard = BaseCard<
+export type FleshAndBloodCard = Card<
   FleshAndBloodGameData,
   FleshAndBloodClass,
   FleshAndBloodCardType,

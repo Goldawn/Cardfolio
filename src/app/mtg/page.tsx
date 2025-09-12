@@ -379,7 +379,7 @@ export default function Collection(): JSX.Element {
             {selectedSetCards.map(card => (
               <div key={card.id} className="set-card-item">
                 <img
-                  src={card.image?.small}
+                  src={card.image || '/placeholder.png'}
                   alt={card.name}
                   className="set-card-image"
                 />
@@ -402,7 +402,7 @@ export default function Collection(): JSX.Element {
           {sortedAndFilteredCards.map((card: GameCard) => (
             <div key={card.id} className="collection-card-item">
               <img
-                src={card.image?.small}
+                src={card.image || '/placeholder.png'}
                 alt={card.name}
                 className="card-image"
               />
