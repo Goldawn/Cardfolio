@@ -1,11 +1,4 @@
-:root {
-  --rarity-common: #9aa0a6; /* gris */
-  --rarity-uncommon: #62a0ea; /* bleu */
-  --rarity-rare: #fbc02d; /* or */
-  --rarity-mythic: #f57c00; /* orange */
-  --rarity-special: #e91e63; /* rose/violet */
-  --rarity-other: rgba(255, 255, 255, 0.14); /* discret */
-}
+/* CSS custom properties moved to global styles */
 
 /* ============ Shell / Toolbar ============ */
 .wrapper {
@@ -136,9 +129,7 @@
 }
 
 /* ============ Alerte Légalité (commun) ============ */
-:root {
-  --legality-color: 230 80 34;
-}
+/* CSS custom properties moved to global styles */
 
 .rowProblem {
   border-left: 3px solid rgb(var(--legality-color));
@@ -735,13 +726,7 @@
 }
 
 /* === Largeurs de colonnes unifiées (List + Compact) === */
-:root {
-  --col-thumb: 60px; /* vignette */
-  --col-qty: 30px; /* qté */
-  --col-cmc: 60px; /* mana cost (icônes) */
-  --col-actions: 40px; /* étoiles / boutons */
-  --col-rarity: 3px; /* barre rareté */
-}
+/* CSS custom properties moved to global styles */
 
 /* même algo de sizing partout */
 .listTable,

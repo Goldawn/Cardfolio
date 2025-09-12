@@ -1,6 +1,4 @@
-:root {
-  --main-color: #12384e;
-}
+/* CSS custom properties moved to global styles */
 
 .singleDeck {
   width: 120px;
