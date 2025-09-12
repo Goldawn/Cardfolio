@@ -7,6 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "lint:all": "eslint src/**/*.{ts,tsx} --ext .ts,.tsx",
+    "type-check": "tsc --noEmit",
+    "check-all": "npm run type-check && npm run lint:all",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
