@@ -1,9 +1,8 @@
-// Types spécifiques Magic: The Gathering
-// ======================================
+// Types spécifiques Magic: The Gathering mis à jour
+// ================================================
 
-import { BaseCard, CardImages } from '../base'
-import { Collection } from '../collections'
-import { Decklist } from '../decks'
+import { Card } from '../base-updated'
+import { Collection, Decklist, WishlistList } from '../collections-updated'
 
 export type MTGColor = 'W' | 'U' | 'B' | 'R' | 'G' | 'C' | 'M'
 export type MTGCardType =
@@ -55,17 +54,71 @@ export type MTGCardFace = {
   oracle_text?: string | undefined
   power?: string | undefined
   toughness?: string | undefined
-  image_uris?: CardImages | undefined
+  image_uris?:
+    | {
+        small?: string
+        normal?: string
+        large?: string
+        art_crop?: string
+      }
+    | undefined
 }
 
-export type MTGCard = BaseCard<
-  MTGGameData,
-  MTGColor,
-  MTGCardType,
-  MTGFormat
-> & {
+// Carte Magic alignée avec le modèle Prisma
+export type MTGCard = Card<MTGGameData, MTGColor, MTGCardType, MTGFormat> & {
   gameType: 'magic'
 }
 
+// Collections et decks Magic
 export type MTGCollection = Collection<'magic'>
+export type MTGWishlist = WishlistList<'magic'>
 export type MTGDecklist = Decklist<'magic', MTGColor, MTGFormat>
+
+// Types spécifiques pour les opérations Magic
+export type MTGCollectionOperation = {
+  type: 'add' | 'remove' | 'update'
+  externalId: string // ✅ externalId au lieu de scryfallId
+  quantity?: number
+  priceEntry?: any
+}
+
+export type MTGDeckOperation = {
+  type: 'add' | 'remove' | 'update' | 'allocate'
+  externalId: string // ✅ externalId au lieu de scryfallId
+  quantity?: number
+  allocated?: number
+}
+
+// Types pour la validation Magic
+export type MTGDeckValidation = {
+  isValid: boolean
+  errors: string[]
+  warnings: string[]
+  formatCompliance: boolean
+  cardCount: number
+  colorIdentity: MTGColor[]
+  commander?: {
+    name: string
+    externalId: string // ✅ externalId
+    colors: MTGColor[]
+  }
+}
+
+// Types pour les statistiques Magic
+export type MTGCollectionStats = {
+  totalCards: number
+  totalValue: number
+  cardsByRarity: Record<string, number>
+  cardsByType: Record<MTGCardType, number>
+  cardsByColor: Record<MTGColor, number>
+  cardsBySet: Record<string, number>
+}
+
+export type MTGDeckStats = {
+  totalCards: number
+  cardsByType: Record<MTGCardType, number>
+  cardsByColor: Record<MTGColor, number>
+  averageManaCost: number
+  colorIdentity: MTGColor[]
+  curve: Record<number, number> // CMC -> nombre de cartes
+}

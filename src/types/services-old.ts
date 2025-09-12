@@ -1,12 +1,9 @@
-// Types pour les services mis à jour pour la cohérence avec la BDD
-// =================================================================
+// Types pour les services
+// =======================
 
-import { Card } from './base-updated'
-
-// Types pour les cartes enrichies (mis à jour)
+// Types pour les cartes enrichies
 export type EnrichedCard = {
   id: string
-  externalId: string // ✅ externalId au lieu de scryfallId
   name: string
   type?: string
   legalities?: Record<string, string>
@@ -15,17 +12,18 @@ export type EnrichedCard = {
   cmc?: number
   colors?: string[]
   imageUri?: string
+  scryfallId?: string
 }
 
-// Types pour les problèmes de légalité (mis à jour)
+// Types pour les problèmes de légalité
 export type LegalityIssue = {
-  externalId: string // ✅ externalId au lieu de scryfallId
+  scryfallId: string
   name: string
   qty: number
   problems: string[]
 }
 
-// Types pour les résultats de légalité de deck (mis à jour)
+// Types pour les résultats de légalité de deck
 export type DeckLegalityResult = {
   format: string
   total: number
@@ -35,19 +33,19 @@ export type DeckLegalityResult = {
   issues: LegalityIssue[]
   commander?: {
     name: string
-    externalId: string // ✅ externalId au lieu de scryfallId
+    scryfallId: string
     colors: string[]
   }
   colorIdentity?: string[]
   warnings?: string[]
 }
 
-// Types pour les options de vérification de rareté (mis à jour)
+// Types pour les options de vérification de rareté
 export type RarityCheckOptions = {
   format: string
   enriched: EnrichedCard[]
-  deckCards: Array<{ externalId: string; quantity: number }> // ✅ externalId
-  commanderExternalId?: string | null // ✅ externalId
+  deckCards: Array<{ scryfallId: string; quantity: number }>
+  commanderScryfallId?: string | null
 }
 
 // Types pour les services de formatage
@@ -113,27 +111,4 @@ export type TransformOptions = {
   includeMetadata?: boolean
   preserveOriginal?: boolean
   customFields?: Record<string, any>
-}
-
-// Types pour les services d'import de cartes
-export type CardImportResult = {
-  success: boolean
-  card?: Card
-  error?: string
-}
-
-export type BulkImportResult = {
-  success: number
-  errors: Array<{
-    externalId: string
-    error: string
-  }>
-}
-
-// Types pour les services de synchronisation
-export type SyncResult = {
-  imported: number
-  updated: number
-  errors: number
-  missingCards: string[] // externalIds manquants
 }

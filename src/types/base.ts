@@ -1,5 +1,5 @@
-// Types de base pour tous les jeux de cartes
-// ================================================
+// Types de base mis à jour pour la cohérence avec la BDD
+// ======================================================
 
 // Types de base
 export type GameType =
@@ -21,35 +21,64 @@ export type Currency = 'eur' | 'usd'
 
 export type SortOrder = 'asc' | 'desc'
 
-// Structure générique d'une carte avec génériques
-export type BaseCard<
+// Structure d'une carte alignée avec le modèle Prisma
+export type Card<
   TGameData = any,
   TColor = string,
   TCardType = string,
   TFormat = string,
 > = {
+  // Identifiants (alignés avec Prisma)
   id: string
+  externalId: string // ✅ ID générique de l'API externe
   name: string
   gameType: GameType
-  setCode?: string | undefined
-  setName?: string | undefined
-  lang?: string | undefined
-  quantity?: number | undefined
-  addedAt?: string | undefined
-  priceHistory?: PriceHistory[] | undefined
-  rarity?: CardRarity | undefined
-  collectorNumber?: string | undefined
-  artist?: string | undefined
-  legalities?: Record<string, string> | undefined
-  image?: CardImages | undefined
-  // Données spécifiques au jeu
+
+  // Informations de base
+  setName?: string
+  setCode?: string
+  collectorNumber?: string
+  lang?: string
+  rarity?: CardRarity
+  artist?: string
+
+  // Images
+  imageSmall?: string
+  imageNormal?: string
+  imageLarge?: string
+  imageArtCrop?: string
+
+  // Données de jeu (JSON pour flexibilité)
   gameData: TGameData
-  // Couleurs/éléments du jeu
-  colors?: TColor[] | undefined
-  // Types de cartes du jeu
-  cardType?: TCardType | undefined
-  // Format du jeu
-  format?: TFormat | undefined
+  colors?: TColor[] // ✅ Array au lieu de JSON pour TypeScript
+  cardType?: TCardType
+  format?: TFormat
+
+  // Légalités
+  legalities?: Record<string, string>
+
+  // Prix
+  priceUsd?: number
+  priceEur?: number
+  priceTix?: number
+  priceFoilUsd?: number
+  priceFoilEur?: number
+  lastPriceUpdate?: Date
+
+  // Quantité et allocation (pour les collections et decks)
+  quantity?: number
+  allocated?: number
+  dateAdded?: Date
+  priceHistory?: PriceHistory[]
+
+  // Métadonnées
+  createdAt?: Date
+  updatedAt?: Date
+
+  // Relations (optionnelles selon le contexte)
+  collectionId?: string
+  wishlistId?: string
+  deckId?: string
 }
 
 export type CardImages = {
@@ -63,18 +92,17 @@ export type PriceHistory = {
   date: string
   usd: number
   eur: number
+  tix?: number
 }
-
-// Union type pour toutes les cartes (défini dans utils/guards.ts)
 
 // Helper types pour extraire les types
 export type ExtractGameType<T> =
-  T extends BaseCard<any, any, any, any> ? T['gameType'] : never
+  T extends Card<any, any, any, any> ? T['gameType'] : never
 export type ExtractGameData<T> =
-  T extends BaseCard<infer U, any, any, any> ? U : never
+  T extends Card<infer U, any, any, any> ? U : never
 export type ExtractColors<T> =
-  T extends BaseCard<any, infer U, any, any> ? U : never
+  T extends Card<any, infer U, any, any> ? U : never
 export type ExtractCardTypes<T> =
-  T extends BaseCard<any, any, infer U, any> ? U : never
+  T extends Card<any, any, infer U, any> ? U : never
 export type ExtractFormats<T> =
-  T extends BaseCard<any, any, any, infer U> ? U : never
+  T extends Card<any, any, any, infer U> ? U : never

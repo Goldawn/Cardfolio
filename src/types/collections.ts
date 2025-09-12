@@ -1,8 +1,9 @@
-// Types de Collection avec génériques
-// ====================================
+// Types de Collection mis à jour pour la cohérence avec la BDD
+// =============================================================
 
-import { GameType } from './base'
+import { Card, GameType } from './base-updated'
 
+// Collection avec relation directe vers Card
 export type Collection<TGameType extends GameType = GameType> = {
   id: string
   name: string
@@ -11,19 +12,10 @@ export type Collection<TGameType extends GameType = GameType> = {
   createdAt: Date
   updatedAt: Date
   userId: string
-  items: CollectionItem[]
+  cards: Card[] // ✅ Relation directe au lieu de CollectionItem[]
 }
 
-export type CollectionItem = {
-  id: string
-  cardId: string // ID générique de la carte
-  quantity: number
-  dateAdded: Date
-  updatedAt: Date
-  priceHistory: import('./base').PriceHistory[]
-  collectionId: string
-}
-
+// Wishlist avec relation directe vers Card
 export type WishlistList<TGameType extends GameType = GameType> = {
   id: string
   name: string
@@ -32,22 +24,14 @@ export type WishlistList<TGameType extends GameType = GameType> = {
   createdAt: Date
   updatedAt: Date
   userId: string
-  items: WishlistItem[]
+  cards: Card[] // ✅ Relation directe au lieu de WishlistItem[]
 }
 
-export type WishlistItem = {
-  id: string
-  cardId: string
-  quantity: number
-  dateAdded: Date
-  updatedAt: Date
-  wishlistId: string
-}
-
+// CollectionChangeLog mis à jour
 export type CollectionChangeLog<TGameType extends GameType = GameType> = {
   id: string
   userId: string
-  cardId: string
+  cardId: string // ✅ Référence vers Card.id
   gameType: TGameType
   changeType: 'add' | 'remove' | 'update'
   quantity: number
@@ -55,18 +39,35 @@ export type CollectionChangeLog<TGameType extends GameType = GameType> = {
   changedAt: Date
 }
 
-// Types spécifiques utilisés dans l'application
-// =============================================
+// Types spécifiques utilisés dans l'application (mis à jour)
+// =========================================================
 
 export type AppCollectionItem = {
-  scryfallId: string
+  externalId: string // ✅ externalId au lieu de scryfallId
   quantity: number
-  priceHistory: import('./base').PriceHistory[]
+  priceHistory: import('./base-updated').PriceHistory[]
   dbId: string
 }
 
 export type CollectionActions = {
-  addToCollection: (scryfallId: string, priceEntry: any) => Promise<any>
+  addToCollection: (externalId: string, priceEntry: any) => Promise<any> // ✅ externalId
   updateCollectionQuantity: (cardId: string, delta: number) => Promise<any>
   removeFromCollection: (cardId: string) => Promise<any>
+}
+
+// Types pour les opérations de collection
+export type CollectionOperation = {
+  type: 'add' | 'remove' | 'update'
+  externalId: string // ✅ externalId
+  quantity?: number
+  priceEntry?: any
+}
+
+// Types pour les statistiques de collection
+export type CollectionStats = {
+  totalCards: number
+  totalValue: number
+  cardsByRarity: Record<string, number>
+  cardsByType: Record<string, number>
+  cardsBySet: Record<string, number>
 }

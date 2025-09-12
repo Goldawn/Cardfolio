@@ -74,26 +74,81 @@ model Collection {
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
 
-  items     CollectionItem[]
+  cards     Card[]
 
   @@unique([userId, name])
   @@index([userId])
 }
 
-model CollectionItem {
-  id           String     @id @default(uuid())
-  scryfallId   String
-  quantity     Int        @default(1)
-  dateAdded    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  priceHistory Json
-
-  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
-  collectionId String
-
-  @@unique([collectionId, scryfallId])
+model Card {
+  // Identifiants
+  id              String   @id @default(uuid())
+  externalId      String   @unique // ID générique de l'API externe (scryfall, pokemon, etc.)
+  name            String
+  gameType        String   // 'magic', 'pokemon', 'lorcana', etc.
+  
+  // Informations de base
+  setName         String?
+  setCode         String?
+  collectorNumber String?
+  lang            String   @default("en")
+  rarity          String?
+  artist          String?
+  
+  // Images
+  imageSmall      String?
+  imageNormal     String?
+  imageLarge      String?
+  imageArtCrop    String?
+  
+  // Données de jeu (JSON pour flexibilité)
+  gameData        Json     // Contient les données spécifiques au jeu
+  colors          Json?    // Couleurs/éléments du jeu
+  cardType        String?  // Type de carte
+  format          String?  // Format du jeu
+  
+  // Légalités
+  legalities      Json?    // Format: { "commander": "legal", "standard": "banned" }
+  
+  // Prix
+  priceUsd        Float?
+  priceEur        Float?
+  priceTix        Float?
+  priceFoilUsd    Float?
+  priceFoilEur    Float?
+  lastPriceUpdate DateTime?
+  
+  // Quantité et allocation (pour les collections et decks)
+  quantity        Int      @default(1)
+  allocated       Int      @default(0) // combien d'exemplaires « pris » depuis la collection
+  dateAdded       DateTime @default(now())
+  priceHistory    Json?    // Historique des prix pour cette instance
+  
+  // Métadonnées
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  collection      Collection? @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  collectionId    String?
+  wishlist        WishlistList? @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  wishlistId      String?
+  deck            Decklist? @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  deckId          String?
+  changeLogs      CollectionChangeLog[]
+  
+  // Relation inverse pour la carte showcase
+  showcasedInDecks Decklist[] @relation("DecklistShowcase")
+  
+  // Index pour performance
+  @@index([gameType])
+  @@index([setCode])
+  @@index([name])
+  @@index([rarity])
+  @@index([externalId])
   @@index([collectionId])
-  @@index([scryfallId])
+  @@index([wishlistId])
+  @@index([deckId])
 }
 
 model WishlistList {
@@ -106,31 +161,18 @@ model WishlistList {
   user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
 
-  items     WishlistItem[]
+  cards     Card[]
 
   @@unique([userId, name])
   @@index([userId])
 }
 
-model WishlistItem {
-  id           String       @id @default(uuid())
-  scryfallId   String
-  quantity     Int          @default(1)
-  dateAdded    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-
-  wishlist     WishlistList @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
-  wishlistId   String
-
-  @@unique([wishlistId, scryfallId])
-  @@index([scryfallId])
-}
 
 model Decklist {
   id        String     @id @default(uuid())
   name      String
   colors Json?   // ex: ["W","U"] — tableau JSON de strings
-  showcasedDeckCardId String?
+  showcasedCardId String?
   showcasedArt        String? 
   format   String     @default("standard") // ex: "commander", "standard", etc.
   isLocked Boolean    @default(false) // pour empêcher les modifs accidentelles
@@ -141,36 +183,25 @@ model Decklist {
   user      User       @relation(fields: [userId], references: [id])
   userId    String
 
-  cards     DeckCard[] // relation vers cartes du deck
+  cards     Card[] // relation directe vers les cartes du deck
 
   // Relation optionnelle vers la carte showcase
-  showcasedDeckCard DeckCard? @relation("DecklistShowcase", fields: [showcasedDeckCardId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  showcasedCard Card? @relation("DecklistShowcase", fields: [showcasedCardId], references: [id], onDelete: SetNull, onUpdate: Cascade)
 }
 
-model DeckCard {
-  id           String     @id @default(uuid())
-  scryfallId   String
-  quantity     Int        @default(1)
-  allocated    Int        @default(0) // ✅ combien d'exemplaires « pris » depuis la collection
-
-  deck         Decklist   @relation(fields: [deckId], references: [id])
-  deckId       String
-
-  // côté inverse de la relation showcase (pas de champ)
-  DecklistShowcase Decklist[] @relation("DecklistShowcase")
-}
 
 model CollectionChangeLog {
   id          String   @id @default(uuid())
   userId      String
-  scryfallId  String
+  cardId      String   // Référence vers Card.id
   changeType  String   // "add", "remove", "update"
   quantity    Int      // ex: +2 ou -1
   totalAfter  Int
   changedAt   DateTime @default(now())
 
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  card        Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-  @@index([scryfallId])
+  @@index([cardId])
 }

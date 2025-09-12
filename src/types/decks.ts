@@ -1,8 +1,9 @@
-// Types de Deck avec génériques
-// ==============================
+// Types de Deck mis à jour pour la cohérence avec la BDD
+// ======================================================
 
-import { GameType } from './base'
+import { Card, GameType } from './base-updated'
 
+// Decklist avec relation directe vers Card
 export type Decklist<
   TGameType extends GameType = GameType,
   TColor = string,
@@ -12,7 +13,7 @@ export type Decklist<
   name: string
   gameType: TGameType
   colors?: TColor[]
-  showcasedCardId?: string
+  showcasedCardId?: string // ✅ Référence vers Card.id
   showcasedArt?: string
   format: TFormat
   isLocked: boolean
@@ -20,22 +21,41 @@ export type Decklist<
   createdAt: Date
   updatedAt: Date
   userId: string
-  cards: DeckCard[]
+  cards: Card[] // ✅ Relation directe au lieu de DeckCard[]
 }
 
-export type DeckCard = {
-  id: string
-  cardId: string
-  quantity: number
-  allocated: number
-  deckId: string
-}
-
-// Type spécifique utilisé dans l'application
-// =========================================
+// Type spécifique utilisé dans l'application (mis à jour)
+// ======================================================
 
 export type AppDeckCard = {
-  scryfallId: string
+  externalId: string // ✅ externalId au lieu de scryfallId
   quantity: number
   allocated?: number
+}
+
+// Types pour les opérations de deck
+export type DeckOperation = {
+  type: 'add' | 'remove' | 'update' | 'allocate'
+  externalId: string // ✅ externalId
+  quantity?: number
+  allocated?: number
+}
+
+// Types pour la validation de deck
+export type DeckValidation = {
+  isValid: boolean
+  errors: string[]
+  warnings: string[]
+  formatCompliance: boolean
+  cardCount: number
+  colorIdentity: string[]
+}
+
+// Types pour les statistiques de deck
+export type DeckStats = {
+  totalCards: number
+  cardsByType: Record<string, number>
+  cardsByColor: Record<string, number>
+  averageManaCost: number
+  colorIdentity: string[]
 }

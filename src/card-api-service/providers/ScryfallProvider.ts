@@ -34,6 +34,9 @@ export class ScryfallProvider implements ICardProvider {
       )
       return response.data
     } catch (error: any) {
+      if (error.response?.status === 404) {
+        throw new Error('Card not found')
+      }
       throw new Error(`Scryfall API error: ${error.message}`)
     }
   }
