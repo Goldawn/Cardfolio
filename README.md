@@ -125,9 +125,9 @@ npm install
 ### 2. Initialiser Prisma
 
 ```bash
-npx prisma generate
-npx prisma db push
-npx prisma studio
+npx prisma generate \
+&& npx prisma db push \
+&& npx prisma studio
 ```
 
 ### 3. Configurer les variables d’environnement

@@ -10,19 +10,31 @@ import {
   bucketLabel, // ✅ import ajouté
 } from './mtgCards'
 import { sortByName, sortByMVThenName } from './mtgSorts'
+import { MTGCard, MTGColor, MTGCardType } from '@/types'
 
-export const buildNameList = (cards: any[] = []) =>
+export const buildNameList = (cards: MTGCard[] = []): MTGCard[] =>
   cards
-    .filter(c => Number(c?.decklistQuantity || 0) > 0)
+    .filter(c => Number(c?.quantity || 0) > 0)
     .slice()
     .sort(sortByName)
 
-export const buildMvSections = (cards: any[] = []) => {
-  const map = new Map<string, any[]>(BUCKETS.map(b => [b, [] as any[]]))
-  const lands: any[] = []
+export interface Section {
+  key: string
+  title: string
+  items: MTGCard[]
+}
+
+export interface SectionResult {
+  sections: Section[]
+  lands: MTGCard[]
+}
+
+export const buildMvSections = (cards: MTGCard[] = []): SectionResult => {
+  const map = new Map<string, MTGCard[]>(BUCKETS.map(b => [b, [] as MTGCard[]]))
+  const lands: MTGCard[] = []
 
   for (const c of cards) {
-    const qty = Number(c?.decklistQuantity || 0)
+    const qty = Number(c?.quantity || 0)
     if (!qty) continue
 
     if (isLand(c)) {
@@ -46,11 +58,11 @@ export const buildMvSections = (cards: any[] = []) => {
   return { sections, lands: lands.sort(sortByName) }
 }
 
-export const buildTypeSections = (cards: any[] = []) => {
-  const map = new Map<string, any[]>()
+export const buildTypeSections = (cards: MTGCard[] = []): SectionResult => {
+  const map = new Map<MTGCardType, MTGCard[]>()
 
   for (const c of cards) {
-    const qty = Number(c?.decklistQuantity || 0)
+    const qty = Number(c?.quantity || 0)
     if (!qty) continue
     const k = primaryTypeOf(c)
     const arr = map.get(k) || []
@@ -69,12 +81,14 @@ export const buildTypeSections = (cards: any[] = []) => {
   return { sections, lands }
 }
 
-export const buildColorSections = (cards: any[] = []) => {
-  const map = new Map<string, any[]>(COLOR_ORDER.map(k => [k, [] as any[]]))
-  const lands: any[] = []
+export const buildColorSections = (cards: MTGCard[] = []): SectionResult => {
+  const map = new Map<MTGColor, MTGCard[]>(
+    COLOR_ORDER.map(k => [k, [] as MTGCard[]])
+  )
+  const lands: MTGCard[] = []
 
   for (const c of cards) {
-    const qty = Number(c?.decklistQuantity || 0)
+    const qty = Number(c?.quantity || 0)
     if (!qty) continue
 
     if (isLand(c)) {

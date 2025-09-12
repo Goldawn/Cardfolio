@@ -1,6 +1,30 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* DeckCase module variables */
+  --main-color: #12384e;
+
+  /* MagicCardPlaceholder module variables */
+  --border-width: 10px;
+
+  /* Rarity colors */
+  --rarity-common: #9aa0a6; /* gris */
+  --rarity-uncommon: #62a0ea; /* bleu */
+  --rarity-rare: #fbc02d; /* or */
+  --rarity-mythic: #f57c00; /* orange */
+  --rarity-special: #e91e63; /* rose/violet */
+  --rarity-other: rgba(255, 255, 255, 0.14); /* discret */
+
+  /* Column widths for List + Compact views */
+  --col-thumb: 60px; /* vignette */
+  --col-qty: 30px; /* qté */
+  --col-cmc: 60px; /* mana cost (icônes) */
+  --col-actions: 40px; /* étoiles / boutons */
+  --col-rarity: 3px; /* barre rareté */
+
+  /* Legality colors */
+  --legality-color: 230 80 34;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -65,6 +89,20 @@ button {
 
 main {
   padding: 20px;
+}
+
+a,
+p,
+span,
+li,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+div {
+  color: white;
 }
 
 a {

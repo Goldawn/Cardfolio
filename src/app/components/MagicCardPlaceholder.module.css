@@ -1,6 +1,4 @@
-:root {
-  --border-width: 10px;
-}
+/* CSS custom properties moved to global styles */
 
 .cardPlaceholder {
   width: 200px;

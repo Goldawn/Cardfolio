@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { SessionProvider } from 'next-auth/react'
 import { Geist, Geist_Mono } from 'next/font/google'
 import CurrencyContextProvider from '@/context'
-import Navigation from './components/Navigation.js'
+import Navigation from './components/Navigation'
 import './globals.css'
 
 const geistSans = Geist({
@@ -26,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <SessionProvider>
           <CurrencyContextProvider>

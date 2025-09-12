@@ -2,13 +2,21 @@
 import { useState, useRef, useEffect } from 'react'
 import styles from './SplitButton.module.css'
 
+interface SplitButtonProps {
+  lists?: any[]
+  defaultListId?: string | null
+  onQuickAdd?: (listId: string, card: any) => Promise<void>
+  onCreateWishlist?: (name: string) => Promise<string | null>
+  card?: any
+}
+
 export default function SplitButton({
   lists = [],
   defaultListId,
-  onQuickAdd, // (listId, card) => Promise<void>
-  onCreateWishlist, // (name) => Promise<string|null> -> retourne le nouvel id
+  onQuickAdd,
+  onCreateWishlist,
   card,
-}) {
+}: SplitButtonProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [selectedList, setSelectedList] = useState(
     defaultListId || (lists[0]?.id ?? null)
@@ -16,7 +24,7 @@ export default function SplitButton({
   const [creating, setCreating] = useState(false)
   const [newListName, setNewListName] = useState('')
   const [pending, setPending] = useState(false)
-  const menuRef = useRef(null)
+  const menuRef = useRef<HTMLDivElement>(null)
 
   // Suivre les props si elles changent
   useEffect(() => {
@@ -24,10 +32,10 @@ export default function SplitButton({
     else if (!selectedList && lists.length > 0) setSelectedList(lists[0].id)
   }, [defaultListId, lists.length])
 
-  // Ferme le menu si clic à l’extérieur
+  // Ferme le menu si clic à l'extérieur
   useEffect(() => {
-    function handleClickOutside(e) {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setMenuOpen(false)
       }
     }
@@ -37,14 +45,14 @@ export default function SplitButton({
 
   // Esc pour fermer
   useEffect(() => {
-    function onKey(e) {
+    function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') setMenuOpen(false)
     }
     if (menuOpen) document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   }, [menuOpen])
 
-  const handleListSelect = listId => {
+  const handleListSelect = (listId: string) => {
     setSelectedList(listId)
     setMenuOpen(false)
   }
