@@ -1,20 +1,12 @@
 // services/wishlistMissing.ts
-interface DeckCard {
-  scryfallId: string
-  quantity: number
-}
-
-interface CollectionItem {
-  scryfallId: string
-  quantity: number
-}
+import type { AppDeckCard, AppCollectionItem } from '@/types'
 
 interface MissingCard {
   scryfallId: string
   quantity: number
 }
 
-export function computeMissingFromDeck(deckCards: DeckCard[] = [], collectionItems: CollectionItem[] = []): MissingCard[] {
+export function computeMissingFromDeck(deckCards: AppDeckCard[] = [], collectionItems: AppCollectionItem[] = []): MissingCard[] {
   const have = new Map(
     collectionItems.map(i => [i.scryfallId, i.quantity || 0])
   )

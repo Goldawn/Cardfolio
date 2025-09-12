@@ -1,6 +1,7 @@
 // services/legalities.ts
 
 import type { MTGFormat } from '@/types/games/magic'
+import type { AppDeckCard } from '@/types'
 
 /** =========================
  *  Formats & règles de base
@@ -57,11 +58,7 @@ export const SPECIAL_COPIES_RULES: Record<string, number> = {
   'slime against humanity': Infinity,
 }
 
-interface DeckCard {
-  id: string
-  scryfallId: string
-  quantity: number
-}
+// Utilise AppDeckCard de @types/ au lieu de définir localement
 
 interface EnrichedCard {
   id: string
@@ -187,7 +184,7 @@ export function checkRarityRules({
  */
 export function evaluateDeckLegality(
   deck: { format?: string },
-  deckCards: DeckCard[],
+  deckCards: AppDeckCard[],
   enriched: EnrichedCard[],
   opts: { commanderScryfallId?: string | null } = {}
 ): DeckLegalityResult {

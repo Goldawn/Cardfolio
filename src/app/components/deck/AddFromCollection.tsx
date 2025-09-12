@@ -3,23 +3,13 @@
 import { useEffect, useMemo, useState, useTransition } from 'react'
 import { cardApiManager } from '@/app/services/CardApiManager'
 import styles from './AddFromCollection.module.css'
-import type { GameCard } from '@/types'
+import type { GameCard, AppCollectionItem, AppDeckCard } from '@/types'
 import type { JSX } from 'react'
-
-interface CollectionItem {
-  scryfallId: string
-  quantity: number
-}
-
-interface DeckCard {
-  scryfallId: string
-  quantity: number
-}
 
 interface AddFromCollectionProps {
   deckId: string
-  collectionItems: CollectionItem[]
-  currentDeckCards: DeckCard[]
+  collectionItems: AppCollectionItem[]
+  currentDeckCards: AppDeckCard[]
   onAdd: (scryfallId: string, qty: number) => Promise<void>
 }
 
@@ -40,7 +30,7 @@ export default function AddFromCollection({
   // map des quantités déjà dans le deck (pour cap si respectOwned)
   const inDeckMap = useMemo(() => {
     const m = new Map<string, number>()
-    ;(currentDeckCards || []).forEach((dc: DeckCard) => {
+    ;(currentDeckCards || []).forEach((dc: AppDeckCard) => {
       m.set(dc.scryfallId, (m.get(dc.scryfallId) || 0) + (dc.quantity || 0))
     })
     return m
@@ -56,7 +46,7 @@ export default function AddFromCollection({
       }
       try {
         // Utilisation du CardService pour le bulk fetch
-        const cardIds = collectionItems.map((it: CollectionItem) => it.scryfallId)
+        const cardIds = collectionItems.map((it: AppCollectionItem) => it.scryfallId)
         const result = await cardService.fetchBulkCards({
           cardIds,
           options: {
@@ -67,7 +57,7 @@ export default function AddFromCollection({
         
         // Rattache ownedQuantity à chaque carte
         const enriched = result.cards.map((card: GameCard) => {
-          const owned = collectionItems.find((ci: CollectionItem) => ci.scryfallId === card.id)?.quantity || 0
+          const owned = collectionItems.find((ci: AppCollectionItem) => ci.scryfallId === card.id)?.quantity || 0
           return { ...card, ownedQuantity: owned }
         })
         
@@ -106,7 +96,7 @@ export default function AddFromCollection({
   const addOne = (scryfallId: string): void => {
     const wanted = qtyById[scryfallId] ?? 1
     const owned =
-      collectionItems.find((ci: CollectionItem) => ci.scryfallId === scryfallId)?.quantity || 0
+      collectionItems.find((ci: AppCollectionItem) => ci.scryfallId === scryfallId)?.quantity || 0
     const inDeck = inDeckMap.get(scryfallId) || 0
     let qty = wanted
 

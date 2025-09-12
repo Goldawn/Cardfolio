@@ -30,3 +30,12 @@ export type DeckCard = {
   allocated: number
   deckId: string
 }
+
+// Type spécifique utilisé dans l'application
+// =========================================
+
+export type AppDeckCard = {
+  scryfallId: string
+  quantity: number
+  allocated?: number
+}

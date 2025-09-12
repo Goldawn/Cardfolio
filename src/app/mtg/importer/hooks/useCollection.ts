@@ -1,31 +1,17 @@
 import { useState, useMemo, useTransition } from 'react'
 import { fetchCardPrice } from '../../../services/pricing'
-
-export interface CollectionItem {
-  scryfallId: string
-  quantity: number
-  priceHistory: Array<{
-    date: string
-    usd: number
-    eur: number
-  }>
-}
-
-export interface CollectionActions {
-  addToCollection: (scryfallId: string, priceEntry: any) => Promise<any>
-  updateCollectionQuantity: (cardId: string, delta: number) => Promise<any>
-  removeFromCollection: (cardId: string) => Promise<any>
-}
+import type { AppCollectionItem, CollectionActions } from '@/types'
 
 export function useCollection(
-  initialCollection: CollectionItem[],
+  initialCollection: AppCollectionItem[],
   actions: CollectionActions
 ) {
-  const [collection, setCollection] = useState<CollectionItem[]>(
+  const [collection, setCollection] = useState<AppCollectionItem[]>(
     initialCollection.map((c: any) => ({
       scryfallId: c.scryfallId,
       quantity: c.quantity,
       priceHistory: c.priceHistory,
+      dbId: c.dbId || c.id || c.scryfallId, // Fallback pour dbId
     }))
   )
 
@@ -92,6 +78,7 @@ export function useCollection(
                 scryfallId,
                 quantity: item.quantity,
                 priceHistory: item.priceHistory || [newPriceEntry],
+                dbId: item.id || item.dbId || scryfallId,
               },
             ]
           }
@@ -134,6 +121,7 @@ export function useCollection(
                   scryfallId: cardId,
                   quantity: result.item.quantity,
                   priceHistory: [],
+                  dbId: result.item.id || result.item.dbId || cardId,
                 },
               ]
             }

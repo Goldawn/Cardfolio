@@ -54,3 +54,19 @@ export type CollectionChangeLog<TGameType extends GameType = GameType> = {
   totalAfter: number
   changedAt: Date
 }
+
+// Types spécifiques utilisés dans l'application
+// =============================================
+
+export type AppCollectionItem = {
+  scryfallId: string
+  quantity: number
+  priceHistory: import('./base').PriceHistory[]
+  dbId: string
+}
+
+export type CollectionActions = {
+  addToCollection: (scryfallId: string, priceEntry: any) => Promise<any>
+  updateCollectionQuantity: (cardId: string, delta: number) => Promise<any>
+  removeFromCollection: (cardId: string) => Promise<any>
+}

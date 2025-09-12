@@ -16,23 +16,10 @@ import Loader from '../../components/Loader'
 import { fetchCardPrice } from '../../services/pricing'
 import SetBar from '../../components/SetBar' // ✅ intégré
 import styles from './page.module.css'
-import type { GameCard, Currency } from '@/types'
+import type { GameCard, Currency, AppCollectionItem, CollectionActions } from '@/types'
 import type { GameSet } from '../../services/Scryfall'
 import type { MTGCard } from '@/types/games/magic'
 import type { JSX } from 'react'
-
-interface CollectionItem {
-  scryfallId: string
-  quantity: number
-  priceHistory: any[]
-  dbId: string
-}
-
-interface CollectionActions {
-  addToCollection: (scryfallId: string, priceEntry: any) => Promise<any>
-  updateCollectionQuantity: (cardId: string, delta: number) => Promise<any>
-  removeFromCollection: (cardId: string) => Promise<any>
-}
 
 interface CollectionClientProps {
   initialItems: any[]
@@ -44,7 +31,7 @@ export default function CollectionClient({ initialItems, actions }: CollectionCl
   const cardService = cardApiManager.getCardService()
 
   // collection brute (scryfallId, qty, priceHistory, dbId)
-  const [collection, setCollection] = useState<CollectionItem[]>(
+  const [collection, setCollection] = useState<AppCollectionItem[]>(
     (initialItems || []).map((it: any) => ({
       scryfallId: it.scryfallId,
       quantity: it.quantity,
@@ -282,7 +269,7 @@ export default function CollectionClient({ initialItems, actions }: CollectionCl
                 quantity: item.quantity,
                 priceHistory: item.priceHistory || [newPriceEntry],
                 dbId: item.id,
-              } as CollectionItem,
+              } as AppCollectionItem,
             ]
           }
           const copy = [...prev]
@@ -321,7 +308,7 @@ export default function CollectionClient({ initialItems, actions }: CollectionCl
                   quantity: result.item.quantity,
                   priceHistory: [],
                   dbId: result.item.id,
-                } as CollectionItem,
+                } as AppCollectionItem,
               ]
             }
             const copy = [...prev]
