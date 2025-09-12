@@ -242,7 +242,7 @@ export class SetService {
     for (const [name, provider] of this.providers) {
       try {
         healthStatus[name] = await provider.isHealthy()
-      } catch (error) {
+      } catch (_error) {
         healthStatus[name] = false
       }
     }

@@ -164,8 +164,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 // DELETE – Supprime un item OU tous les items d'une wishlist
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   const { userId } = await params
-  const { scryfallId, wishlistId }: DeleteWishlistItemRequest =
-    await request.json()
+  const { scryfallId }: DeleteWishlistItemRequest = await request.json()
   console.log('UserId de la route DELETE', userId)
   console.log('entrée dans la route de delete', scryfallId)
 

@@ -307,7 +307,7 @@ export class MonitoringService {
           status: isHealthy ? 'healthy' : 'unhealthy',
           lastCheck: now,
         }
-      } catch (error) {
+      } catch (_error) {
         services[name] = {
           status: 'unhealthy',
           lastCheck: now,

@@ -305,7 +305,7 @@ export const healthApiHandler = async (_req: any, res: any) => {
   try {
     const health = await dashboard.monitoringService.getHealthStatus()
     res.status(200).json(health)
-  } catch (error) {
+  } catch (_error) {
     res
       .status(500)
       .json({ error: 'Erreur lors de la récupération de la santé' })
@@ -319,7 +319,7 @@ export const metricsApiHandler = async (_req: any, res: any) => {
   try {
     const metrics = await dashboard.getApiReport()
     res.status(200).json(metrics)
-  } catch (error) {
+  } catch (_error) {
     res
       .status(500)
       .json({ error: 'Erreur lors de la récupération des métriques' })
@@ -334,7 +334,7 @@ export const reportApiHandler = async (_req: any, res: any) => {
     const htmlReport = await dashboard.generateHtmlReport()
     res.setHeader('Content-Type', 'text/html')
     res.status(200).send(htmlReport)
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({ error: 'Erreur lors de la génération du rapport' })
   }
 }

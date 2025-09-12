@@ -263,7 +263,7 @@ export const healthApiRoute = async (_req: any, res: any) => {
   try {
     const health = await serviceManager.getMonitoringService().getHealthStatus()
     res.status(200).json(health)
-  } catch (error) {
+  } catch (_error) {
     res
       .status(500)
       .json({ error: 'Erreur lors de la récupération de la santé' })
@@ -277,7 +277,7 @@ export const metricsApiRoute = async (_req: any, res: any) => {
   try {
     const stats = serviceManager.getMonitoringService().getStats()
     res.status(200).json(stats)
-  } catch (error) {
+  } catch (_error) {
     res
       .status(500)
       .json({ error: 'Erreur lors de la récupération des métriques' })
@@ -291,7 +291,7 @@ export const clearCacheApiRoute = async (_req: any, res: any) => {
   try {
     await serviceManager.getCacheService().clear()
     res.status(200).json({ message: 'Cache vidé avec succès' })
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({ error: 'Erreur lors du vidage du cache' })
   }
 }

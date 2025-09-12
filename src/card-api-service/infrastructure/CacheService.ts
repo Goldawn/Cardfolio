@@ -161,7 +161,7 @@ export class RedisCacheProvider implements ICacheProvider {
       // TODO: Vérifier la santé de Redis
       // await this.redis.ping()
       return true
-    } catch (error) {
+    } catch (_error) {
       return false
     }
   }

@@ -1,4 +1,6 @@
 import { FlatCompat } from '@eslint/eslintrc'
+import typescriptEslint from '@typescript-eslint/eslint-plugin'
+import typescriptParser from '@typescript-eslint/parser'
 import { dirname } from 'path'
 import { fileURLToPath } from 'url'
 
@@ -12,6 +14,20 @@ const compat = new FlatCompat({
 const eslintConfig = [
   ...compat.extends('next/core-web-vitals'),
   {
+    files: ['**/*.{ts,tsx}'],
+    languageOptions: {
+      parser: typescriptParser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
+    },
+    plugins: {
+      '@typescript-eslint': typescriptEslint,
+    },
     rules: {
       // Désactiver temporairement les règles strictes pendant la migration TypeScript
       '@typescript-eslint/no-explicit-any': 'off',
