@@ -1,10 +1,11 @@
 // app/lib/deckStats.ts
-import { MTGCard, MTGColor } from '@/types'
+import { GameCard, MTGColor } from '@/types'
+import { isMTGCard } from '@/types/utils/guards'
 import {
+  ColorDistribution,
+  ColorDistributionData,
   ManaCurveData,
   ManaCurveSplitData,
-  ColorDistributionData,
-  ColorDistribution,
 } from '@/types/utils/statistics'
 
 // Détecte si la carte est un terrain (pour exclure de la courbe)
@@ -96,7 +97,7 @@ export interface ColorDistributionOptions {
  */
 // retourne un tableau avec la repartition des cartes par manacost et par type de cartes : Créature/non créature et de 1- à 7+
 export function computeManaCurveSplit(
-  cards: MTGCard[],
+  cards: GameCard[],
   opts: ManaCurveOptions = {}
 ): ManaCurveSplitData[] {
   const { excludeLands = true, cap = 7, mergeLow = true } = opts
@@ -106,11 +107,15 @@ export function computeManaCurveSplit(
   let overC = 0 // créatures > cap
   let overN = 0 // non-créatures > cap
 
-  ;(cards || []).forEach(card => {
+  ;(cards || []).filter(isMTGCard).forEach(card => {
     const qty = Number(card?.quantity ?? 0)
     if (!qty) return
 
-    const typeLine = (card?.gameData?.type || card?.gameData?.typeLine || '').toLowerCase()
+    const typeLine = (
+      card?.gameData?.type ||
+      card?.gameData?.typeLine ||
+      ''
+    ).toLowerCase()
     if (excludeLands && typeLine.includes('land')) return
 
     const isCreature = typeLine.includes('creature')
@@ -168,7 +173,7 @@ export function computeManaCurveSplit(
 
 // retourne un tableau avec la repartition des cartes par manacost, de 1- à 7+
 export function computeManaCurve(
-  cards: MTGCard[],
+  cards: GameCard[],
   opts: ManaCurveOptions = {}
 ): ManaCurveData[] {
   const { excludeLands = true, cap = 7 } = opts
@@ -177,7 +182,7 @@ export function computeManaCurve(
   const buckets = new Array(cap + 1).fill(0)
   let capPlus = 0
 
-  ;(cards || []).forEach(card => {
+  ;(cards || []).filter(isMTGCard).forEach(card => {
     const qty = Number(card?.quantity ?? 0)
     if (!qty) return
     if (excludeLands && isLand(card)) return
@@ -211,7 +216,9 @@ export function getCardColors(card: any): MTGColor[] {
   const set = new Set<MTGColor>(
     cols
       .map((c: any) => String(c).toUpperCase())
-      .filter((c: string) => ['W', 'U', 'B', 'R', 'G'].includes(c)) as MTGColor[]
+      .filter((c: string) =>
+        ['W', 'U', 'B', 'R', 'G'].includes(c)
+      ) as MTGColor[]
   )
 
   return set.size ? Array.from(set) : ['C'] // incolore si rien
@@ -219,7 +226,7 @@ export function getCardColors(card: any): MTGColor[] {
 
 //retourne un tableau avec la répartition des cartes par couleur
 export function computeColorDistribution(
-  cards: MTGCard[],
+  cards: GameCard[],
   opts: ColorDistributionOptions = {}
 ): ColorDistribution<MTGColor> {
   const {
@@ -239,7 +246,7 @@ export function computeColorDistribution(
     ...(includeColorless ? {} : { C: 0, M: 0 }),
   }
 
-  ;(cards || []).forEach(card => {
+  ;(cards || []).filter(isMTGCard).forEach(card => {
     const qty = Number(card?.quantity ?? 0)
     if (!qty) return
     if (excludeLands && isLand(card)) return

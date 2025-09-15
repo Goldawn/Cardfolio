@@ -1,5 +1,4 @@
 import type { GameSet } from '@/card-api-service/dto'
-import { prisma } from '@/lib/prisma'
 import { useCallback, useEffect, useState } from 'react'
 
 export function useSets() {
@@ -7,38 +6,24 @@ export function useSets() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Charger tous les sets depuis la BDD
+  useEffect(() => {
+    console.log('sets', sets)
+  }, [sets])
+
+  // Charger tous les sets depuis l'API
   const loadSets = useCallback(async () => {
     setLoading(true)
     setError(null)
 
     try {
-      // Récupérer les sets uniques depuis les cartes en BDD
-      const setsData = await prisma.card.findMany({
-        select: {
-          setName: true,
-          setCode: true,
-        },
-        distinct: ['setName', 'setCode'],
-        where: {
-          setName: { not: null },
-          setCode: { not: null },
-        },
-      })
+      const response = await fetch('/api/mtg/sets')
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`)
+      }
 
-      // Transformer en format GameSet
-      const gameSets: GameSet[] = setsData.map(set => ({
-        id: set.setCode!,
-        code: set.setCode!,
-        name: set.setName!,
-        releaseDate: '', // Pas stocké en BDD pour l'instant
-        setType: 'expansion', // Par défaut
-        cardCount: 0, // Pas stocké en BDD pour l'instant
-        digital: false, // Par défaut
-        parentSetCode: undefined,
-      }))
-
-      setSets(gameSets)
+      const data = await response.json()
+      console.log('setsData from API', data.sets)
+      setSets(data.sets)
     } catch (err) {
       setError(
         err instanceof Error

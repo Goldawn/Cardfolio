@@ -1,7 +1,9 @@
 'use client'
 
 import { prisma } from '@/lib/prisma'
-import type { MTGCard } from '@/types/games/magic'
+import { transformPrismaResults } from '@/types/utils/cardHelpers'
+import type { GameCard } from '@/types/utils/guards'
+import { isMTGCard } from '@/types/utils/guards'
 import { useEffect, useRef, useState, useTransition } from 'react'
 import styles from './AddFromCollection.module.css'
 
@@ -34,7 +36,7 @@ export default function ManualAdd({
   defaultQty = 1,
 }: ManualAddProps) {
   const [query, setQuery] = useState('')
-  const [results, setResults] = useState<MTGCard[]>([]) // cartes formatées
+  const [results, setResults] = useState<GameCard[]>([]) // cartes formatées
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [qtyById, setQtyById] = useState<Record<string, number>>({})
@@ -87,20 +89,8 @@ export default function ManualAdd({
 
         if (cancelled) return
 
-        // Transformer les résultats pour correspondre au format MTGCard
-        const formattedResults = searchResults.map(
-          card =>
-            ({
-              id: card.externalId,
-              externalId: card.externalId,
-              name: card.name,
-              gameType: card.gameType,
-              setCode: card.setCode,
-              rarity: card.rarity,
-              gameData: card.gameData as any,
-              image: card.imageSmall || card.imageNormal || '',
-            }) as unknown as MTGCard
-        )
+        // Transformer les résultats pour correspondre au format GameCard
+        const formattedResults = transformPrismaResults(searchResults)
 
         setResults(formattedResults)
       } catch (e: any) {
@@ -185,8 +175,10 @@ export default function ManualAdd({
                     <p className={styles.cardSet}>
                       {card.setCode} - {card.rarity}
                     </p>
-                    <p className={styles.cardType}>{card.gameData?.typeLine}</p>
-                    {card.gameData?.manaCost && (
+                    <p className={styles.cardType}>
+                      {isMTGCard(card) ? card.gameData?.typeLine : 'N/A'}
+                    </p>
+                    {isMTGCard(card) && card.gameData?.manaCost && (
                       <p className={styles.manaCost}>
                         {card.gameData.manaCost}
                       </p>

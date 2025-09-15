@@ -1,4 +1,4 @@
-import type { MTGCard } from '@/types/games/magic'
+import type { GameCard } from '@/types/utils/guards'
 import type { GameSet, PriceData } from '../dto/AppDTOs'
 
 /**
@@ -6,7 +6,7 @@ import type { GameSet, PriceData } from '../dto/AppDTOs'
  */
 
 export interface CardServiceResponseDTO {
-  data: MTGCard
+  data: GameCard
   metadata: ServiceMetadataDTO
   error?: ServiceErrorDTO
 }
@@ -30,7 +30,7 @@ export interface PriceServiceResponseDTO {
 }
 
 export interface BulkCardResponseDTO {
-  cards: MTGCard[]
+  cards: GameCard[]
   errors: Array<{
     cardId: string
     error: ServiceErrorDTO

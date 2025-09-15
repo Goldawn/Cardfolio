@@ -1,14 +1,15 @@
 'use client'
 
 import { prisma } from '@/lib/prisma'
-import type { MTGCard } from '@/types'
+import type { GameCard } from '@/types'
+import { transformPrismaResults } from '@/types/utils/cardHelpers'
 import type { JSX } from 'react'
 import { useCallback, useEffect, useState } from 'react'
 import Card from './Card'
 import styles from './FetchCardInput.module.css'
 
 // Helper pour obtenir l'URL d'image d'une carte
-const getCardImageUrl = (card: MTGCard): string =>
+const getCardImageUrl = (card: GameCard): string =>
   card.imageLarge || card.imageNormal || card.imageSmall || ''
 
 export default function FetchCardInput(): JSX.Element {
@@ -18,7 +19,7 @@ export default function FetchCardInput(): JSX.Element {
 
   // États locaux pour la recherche
   const [query, setQuery] = useState('')
-  const [searchResults, setSearchResults] = useState<MTGCard[]>([])
+  const [searchResults, setSearchResults] = useState<GameCard[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | undefined>(undefined)
   const [suggestions, setSuggestions] = useState<string[]>([])
@@ -63,27 +64,8 @@ export default function FetchCardInput(): JSX.Element {
           take: 20, // Limiter les résultats
         })
 
-        // Transformer les résultats pour correspondre au format MTGCard
-        const formattedResults = results.map(
-          card =>
-            ({
-              id: card.externalId,
-              externalId: card.externalId,
-              name: card.name,
-              gameType: card.gameType,
-              setCode: card.setCode,
-              setName: card.setName,
-              rarity: card.rarity,
-              artist: card.artist,
-              collectorNumber: card.collectorNumber,
-              gameData: card.gameData as any,
-              image:
-                card.imageLarge || card.imageNormal || card.imageSmall || '',
-              imageSmall: card.imageSmall,
-              imageNormal: card.imageNormal,
-              imageLarge: card.imageLarge,
-            }) as unknown as MTGCard
-        )
+        // Transformer les résultats pour correspondre au format GameCard
+        const formattedResults = transformPrismaResults(results)
 
         setSearchResults(formattedResults)
       } catch (err) {

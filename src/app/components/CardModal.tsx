@@ -1,7 +1,8 @@
 'use client'
 
 import { useCurrencyContext } from '@/context/'
-import type { MTGCard, PriceHistory } from '@/types'
+import type { GameCard, PriceHistory } from '@/types'
+import { isMTGCard } from '@/types/utils/guards'
 import type { JSX } from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import {
@@ -19,13 +20,13 @@ import useModalKeyboardNavigation from '../hooks/useModalKeyboardNavigation'
 import styles from './CardModal.module.css'
 
 // Helper pour obtenir l'URL d'image d'une carte
-const getCardImageUrl = (card: MTGCard): string =>
+const getCardImageUrl = (card: GameCard): string =>
   card.imageLarge || card.imageNormal || card.imageSmall || ''
 
 interface CardModalProps {
-  card: MTGCard
+  card: GameCard
   onClose: () => void
-  cardList?: MTGCard[] | undefined
+  cardList?: GameCard[] | undefined
   currentIndex?: number | undefined
 }
 
@@ -104,42 +105,46 @@ export default function CardModal({
     return getCardImageUrl(currentCard)
   }
 
-  const renderCardFace = (cardData: MTGCard) => {
+  const renderCardFace = (cardData: GameCard) => {
     const { gameData, colors } = cardData
 
     return (
       <>
         <h2>{cardData.name}</h2>
-        {gameData?.manaCost && (
+        {isMTGCard(cardData) && (gameData as any)?.manaCost && (
           <p>
             <strong>Coût de mana :</strong>{' '}
-            {formatAndParseText(gameData.manaCost)}
+            {formatAndParseText((gameData as any).manaCost)}
           </p>
         )}
         <p>
           <strong>Type :</strong>{' '}
-          {gameData?.typeLine || gameData?.type || 'N/A'}
+          {isMTGCard(cardData)
+            ? (gameData as any)?.typeLine || (gameData as any)?.type || 'N/A'
+            : 'N/A'}
         </p>
-        {gameData?.power && gameData?.toughness && (
-          <p>
-            <strong>Statistiques :</strong> {gameData.power}/
-            {gameData.toughness}
-          </p>
-        )}
+        {isMTGCard(cardData) &&
+          (gameData as any)?.power &&
+          (gameData as any)?.toughness && (
+            <p>
+              <strong>Statistiques :</strong> {(gameData as any).power}/
+              {(gameData as any).toughness}
+            </p>
+          )}
         {(gameData as any)?.loyalty && (
           <p>
             <strong>Points de loyauté :</strong> {(gameData as any).loyalty}
           </p>
         )}
-        {gameData?.oracleText && (
+        {isMTGCard(cardData) && (gameData as any)?.oracleText && (
           <p>
             <strong>Description :</strong>{' '}
-            {formatAndParseText(gameData.oracleText)}
+            {formatAndParseText((gameData as any).oracleText)}
           </p>
         )}
-        {gameData?.flavorText && (
+        {isMTGCard(cardData) && (gameData as any)?.flavorText && (
           <p>
-            <em>{formatAndParseText(gameData.flavorText)}</em>
+            <em>{formatAndParseText((gameData as any).flavorText)}</em>
           </p>
         )}
         {colors && colors.length > 0 && (

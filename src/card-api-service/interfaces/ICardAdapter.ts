@@ -1,4 +1,4 @@
-import type { MTGCard } from '@/types/games/magic'
+import type { GameCard } from '@/types/utils/guards'
 import type { GameSet, PriceData } from '../dto'
 
 /**
@@ -14,7 +14,7 @@ export interface ICardAdapter {
   /**
    * Transforme une carte brute en format app
    */
-  transformCard(rawData: any): MTGCard
+  transformCard(rawData: any): GameCard
 
   /**
    * Transforme un set brut en format app
@@ -29,7 +29,7 @@ export interface ICardAdapter {
   /**
    * Transforme une liste de cartes
    */
-  transformCards(rawDataList: any[]): MTGCard[]
+  transformCards(rawDataList: any[]): GameCard[]
 
   /**
    * Transforme une liste de sets

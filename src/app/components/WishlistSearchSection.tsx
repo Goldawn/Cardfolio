@@ -1,7 +1,8 @@
 'use client'
 
 import { prisma } from '@/lib/prisma'
-import type { MTGCard } from '@/types'
+import type { GameCard } from '@/types'
+import { transformPrismaResults } from '@/types/utils/cardHelpers'
 import { useCallback, useEffect, useState } from 'react'
 
 // Hook useDebounce simple
@@ -27,7 +28,7 @@ interface WishlistSearchSectionProps {
   StopAddingToWishlist: () => void
   wishlistId: string
   onHoverCard: (cardId: string, imageUrl: string) => void
-  onCardAdded: (card: MTGCard, quantity: number) => void
+  onCardAdded: (card: GameCard, quantity: number) => void
 }
 
 export default function WishlistSearchSection({
@@ -40,7 +41,7 @@ export default function WishlistSearchSection({
 }: WishlistSearchSectionProps) {
   const [searchInput, setSearchInput] = useState('')
   const [suggestions, setSuggestions] = useState<string[]>([])
-  const [searchResults, setSearchResults] = useState<MTGCard[]>([])
+  const [searchResults, setSearchResults] = useState<GameCard[]>([])
   const [loading, setLoading] = useState(false)
   const [highlightIndex, setHighlightIndex] = useState(-1)
   const [freezeAutocomplete, setFreezeAutocomplete] = useState(false)
@@ -109,25 +110,7 @@ export default function WishlistSearchSection({
       })
 
       // Transformer les résultats pour correspondre au format MTGCard
-      const formattedResults = results.map(
-        card =>
-          ({
-            id: card.externalId,
-            externalId: card.externalId,
-            name: card.name,
-            gameType: card.gameType,
-            setCode: card.setCode,
-            setName: card.setName,
-            rarity: card.rarity,
-            artist: card.artist,
-            collectorNumber: card.collectorNumber,
-            gameData: card.gameData as any,
-            image: card.imageLarge || card.imageNormal || card.imageSmall || '',
-            imageSmall: card.imageSmall,
-            imageNormal: card.imageNormal,
-            imageLarge: card.imageLarge,
-          }) as unknown as MTGCard
-      )
+      const formattedResults = transformPrismaResults(results)
 
       setSearchResults(formattedResults)
     } catch (error) {
@@ -172,25 +155,7 @@ export default function WishlistSearchSection({
       })
 
       // Transformer les résultats pour correspondre au format MTGCard
-      const formattedResults = results.map(
-        card =>
-          ({
-            id: card.externalId,
-            externalId: card.externalId,
-            name: card.name,
-            gameType: card.gameType,
-            setCode: card.setCode,
-            setName: card.setName,
-            rarity: card.rarity,
-            artist: card.artist,
-            collectorNumber: card.collectorNumber,
-            gameData: card.gameData as any,
-            image: card.imageLarge || card.imageNormal || card.imageSmall || '',
-            imageSmall: card.imageSmall,
-            imageNormal: card.imageNormal,
-            imageLarge: card.imageLarge,
-          }) as unknown as MTGCard
-      )
+      const formattedResults = transformPrismaResults(results)
 
       setSearchResults(formattedResults)
     } catch (error) {
@@ -236,7 +201,7 @@ export default function WishlistSearchSection({
   )
 
   // Ajout à la wishlist
-  const handleAddToWishlist = async (card: MTGCard, quantity: number = 1) => {
+  const handleAddToWishlist = async (card: GameCard, quantity: number = 1) => {
     try {
       // Logique d'ajout à la wishlist (inchangée)
       // ... votre logique existante ...

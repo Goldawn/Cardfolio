@@ -1,4 +1,5 @@
-import type { MTGCard } from '@/types/games/magic'
+import type { GameCard } from '@/types/utils/guards'
+import { isMTGCard } from '@/types/utils/guards'
 import { PrismaClient } from '@prisma/client'
 
 /**
@@ -15,7 +16,7 @@ export class DatabaseAdapter {
   /**
    * Importe une carte depuis les données API vers la base de données
    */
-  async importCardFromAPI(cardData: MTGCard): Promise<any> {
+  async importCardFromAPI(cardData: GameCard): Promise<any> {
     try {
       // Vérifier si la carte existe déjà
       const existingCard = await this.prisma.card.findUnique({
@@ -39,7 +40,7 @@ export class DatabaseAdapter {
    * Importe plusieurs cartes en lot
    */
   async bulkImportCards(
-    cardsData: MTGCard[]
+    cardsData: GameCard[]
   ): Promise<{ success: number; errors: any[] }> {
     const results = { success: 0, errors: [] as any[] }
 
@@ -62,7 +63,7 @@ export class DatabaseAdapter {
   /**
    * Crée une nouvelle carte en base
    */
-  private async createNewCard(cardData: MTGCard): Promise<any> {
+  private async createNewCard(cardData: GameCard): Promise<any> {
     const cardInput = this.transformCardDataToDbFormat(cardData)
 
     return await this.prisma.card.create({
@@ -75,7 +76,7 @@ export class DatabaseAdapter {
    */
   private async updateExistingCard(
     cardId: string,
-    cardData: MTGCard
+    cardData: GameCard
   ): Promise<any> {
     const cardInput = this.transformCardDataToDbFormat(cardData)
 
@@ -91,7 +92,7 @@ export class DatabaseAdapter {
   /**
    * Transforme les données de carte API vers le format base de données
    */
-  private transformCardDataToDbFormat(cardData: MTGCard): any {
+  private transformCardDataToDbFormat(cardData: GameCard): any {
     // Extraire les prix depuis priceHistory
     const latestPrice = cardData.priceHistory?.[0]
 
@@ -127,7 +128,9 @@ export class DatabaseAdapter {
       // Données de jeu
       gameData: cardData.gameData,
       colors: cardData.colors,
-      cardType: cardData.gameData?.type || cardData.gameData?.typeLine,
+      cardType: isMTGCard(cardData)
+        ? cardData.gameData?.type || cardData.gameData?.typeLine
+        : undefined,
       format: cardData.format,
 
       // Légalités
@@ -136,7 +139,7 @@ export class DatabaseAdapter {
       // Prix
       priceUsd: latestPrice?.usd,
       priceEur: latestPrice?.eur,
-      priceTix: undefined, // Pas disponible dans MTGCard actuel
+      priceTix: undefined, // Pas disponible dans GameCard actuel
       priceFoilUsd: undefined, // À implémenter si nécessaire
       priceFoilEur: undefined, // À implémenter si nécessaire
       lastPriceUpdate: latestPrice ? new Date(latestPrice.date) : new Date(),

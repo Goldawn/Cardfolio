@@ -6,12 +6,13 @@ import {
   getMV,
   rarityKeyOf,
 } from '@/lib/mtgCards'
-import type { MTGCard } from '@/types'
+import type { GameCard } from '@/types'
+import { isMTGCard } from '@/types/utils/guards'
 import { Fragment } from 'react'
 import styles from './DeckCardsTabs.module.css'
 
 interface DeckRowProps {
-  card: MTGCard & { deckCardId: string; decklistQuantity: number }
+  card: GameCard & { deckCardId: string; decklistQuantity: number }
   deckState: any
   editMode: boolean
   isPending: boolean
@@ -81,9 +82,13 @@ export default function DeckRow({
 
   // Champs partagés
   const name = card.name || ''
-  const typeLine = card.gameData?.type || card.gameData?.typeLine || ''
-  const manaCostNode = formatAndParseText(card.gameData?.manaCost)
-  const mv = getMV(card) // numérique (pour tooltip CMC côté compact)
+  const typeLine = isMTGCard(card)
+    ? card.gameData?.type || card.gameData?.typeLine || ''
+    : ''
+  const manaCostNode = isMTGCard(card)
+    ? formatAndParseText(card.gameData?.manaCost)
+    : null
+  const mv = isMTGCard(card) ? getMV(card) : 0 // numérique (pour tooltip CMC côté compact)
   const artSmall = getArtSmall(card)
 
   // === Rendu selon variant ===

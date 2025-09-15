@@ -3,8 +3,7 @@
 import { useCurrencyContext } from '@/context/'
 import { prisma } from '@/lib/prisma'
 import type { AppCollectionItem, CollectionActions } from '@/types'
-import type { MTGCard } from '@/types/games/magic'
-import { isMTGCard } from '@/types/utils/guards'
+import type { GameCard } from '@/types/utils/guards'
 import Link from 'next/link'
 import type { JSX } from 'react'
 import { useEffect, useMemo, useState, useTransition } from 'react'
@@ -38,12 +37,12 @@ export default function CollectionClient({
   )
 
   // cartes enrichies avec Scryfall + formatCard (pour l'affichage sans set sélectionné)
-  const [enrichedCollection, setEnrichedCollection] = useState<MTGCard[]>([])
+  const [enrichedCollection, setEnrichedCollection] = useState<GameCard[]>([])
 
   // sets & navigation par extension
   const [sets, setSets] = useState<any[]>([])
   const [selectedSet, setSelectedSet] = useState<string | undefined>()
-  const [selectedSetCards, setSelectedSetCards] = useState<MTGCard[]>([])
+  const [selectedSetCards, setSelectedSetCards] = useState<GameCard[]>([])
   const [nextPage, setNextPage] = useState<string | undefined>()
   const [loading, setLoading] = useState<boolean>(false)
   const [hideNotOwned, setHideNotOwned] = useState<boolean>(false)
@@ -95,27 +94,13 @@ export default function CollectionClient({
             if (!card) return null
 
             return {
-              id: card.externalId,
-              externalId: card.externalId,
-              name: card.name,
-              gameType: card.gameType,
-              setCode: card.setCode,
-              setName: card.setName,
-              rarity: card.rarity,
-              artist: card.artist,
-              collectorNumber: card.collectorNumber,
-              gameData: card.gameData as any,
-              image:
-                card.imageLarge || card.imageNormal || card.imageSmall || '',
-              imageSmall: card.imageSmall,
-              imageNormal: card.imageNormal,
-              imageLarge: card.imageLarge,
+              ...card,
               quantity: it.quantity,
               priceHistory: it.priceHistory || [],
               dbId: it.dbId,
-            } as unknown as MTGCard
+            }
           })
-          .filter(Boolean) as MTGCard[]
+          .filter(Boolean) as GameCard[]
 
         setEnrichedCollection(enrichedCards)
       } catch (e) {
@@ -285,7 +270,7 @@ export default function CollectionClient({
   // ---------- Actions côté client (Server Actions derrière) ----------
   const [isPending, startTransition] = useTransition()
 
-  const handleAddToCollection = (card: MTGCard): void => {
+  const handleAddToCollection = (card: GameCard): void => {
     const externalId = card.id
     startTransition(async () => {
       try {
@@ -446,25 +431,23 @@ export default function CollectionClient({
         {loading && <Loader />}
 
         <div className={styles.cardContainer}>
-          {sortedAndFilteredCards
-            .filter(isMTGCard)
-            .map((card: MTGCard, index: number) => (
-              <Card
-                key={card.id}
-                card={card}
-                cardList={sortedAndFilteredCards.filter(isMTGCard)}
-                currentIndex={index}
-                showName
-                showQuantity
-                showPrice
-                showAddToCollectionButton
-                showDeleteButton
-                onAddToCollection={() => handleAddToCollection(card)}
-                updateQuantity={handleUpdateQuantity}
-                onRemove={handleRemove}
-                compareWithCollection={Boolean(selectedSet)}
-              />
-            ))}
+          {sortedAndFilteredCards.map((card: GameCard, index: number) => (
+            <Card
+              key={card.id}
+              card={card}
+              cardList={sortedAndFilteredCards}
+              currentIndex={index}
+              showName
+              showQuantity
+              showPrice
+              showAddToCollectionButton
+              showDeleteButton
+              onAddToCollection={() => handleAddToCollection(card)}
+              updateQuantity={handleUpdateQuantity}
+              onRemove={handleRemove}
+              compareWithCollection={Boolean(selectedSet)}
+            />
+          ))}
         </div>
       </div>
     </div>

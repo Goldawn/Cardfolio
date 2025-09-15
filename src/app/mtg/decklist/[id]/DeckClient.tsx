@@ -1,7 +1,7 @@
 'use client'
 
 import { prisma } from '@/lib/prisma'
-import type { MTGCard } from '@/types'
+import type { GameCard } from '@/types'
 import type { JSX } from 'react'
 import { useEffect, useMemo, useState, useTransition } from 'react'
 import Card from '../../../components/Card'
@@ -31,7 +31,7 @@ export default function DeckClient({
   // console.log(deck)
   const [deckState, setDeckState] = useState(deck) // { id, name, format, showcasedCard }
   const [deckCards, setDeckCards] = useState(initialDeckCards || [])
-  const [enriched, setEnriched] = useState<MTGCard[]>([]) // cartes formatées  { deckCardId, decklistQuantity }
+  const [enriched, setEnriched] = useState<GameCard[]>([]) // cartes formatées  { deckCardId, decklistQuantity }
   const [tab, setTab] = useState<string>('fromCollection') // "fromCollection" | "manual" | "import"
   const [isPending, startTransition] = useTransition()
   const [deckColors, setDeckColors] = useState<string[]>([]) // ["W","U","B","R","G","C"]
@@ -92,9 +92,9 @@ export default function DeckClient({
               imageLarge: card.imageLarge,
               decklistQuantity: dc.quantity,
               deckCardId: dc.id,
-            } as unknown as MTGCard
+            }
           })
-          .filter(Boolean) as MTGCard[]
+          .filter(Boolean) as GameCard[]
 
         if (!cancelled) setEnriched(out)
       } catch (e) {
@@ -115,7 +115,7 @@ export default function DeckClient({
     const qtyById = new Map(
       deckCards.map(dc => [dc.externalId, dc.quantity || 0])
     )
-    enriched.forEach((c: MTGCard) => {
+    enriched.forEach((c: GameCard) => {
       const qty = qtyById.get(c.id) || 0
       if (qty <= 0) return
       if ((c as any).type?.includes('Basic Land')) return // ignore lands de base

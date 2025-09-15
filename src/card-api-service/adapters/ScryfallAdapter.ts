@@ -1,5 +1,7 @@
-import type { CardImages, CardRarity } from '@/types/base'
-import type { MTGCard, MTGColor, MTGGameData } from '@/types/games/magic'
+import type { CardRarity } from '@/types/base'
+import type { MTGColor, MTGGameData } from '@/types/games/magic'
+import type { GameCard } from '@/types/utils/guards'
+import { transformToGameCard } from '@/types/utils/transformers'
 import type {
   GameSet,
   PriceData,
@@ -14,20 +16,12 @@ import type { ICardAdapter } from '../interfaces'
 export class ScryfallAdapter implements ICardAdapter {
   readonly providerName = 'scryfall'
 
-  transformCard(rawData: ScryfallCardDTO): MTGCard {
+  transformCard(rawData: ScryfallCardDTO): GameCard {
     if (!this.validateRawData(rawData)) {
       throw new Error('Invalid Scryfall card data')
     }
 
-    const layoutType = rawData.layout || 'normal'
-
-    // Gestion des couleurs
-    const _checkColorless = (card: ScryfallCardDTO | any): MTGColor[] => {
-      return card.colors?.length === 0 && card.mana_cost
-        ? ['C']
-        : (card.colors as MTGColor[]) || []
-    }
-
+    // Gestion des couleurs MTG
     const checkColorlessIdentity = (card: ScryfallCardDTO): MTGColor[] => {
       return Array.isArray(card.color_identity) &&
         card.color_identity.length === 0 &&
@@ -37,16 +31,18 @@ export class ScryfallAdapter implements ICardAdapter {
         : (card.color_identity as MTGColor[]) || []
     }
 
-    // Base commune pour toutes les cartes
-    const baseCard: Omit<MTGCard, 'name' | 'gameData' | 'image' | 'layout'> = {
+    // Préparation des données pour le helper générique
+    const rawCardData: any = {
       id: rawData.id || '',
       externalId: rawData.id || '',
+      name: rawData.name || 'Unknown',
       gameType: 'magic' as const,
       setCode: rawData.set || '',
       setName: rawData.set_name || '',
-      lang: rawData.lang || 'en',
-      quantity: 1,
-      dateAdded: new Date(),
+      rarity: rawData.rarity as CardRarity,
+      artist: rawData.artist || '',
+      collectorNumber: rawData.collector_number || '',
+      gameData: this.extractMTGGameData(rawData),
       priceHistory: [
         {
           date: new Date().toISOString().split('T')[0],
@@ -54,67 +50,43 @@ export class ScryfallAdapter implements ICardAdapter {
           eur: rawData.prices?.eur ? parseFloat(rawData.prices.eur) : 0,
         },
       ],
-      rarity: (rawData.rarity as CardRarity) || undefined,
-      collectorNumber: rawData.collector_number || '',
-      artist: rawData.artist || '',
-      legalities: rawData.legalities || {},
-      colors: checkColorlessIdentity(rawData),
     }
 
-    // Extraction des images
-    const extractImage = (face: ScryfallCardDTO | any): CardImages => ({
-      small: face?.image_uris?.small || undefined,
-      normal: face?.image_uris?.normal || undefined,
-      large: face?.image_uris?.large || undefined,
-      artCrop: face?.image_uris?.art_crop || undefined,
-    })
+    // Only add image properties if they exist
+    if (rawData.image_uris?.small)
+      rawCardData.imageSmall = rawData.image_uris.small
+    if (rawData.image_uris?.normal)
+      rawCardData.imageNormal = rawData.image_uris.normal
+    if (rawData.image_uris?.large)
+      rawCardData.imageLarge = rawData.image_uris.large
+    if (rawData.image_uris?.art_crop)
+      rawCardData.imageArtCrop = rawData.image_uris.art_crop
 
-    // Données de jeu spécifiques
-    const gameData: MTGGameData = {
-      manaCost: rawData.mana_cost || undefined,
-      manaValue: rawData.cmc || undefined,
-      type: rawData.type_line || undefined,
-      typeLine: rawData.type_line || undefined,
-      oracleText: rawData.oracle_text || undefined,
-      flavorText: rawData.flavor_text || undefined,
-      power: rawData.power || undefined,
-      toughness: rawData.toughness || undefined,
-      colorIdentity: checkColorlessIdentity(rawData),
-      card_faces: rawData.card_faces?.map(face => ({
-        name: face.name,
-        mana_cost: face.mana_cost,
-        type_line: face.type_line,
-        oracle_text: face.oracle_text,
-        power: face.power,
-        toughness: face.toughness,
-        image_uris: face.image_uris,
-      })),
-    }
+    // Utilisation du helper générique
+    const gameCard = transformToGameCard(rawCardData, 'magic')
 
-    // Cas spécial des cartes réversibles
-    if (layoutType === 'transform' || layoutType === 'modal_dfc') {
-      const frontFace = rawData.card_faces?.[0]
-      const backFace = rawData.card_faces?.[1]
-
-      const frontImage = extractImage(frontFace || rawData)
-      return {
-        ...baseCard,
-        name: rawData.name,
-        gameData,
-        image: frontImage.normal || frontImage.small || '',
-        layout: layoutType,
-        // Ajout des données de la face arrière
-        reversibleImage: backFace ? extractImage(backFace) : undefined,
-      } as MTGCard & { layout: string; reversibleImage?: CardImages }
-    }
-
-    // Carte normale
-    const cardImage = extractImage(rawData)
+    // Ajout des propriétés spécifiques MTG
     return {
-      ...baseCard,
-      name: rawData.name,
-      gameData,
-      image: cardImage.normal || cardImage.small || '',
+      ...gameCard,
+      colors: checkColorlessIdentity(rawData),
+      legalities: rawData.legalities || {},
+    } as GameCard
+  }
+
+  private extractMTGGameData(rawData: ScryfallCardDTO): MTGGameData {
+    return {
+      manaCost: rawData.mana_cost,
+      manaValue: rawData.cmc,
+      cmc: rawData.cmc,
+      convertedManaCost: rawData.cmc,
+      type: rawData.type_line,
+      typeLine: rawData.type_line,
+      oracleText: rawData.oracle_text,
+      flavorText: rawData.flavor_text,
+      power: rawData.power,
+      toughness: rawData.toughness,
+      colorIdentity: rawData.color_identity as MTGColor[],
+      card_faces: rawData.card_faces,
     }
   }
 
@@ -149,7 +121,7 @@ export class ScryfallAdapter implements ICardAdapter {
     }
   }
 
-  transformCards(rawDataList: ScryfallCardDTO[]): MTGCard[] {
+  transformCards(rawDataList: ScryfallCardDTO[]): GameCard[] {
     return rawDataList.map(card => this.transformCard(card))
   }
 

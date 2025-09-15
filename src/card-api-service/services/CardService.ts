@@ -1,4 +1,4 @@
-import type { MTGCard } from '@/types/games/magic'
+import type { GameCard } from '@/types/utils/guards'
 import type { ServiceConfig } from '../config'
 import type {
   BulkCardResponseDTO,
@@ -34,7 +34,7 @@ export class CardService {
   /**
    * Récupère une carte par son ID ou nom
    */
-  async fetchCard(request: CardFetchRequestDTO): Promise<MTGCard> {
+  async fetchCard(request: CardFetchRequestDTO): Promise<GameCard> {
     const providerName = request.provider || this.defaultProvider
     const provider = this.providers.get(providerName)
     const adapter = this.adapters.get(providerName)
@@ -67,14 +67,14 @@ export class CardService {
   /**
    * Récupère une carte par son nom
    */
-  async fetchCardByName(cardName: string, options?: any): Promise<MTGCard> {
+  async fetchCardByName(cardName: string, options?: any): Promise<GameCard> {
     return this.fetchCard({ cardName, options })
   }
 
   /**
    * Recherche des cartes
    */
-  async searchCards(request: SearchRequestDTO): Promise<MTGCard[]> {
+  async searchCards(request: SearchRequestDTO): Promise<GameCard[]> {
     const providerName = request.provider || this.defaultProvider
     const provider = this.providers.get(providerName)
     const adapter = this.adapters.get(providerName)
@@ -104,7 +104,7 @@ export class CardService {
   /**
    * Récupère toutes les cartes d'un set
    */
-  async fetchSetCards(request: SetFetchRequestDTO): Promise<MTGCard[]> {
+  async fetchSetCards(request: SetFetchRequestDTO): Promise<GameCard[]> {
     const providerName = request.provider || this.defaultProvider
     const provider = this.providers.get(providerName)
     const adapter = this.adapters.get(providerName)
@@ -113,7 +113,7 @@ export class CardService {
       throw new Error(`Provider or adapter not found: ${providerName}`)
     }
 
-    const allCards: MTGCard[] = []
+    const allCards: GameCard[] = []
     let hasMore = true
     let _nextPage: string | undefined
 
@@ -155,7 +155,7 @@ export class CardService {
   async fetchMoreCards(
     nextPageUrl: string,
     providerName?: string
-  ): Promise<MTGCard[]> {
+  ): Promise<GameCard[]> {
     const provider = this.providers.get(providerName || this.defaultProvider)
     const adapter = this.adapters.get(providerName || this.defaultProvider)
 
@@ -226,7 +226,7 @@ export class CardService {
       throw new Error(`Provider or adapter not found: ${providerName}`)
     }
 
-    const cards: MTGCard[] = []
+    const cards: GameCard[] = []
     const errors: Array<{ cardId: string; error: any }> = []
     const batchSize = request.options?.batchSize || 10
     const delayBetweenBatches = request.options?.delayBetweenBatches || 1000
@@ -279,7 +279,7 @@ export class CardService {
   // Méthodes de fallback privées
   private async fetchCardWithFallback(
     request: CardFetchRequestDTO
-  ): Promise<MTGCard> {
+  ): Promise<GameCard> {
     for (const fallbackProvider of this.config.fallbackProviders) {
       try {
         return await this.fetchCard({ ...request, provider: fallbackProvider })
@@ -293,7 +293,7 @@ export class CardService {
 
   private async searchCardsWithFallback(
     request: SearchRequestDTO
-  ): Promise<MTGCard[]> {
+  ): Promise<GameCard[]> {
     for (const fallbackProvider of this.config.fallbackProviders) {
       try {
         return await this.searchCards({
@@ -310,7 +310,7 @@ export class CardService {
 
   private async fetchSetCardsWithFallback(
     request: SetFetchRequestDTO
-  ): Promise<MTGCard[]> {
+  ): Promise<GameCard[]> {
     for (const fallbackProvider of this.config.fallbackProviders) {
       try {
         return await this.fetchSetCards({

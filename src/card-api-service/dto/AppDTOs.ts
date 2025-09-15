@@ -1,6 +1,6 @@
 import type { CardRarity, Currency } from '@/types/base'
-import type { MTGCard } from '@/types/games/magic'
 import type { GameSet } from '@/types/sets'
+import type { GameCard } from '@/types/utils/guards'
 
 /**
  * DTOs pour les données de l'application (format unifié)
@@ -35,7 +35,7 @@ export interface PriceData {
 }
 
 export interface CardSearchResult {
-  cards: MTGCard[]
+  cards: GameCard[]
   totalResults: number
   hasMore: boolean
   nextPage?: string
@@ -58,7 +58,4 @@ export interface SearchFilters {
 
 // Réexport des types existants pour cohérence
 export type { CardRarity, Currency } from '@/types/base'
-export type { MTGCard } from '@/types/games/magic'
-
-// Export direct pour éviter les problèmes d'import
-export type { MTGCard as MTGCardType } from '@/types/games/magic'
+export type { GameCard } from '@/types/utils/guards'

@@ -1,7 +1,6 @@
 import { DatabaseAdapter } from '../adapters/DatabaseAdapter'
 import { ScryfallAdapter } from '../adapters/ScryfallAdapter'
 import { ScryfallProvider } from '../providers/ScryfallProvider'
-// import type { MTGCard } from '@/types/games/magic' // TODO: Utiliser quand les types seront alignés
 
 /**
  * Service pour importer les cartes depuis les APIs vers la base de données

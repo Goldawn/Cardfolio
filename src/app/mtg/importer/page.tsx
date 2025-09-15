@@ -62,7 +62,7 @@ export default async function MTGImportPage(): Promise<JSX.Element> {
     })
 
     const mergedHistory = Array.isArray(existing?.priceHistory)
-      ? [...(existing.priceHistory || []), newPriceEntry]
+      ? [...((existing && existing.priceHistory) || []), newPriceEntry]
       : [newPriceEntry]
 
     let saved
@@ -81,10 +81,22 @@ export default async function MTGImportPage(): Promise<JSX.Element> {
         },
       })
     } else {
-      saved = await prisma.card.create({
+      // First find the card by externalId, then update it with collectionId
+      const card = await prisma.card.findFirst({
+        where: { externalId },
+        select: { id: true },
+      })
+
+      if (!card) {
+        throw new Error(
+          `Card with externalId ${externalId} not found in database`
+        )
+      }
+
+      saved = await prisma.card.update({
+        where: { id: card.id },
         data: {
           collectionId,
-          externalId,
           quantity: 1,
           priceHistory: mergedHistory,
         },
@@ -183,10 +195,22 @@ export default async function MTGImportPage(): Promise<JSX.Element> {
     if (!existing) {
       // si delta > 0 et pas d'item → on peut créer, sinon noop
       if (delta > 0) {
-        const created = await prisma.card.create({
+        // First find the card by externalId, then update it with collectionId
+        const card = await prisma.card.findFirst({
+          where: { externalId },
+          select: { id: true },
+        })
+
+        if (!card) {
+          throw new Error(
+            `Card with externalId ${externalId} not found in database`
+          )
+        }
+
+        const created = await prisma.card.update({
+          where: { id: card.id },
           data: {
             collectionId: collectionsFromDb[0]?.id,
-            externalId,
             quantity: delta,
             priceHistory: [],
           },
@@ -292,8 +316,21 @@ export default async function MTGImportPage(): Promise<JSX.Element> {
         },
       })
     } else {
-      saved = await prisma.card.create({
-        data: { wishlistId: listId, externalId, quantity },
+      // First find the card by externalId, then update it with wishlistId
+      const card = await prisma.card.findFirst({
+        where: { externalId },
+        select: { id: true },
+      })
+
+      if (!card) {
+        throw new Error(
+          `Card with externalId ${externalId} not found in database`
+        )
+      }
+
+      saved = await prisma.card.update({
+        where: { id: card.id },
+        data: { wishlistId: listId, quantity },
         select: {
           id: true,
           wishlistId: true,

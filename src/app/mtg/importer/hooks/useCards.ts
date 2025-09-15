@@ -1,9 +1,8 @@
-import { prisma } from '@/lib/prisma'
-import type { MTGCard } from '@/types/games/magic'
+import type { GameCard } from '@/types/utils/guards'
 import { useCallback, useState } from 'react'
 
 export function useCards() {
-  const [cards, setCards] = useState<MTGCard[]>([])
+  const [cards, setCards] = useState<GameCard[]>([])
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -14,51 +13,14 @@ export function useCards() {
     setLoading(true)
     setError(null)
     try {
-      // Recherche des cartes du set avec Prisma
-      const results = await prisma.card.findMany({
-        where: {
-          setCode: selectedSet.code,
-        },
-        select: {
-          id: true,
-          externalId: true,
-          name: true,
-          gameType: true,
-          gameData: true,
-          imageSmall: true,
-          imageNormal: true,
-          imageLarge: true,
-          setCode: true,
-          setName: true,
-          rarity: true,
-          artist: true,
-          collectorNumber: true,
-        },
-        take: 100, // Limiter les résultats
-      })
+      // Recherche des cartes du set via l'API
+      const response = await fetch(`/api/mtg/cards?setCode=${selectedSet.code}`)
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`)
+      }
 
-      // Transformer les résultats pour correspondre au format MTGCard
-      const formattedCards = results.map(
-        card =>
-          ({
-            id: card.externalId,
-            externalId: card.externalId,
-            name: card.name,
-            gameType: card.gameType,
-            setCode: card.setCode,
-            setName: card.setName,
-            rarity: card.rarity,
-            artist: card.artist,
-            collectorNumber: card.collectorNumber,
-            gameData: card.gameData as any,
-            image: card.imageLarge || card.imageNormal || card.imageSmall || '',
-            imageSmall: card.imageSmall,
-            imageNormal: card.imageNormal,
-            imageLarge: card.imageLarge,
-          }) as unknown as MTGCard
-      )
-
-      setCards(formattedCards)
+      const data = await response.json()
+      setCards(data.cards)
     } catch (err) {
       const errorMessage =
         err instanceof Error

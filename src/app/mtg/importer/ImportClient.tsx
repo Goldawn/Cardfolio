@@ -29,7 +29,7 @@ export default function ImportClient({
   userId: _userId,
 }: ImportClientProps): JSX.Element {
   // Hooks personnalisés
-  const { sets: _sets, loading: setsLoading, filterSetsByName } = useSets()
+  const { sets, loading: setsLoading, filterSetsByName } = useSets()
   const { cards, loading: cardsLoading, loadSetCards } = useCards()
   const {
     collection,

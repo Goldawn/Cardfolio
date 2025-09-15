@@ -1,5 +1,6 @@
 // /lib/mtgSections.ts
-import { MTGCard, MTG_BUCKETS, MTG_COLOR_ORDER, MTG_TYPE_ORDER } from '@/types'
+import { GameCard, MTG_BUCKETS, MTG_COLOR_ORDER, MTG_TYPE_ORDER } from '@/types'
+import { isMTGCard } from '@/types/utils/guards'
 import {
   bucketLabel,
   colorBucketOf,
@@ -9,7 +10,7 @@ import {
 } from './mtgCards'
 import { sortByMVThenName, sortByName } from './mtgSorts'
 
-export const buildNameList = (cards: MTGCard[] = []): MTGCard[] =>
+export const buildNameList = (cards: GameCard[] = []): GameCard[] =>
   cards
     .filter(c => Number(c?.quantity || 0) > 0)
     .slice()
@@ -18,12 +19,12 @@ export const buildNameList = (cards: MTGCard[] = []): MTGCard[] =>
 export interface Section {
   key: string
   title: string
-  items: MTGCard[]
+  items: GameCard[]
 }
 
 export interface SectionResult {
   sections: Section[]
-  lands: MTGCard[]
+  lands: GameCard[]
 }
 
 /**
@@ -31,18 +32,20 @@ export interface SectionResult {
  * Utilise les types existants de @types/utils pour la cohérence
  */
 function buildGenericSections<T extends string>(
-  cards: MTGCard[],
-  groupBy: (card: MTGCard) => T,
+  cards: GameCard[],
+  groupBy: (card: GameCard) => T,
   order: readonly T[],
   sectionKey: string,
   sectionTitle: (key: T) => string,
-  sortFn: (a: MTGCard, b: MTGCard) => number = sortByName
+  sortFn: (a: GameCard, b: GameCard) => number = sortByName
 ): SectionResult {
-  const map = new Map<T, MTGCard[]>(order.map(k => [k, [] as MTGCard[]]))
-  const lands: MTGCard[] = []
+  const map = new Map<T, GameCard[]>(order.map(k => [k, [] as GameCard[]]))
+  const lands: GameCard[] = []
 
-  // Filtrer et grouper les cartes
+  // Filtrer et grouper les cartes (seulement les cartes MTG)
   for (const card of cards) {
+    if (!isMTGCard(card)) continue
+
     const qty = Number(card?.quantity || 0)
     if (!qty) continue
 
@@ -77,7 +80,7 @@ function buildGenericSections<T extends string>(
   }
 }
 
-export const buildMvSections = (cards: MTGCard[] = []): SectionResult =>
+export const buildMvSections = (cards: GameCard[] = []): SectionResult =>
   buildGenericSections(
     cards,
     c => bucketLabel(getMV(c)),
@@ -87,7 +90,7 @@ export const buildMvSections = (cards: MTGCard[] = []): SectionResult =>
     sortByName
   )
 
-export const buildTypeSections = (cards: MTGCard[] = []): SectionResult =>
+export const buildTypeSections = (cards: GameCard[] = []): SectionResult =>
   buildGenericSections(
     cards,
     primaryTypeOf,
@@ -97,7 +100,7 @@ export const buildTypeSections = (cards: MTGCard[] = []): SectionResult =>
     sortByMVThenName
   )
 
-export const buildColorSections = (cards: MTGCard[] = []): SectionResult =>
+export const buildColorSections = (cards: GameCard[] = []): SectionResult =>
   buildGenericSections(
     cards,
     colorBucketOf,
