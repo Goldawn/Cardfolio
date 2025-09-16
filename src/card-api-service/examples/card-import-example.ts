@@ -24,37 +24,64 @@ export async function runCardImportExamples() {
     }
     console.log('')
 
+    const sets: string[] = [
+      'dmr',
+      'ltr',
+      'inr'
+    ] 
+
+    const importSets = async (sets: string[]) => {
+      for (const setCode of sets) {
+        console.log(`📦 Import du set ${setCode}`)
+        const setResult = await importService.importSetCards(setCode)
+        console.log(`✅ ${setResult.success}/${setResult.total} cartes importées`)
+        if (setResult.errors.length > 0) {
+          console.log(
+            `❌ ${setResult.errors.length} erreurs:`,
+            setResult.errors.slice(0, 3)
+          )
+        }
+        console.log('')
+      }
+    }
+
+    await importSets(sets)
+
     // Exemple 2: Import des cartes d'un set
-    console.log("📋 Exemple 2: Import des cartes d'un set (DMR)")
-    const setResult = await importService.importSetCards('dmr')
-    console.log(`✅ ${setResult.success}/${setResult.total} cartes importées`)
-    if (setResult.errors.length > 0) {
-      console.log(
-        `❌ ${setResult.errors.length} erreurs:`,
-        setResult.errors.slice(0, 3)
-      )
-    }
-    console.log('')
+    // console.log("📋 Exemple 2: Import des cartes d'un set (DMR)")
+    // const setResult = await importService.importSetCards('dmr')
+    // console.log(`✅ ${setResult.success}/${setResult.total} cartes importées`)
+    // if (setResult.errors.length > 0) {
+    //   console.log(
+    //     `❌ ${setResult.errors.length} erreurs:`,
+    //     setResult.errors.slice(0, 3)
+    //   )
+    // }
+    // console.log('')
 
-    // Exemple 3: Recherche et import de cartes
-    console.log('📋 Exemple 3: Recherche et import de cartes "Lightning Bolt"')
-    const searchResult = await importService.searchAndImportCards(
-      'Lightning Bolt',
-      5
-    )
-    console.log(
-      `✅ ${searchResult.imported} cartes importées sur ${searchResult.found} trouvées`
-    )
-    console.log('')
 
-    // Exemple 4: Synchronisation des cartes manquantes
-    console.log('📋 Exemple 4: Synchronisation des cartes manquantes')
-    const syncResult = await importService.importMissingCards()
-    console.log(`✅ ${syncResult.imported} cartes manquantes importées`)
-    if (syncResult.errors.length > 0) {
-      console.log(`❌ ${syncResult.errors.length} erreurs lors de la sync`)
-    }
-    console.log('')
+
+
+
+    // // Exemple 3: Recherche et import de cartes
+    // console.log('📋 Exemple 3: Recherche et import de cartes "Lightning Bolt"')
+    // const searchResult = await importService.searchAndImportCards(
+    //   'Lightning Bolt',
+    //   5
+    // )
+    // console.log(
+    //   `✅ ${searchResult.imported} cartes importées sur ${searchResult.found} trouvées`
+    // )
+    // console.log('')
+
+    // // Exemple 4: Synchronisation des cartes manquantes
+    // console.log('📋 Exemple 4: Synchronisation des cartes manquantes')
+    // const syncResult = await importService.importMissingCards()
+    // console.log(`✅ ${syncResult.imported} cartes manquantes importées`)
+    // if (syncResult.errors.length > 0) {
+    //   console.log(`❌ ${syncResult.errors.length} erreurs lors de la sync`)
+    // }
+    // console.log('')
 
     // Exemple 5: Statistiques de la base de données
     console.log('📋 Exemple 5: Statistiques de la base de données')
