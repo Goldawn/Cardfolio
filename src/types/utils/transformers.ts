@@ -62,12 +62,6 @@ export function transformToGameCard<T extends GameType>(
     artist: rawData.artist,
     collectorNumber: rawData.collectorNumber,
     gameData: rawData.gameData || {},
-    image:
-      rawData.image ||
-      rawData.imageLarge ||
-      rawData.imageNormal ||
-      rawData.imageSmall ||
-      '',
     imageSmall: rawData.imageSmall,
     imageNormal: rawData.imageNormal,
     imageLarge: rawData.imageLarge,
@@ -111,28 +105,6 @@ export function transformEnrichedToGameCards(
   return enrichedDataList
     .map(data => transformEnrichedToGameCard(data))
     .filter(Boolean)
-}
-
-/**
- * Normalise une carte pour l'affichage (sélectionne la meilleure image)
- */
-export function normalizeCardForDisplay(card: GameCard): GameCard {
-  return {
-    ...card,
-    image:
-      card.image ||
-      card.imageLarge ||
-      card.imageNormal ||
-      card.imageSmall ||
-      '',
-  }
-}
-
-/**
- * Normalise une liste de cartes pour l'affichage
- */
-export function normalizeCardsForDisplay(cards: GameCard[]): GameCard[] {
-  return cards.map(normalizeCardForDisplay)
 }
 
 /**
@@ -209,17 +181,4 @@ export function getCardId(card: GameCard | RawCardData): string {
  */
 export function getCardName(card: GameCard | RawCardData): string {
   return card.name || 'Unknown'
-}
-
-/**
- * Helper pour obtenir la meilleure image disponible
- */
-export function getBestImage(card: GameCard | RawCardData): string {
-  return (
-    card.image ||
-    (card as any).imageLarge ||
-    (card as any).imageNormal ||
-    (card as any).imageSmall ||
-    ''
-  )
 }

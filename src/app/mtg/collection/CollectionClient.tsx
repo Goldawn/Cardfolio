@@ -10,7 +10,7 @@ import { useEffect, useMemo, useState, useTransition } from 'react'
 import Card from '../../components/Card'
 import CollectionActionBar from '../../components/CollectionActionBar'
 import Loader from '../../components/Loader'
-import SetBar from '../../components/SetBar' // ✅ intégré
+import SetBar from '../../components/SetBar'
 import useCardFilters from '../../hooks/useCardFilters'
 // Services supprimés - utiliser Prisma directement
 import styles from './page.module.css'

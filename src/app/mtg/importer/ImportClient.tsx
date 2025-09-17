@@ -113,6 +113,7 @@ export default function ImportClient({
   // Charger les cartes quand un set est sélectionné
   useEffect(() => {
     if (selectedSet.code) {
+      console.log(selectedSet)
       loadSetCards(selectedSet)
     }
   }, [selectedSet, loadSetCards])

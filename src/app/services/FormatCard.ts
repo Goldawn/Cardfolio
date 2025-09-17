@@ -5,36 +5,11 @@
 
 import { cardApiManager } from '@/app/services/CardApiManager'
 import type { ScryfallCardDTO } from '@/card-api-service/dto'
-import type { GameCard } from '@/types/utils/guards'
 
 // Instance de l'adapter via le manager
 const getScryfallAdapter = () => {
   const cardService = cardApiManager.getCardService()
   return cardService.getAdapter('scryfall')
-}
-
-/**
- * Formate une carte Scryfall vers le format de l'application
- * Remplace l'ancienne fonction formatCard()
- */
-export const formatCard = (rawCard: ScryfallCardDTO): GameCard => {
-  const adapter = getScryfallAdapter()
-  if (!adapter) {
-    throw new Error('Scryfall adapter not found')
-  }
-  return adapter.transformCard(rawCard)
-}
-
-/**
- * Formate une liste de cartes Scryfall
- * Nouvelle fonctionnalité
- */
-export const formatCards = (rawCards: ScryfallCardDTO[]): GameCard[] => {
-  const adapter = getScryfallAdapter()
-  if (!adapter) {
-    throw new Error('Scryfall adapter not found')
-  }
-  return adapter.transformCards(rawCards)
 }
 
 /**
@@ -76,3 +51,4 @@ export const extractCardName = (rawCard: ScryfallCardDTO): string => {
 // Export des types pour compatibilité
 export type { ScryfallCardDTO } from '@/card-api-service/dto'
 export type { GameCard } from '@/types/utils/guards'
+

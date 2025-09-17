@@ -3,7 +3,6 @@
 
 import { GameCard } from './guards'
 import {
-  normalizeCardsForDisplay,
   transformEnrichedToGameCard,
   transformToGameCard,
   type EnrichedCardData,
@@ -88,13 +87,6 @@ export function createGameCard(
   return transformToGameCard(data, gameType)
 }
 
-/**
- * Helper pour normaliser les cartes avant affichage
- * Remplace les normalisations manuelles
- */
-export function prepareCardsForDisplay(cards: GameCard[]): GameCard[] {
-  return normalizeCardsForDisplay(cards)
-}
 
 /**
  * Helper pour créer une carte avec des données minimales

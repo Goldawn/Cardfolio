@@ -40,6 +40,7 @@ export default function Card({
   updateQuantity,
   undoAddToCollection,
 }: CardProps): JSX.Element {
+  console.log("card ", card)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const getLastPrice = (card: GameCard, currency: Currency): number => {
@@ -78,7 +79,8 @@ export default function Card({
     <div className={`${styles.card} ${className}`} onClick={handleRootClick}>
       <img
         className={`${cardClass}`}
-        src={typeof card.image === 'string' ? card.image : '/placeholder.png'} // <-- fallback
+        // AJOUTER PLACEHOLDER
+        src={card.imageNormal ?? '/placeholder.png'}
         alt={cardName}
         onClick={handleOpenModal}
       />

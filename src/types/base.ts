@@ -43,7 +43,6 @@ export type Card<
   artist?: string
 
   // Images
-  image?: string // ✅ Image par défaut pour compatibilité
   imageSmall?: string
   imageNormal?: string
   imageLarge?: string
