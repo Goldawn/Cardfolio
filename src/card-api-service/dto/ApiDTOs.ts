@@ -2,11 +2,13 @@
  * DTOs pour les données brutes des APIs externes
  */
 
+import { MTGLayout } from "@/types"
+
 // ===== SCRYFALL DTOs =====
 export interface ScryfallCardDTO {
   id: string
   name: string
-  layout?: string
+  layout: MTGLayout
   set: string
   set_name: string
   lang?: string

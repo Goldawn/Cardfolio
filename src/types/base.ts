@@ -27,6 +27,7 @@ export type Card<
   TColor = string,
   TCardType = string,
   TFormat = string,
+  TSpecial = any,
 > = {
   // Identifiants (alignés avec Prisma)
   id: string
@@ -48,6 +49,9 @@ export type Card<
   imageNormal?: string
   imageLarge?: string
   imageArtCrop?: string
+
+  // SpecialCard
+  specialCard?: TSpecial
 
   // Données de jeu (JSON pour flexibilité)
   gameData: TGameData

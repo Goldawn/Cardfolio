@@ -4,7 +4,7 @@
 import { Card } from '../base'
 import { Collection, WishlistList } from '../collections'
 import { Decklist } from '../decks'
-
+export type MTGSpecial = Card<MTGGameData, MTGColor, MTGCardType, MTGFormat>[]
 export type MTGColor = 'W' | 'U' | 'B' | 'R' | 'G' | 'C' | 'M'
 export type MTGCardType =
   | 'creature'
@@ -33,7 +33,18 @@ export type MTGFormat =
   | 'alchemy'
   | 'penny'
 
+export type MTGLayout = 
+  | 'normal' 
+  | 'split' 
+  | 'flip' 
+  | 'adventure' 
+  | 'transform' 
+  | 'modal_dfc'
+  | 'reversible_card'
+
 export type MTGGameData = {
+  gameType: 'magic'
+  layout: MTGLayout | undefined
   manaCost?: string | undefined
   manaValue?: number | undefined
   cmc?: number | undefined
@@ -66,9 +77,7 @@ export type MTGCardFace = {
 }
 
 // Carte Magic alignée avec le modèle Prisma
-export type MTGCard = Card<MTGGameData, MTGColor, MTGCardType, MTGFormat> & {
-  gameType: 'magic'
-}
+export type MTGCard = Card<MTGGameData, MTGColor, MTGCardType, MTGFormat, MTGSpecial>
 
 // Collections et decks Magic
 export type MTGCollection = Collection<'magic'>

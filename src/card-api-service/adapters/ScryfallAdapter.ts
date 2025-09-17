@@ -1,5 +1,5 @@
 import type { CardRarity } from '@/types/base'
-import type { MTGColor, MTGGameData } from '@/types/games/magic'
+import type { MTGColor, MTGGameData, MTGSpecial } from '@/types/games/magic'
 import type { GameCard } from '@/types/utils/guards'
 import { transformToGameCard } from '@/types/utils/transformers'
 import type {
@@ -73,8 +73,18 @@ export class ScryfallAdapter implements ICardAdapter {
     } as GameCard
   }
 
+  private extracMTGSpecial(rawData: ScryfallCardDTO): MTGSpecial {
+    
+    // TODO return MTGSpecial ici donc une version refactorisé de to format card pour etre plus simple 
+    return {
+
+    }
+  }
+
   private extractMTGGameData(rawData: ScryfallCardDTO): MTGGameData {
     return {
+      gameType: 'magic',
+      layout: rawData.layout,
       manaCost: rawData.mana_cost,
       manaValue: rawData.cmc,
       cmc: rawData.cmc,
