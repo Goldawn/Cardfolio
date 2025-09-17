@@ -17,8 +17,8 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? 
-  access_token      String? 
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
@@ -40,21 +40,21 @@ model Session {
 }
 
 model User {
-  id           String        @id @default(uuid())
-  name         String?
-  email        String        @unique
+  id            String    @id @default(uuid())
+  name          String?
+  email         String    @unique
   emailVerified DateTime?
   image         String?
-  createdAt    DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-  accounts      Account[]
-  sessions      Session[]
+  accounts Account[]
+  sessions Session[]
 
-  collection   Collection[]
+  collection    Collection[]
   wishlistLists WishlistList[]
-  decklists    Decklist[]
-  logs         CollectionChangeLog[]
+  decklists     Decklist[]
+  logs          CollectionChangeLog[]
 }
 
 model VerificationToken {
@@ -66,16 +66,16 @@ model VerificationToken {
 }
 
 model Collection {
-  id        String     @id @default(uuid())
-  name      String     @default("Main")
-  isDefault Boolean    @default(true)   // pour marquer la collection principale
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id        String   @id @default(uuid())
+  name      String   @default("Main")
+  isDefault Boolean  @default(true) // pour marquer la collection principale
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
 
-  cards     Card[]
+  cards Card[]
 
   @@unique([userId, name])
   @@index([userId])
@@ -83,34 +83,35 @@ model Collection {
 
 model Card {
   // Identifiants
-  id              String   @id @default(uuid())
-  externalId      String   @unique // ID générique de l'API externe (scryfall, pokemon, etc.)
-  name            String
-  gameType        String   // 'magic', 'pokemon', 'lorcana', etc.
-  
+  id         String @id @default(uuid())
+  externalId String @unique // ID générique de l'API externe (scryfall, pokemon, etc.)
+  name       String
+  gameType   String // 'magic', 'pokemon', 'lorcana', etc.
+
   // Informations de base
   setName         String?
   setCode         String?
   collectorNumber String?
-  lang            String   @default("en")
+  lang            String  @default("en")
   rarity          String?
   artist          String?
-  
+  layout          String? // ex: "normal", "split", "adventure", etc.
+  specialCard     Json? // Extra info for special cards (e.g., double-faced, etc.)
   // Images
   imageSmall      String?
   imageNormal     String?
   imageLarge      String?
   imageArtCrop    String?
-  
+
   // Données de jeu (JSON pour flexibilité)
-  gameData        Json     // Contient les données spécifiques au jeu
-  colors          Json?    // Couleurs/éléments du jeu
-  cardType        String?  // Type de carte
-  format          String?  // Format du jeu
-  
+  gameData Json // Contient les données spécifiques au jeu
+  colors   Json? // Couleurs/éléments du jeu
+  cardType String? // Type de carte
+  format   String? // Format du jeu
+
   // Légalités
-  legalities      Json?    // Format: { "commander": "legal", "standard": "banned" }
-  
+  legalities Json? // Format: { "commander": "legal", "standard": "banned" }
+
   // Prix
   priceUsd        Float?
   priceEur        Float?
@@ -118,29 +119,29 @@ model Card {
   priceFoilUsd    Float?
   priceFoilEur    Float?
   lastPriceUpdate DateTime?
-  
+
   // Quantité et allocation (pour les collections et decks)
-  quantity        Int      @default(1)
-  allocated       Int      @default(0) // combien d'exemplaires « pris » depuis la collection
-  dateAdded       DateTime @default(now())
-  priceHistory    Json?    // Historique des prix pour cette instance
-  
+  quantity     Int      @default(1)
+  allocated    Int      @default(0) // combien d'exemplaires « pris » depuis la collection
+  dateAdded    DateTime @default(now())
+  priceHistory Json? // Historique des prix pour cette instance
+
   // Métadonnées
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relations
-  collection      Collection? @relation(fields: [collectionId], references: [id], onDelete: Cascade)
-  collectionId    String?
-  wishlist        WishlistList? @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
-  wishlistId      String?
-  deck            Decklist? @relation(fields: [deckId], references: [id], onDelete: Cascade)
-  deckId          String?
-  changeLogs      CollectionChangeLog[]
-  
+  collection   Collection?           @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  collectionId String?
+  wishlist     WishlistList?         @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  wishlistId   String?
+  deck         Decklist?             @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  deckId       String?
+  changeLogs   CollectionChangeLog[]
+
   // Relation inverse pour la carte showcase
   showcasedInDecks Decklist[] @relation("DecklistShowcase")
-  
+
   // Index pour performance
   @@index([gameType])
   @@index([setCode])
@@ -153,55 +154,53 @@ model Card {
 }
 
 model WishlistList {
-  id        String         @id @default(uuid())
+  id        String   @id @default(uuid())
   name      String
-  isDefault Boolean        @default(false)
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
 
-  cards     Card[]
+  cards Card[]
 
   @@unique([userId, name])
   @@index([userId])
 }
 
-
 model Decklist {
-  id        String     @id @default(uuid())
-  name      String
-  colors Json?   // ex: ["W","U"] — tableau JSON de strings
+  id              String   @id @default(uuid())
+  name            String
+  colors          Json? // ex: ["W","U"] — tableau JSON de strings
   showcasedCardId String?
-  showcasedArt        String? 
-  format   String     @default("standard") // ex: "commander", "standard", etc.
-  isLocked Boolean    @default(false) // pour empêcher les modifs accidentelles
-  notes    String?    // notes utilisateur sur le deck
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  showcasedArt    String?
+  format          String   @default("standard") // ex: "commander", "standard", etc.
+  isLocked        Boolean  @default(false) // pour empêcher les modifs accidentelles
+  notes           String? // notes utilisateur sur le deck
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  user      User       @relation(fields: [userId], references: [id])
-  userId    String
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
 
-  cards     Card[] // relation directe vers les cartes du deck
+  cards Card[] // relation directe vers les cartes du deck
 
   // Relation optionnelle vers la carte showcase
   showcasedCard Card? @relation("DecklistShowcase", fields: [showcasedCardId], references: [id], onDelete: SetNull, onUpdate: Cascade)
 }
 
-
 model CollectionChangeLog {
-  id          String   @id @default(uuid())
-  userId      String
-  cardId      String   // Référence vers Card.id
-  changeType  String   // "add", "remove", "update"
-  quantity    Int      // ex: +2 ou -1
-  totalAfter  Int
-  changedAt   DateTime @default(now())
+  id         String   @id @default(uuid())
+  userId     String
+  cardId     String // Référence vers Card.id
+  changeType String // "add", "remove", "update"
+  quantity   Int // ex: +2 ou -1
+  totalAfter Int
+  changedAt  DateTime @default(now())
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  card        Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([cardId])
